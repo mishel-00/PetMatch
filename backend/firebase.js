@@ -1,4 +1,4 @@
- // Esto es la conexión con firebase cloud -- mi base de datos 
+ // Esto es la conexión con firebase cloud -- mi base de datos sss
  const admin = require("firebase-admin");
 const serviceAccount = require("./firebase-adminsdk.json"); // Asegúrate de que este archivo exista
 
