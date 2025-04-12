@@ -2,6 +2,7 @@
 // Obtiene los headers con el token desde ` AsyncStorage`
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "@/config/apiconfig";
 
 const getHeaders = async () => {
     const token = await AsyncStorage.getItem("token"); // Obtiene el token almacenado
