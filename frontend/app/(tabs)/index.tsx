@@ -1,74 +1,49 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React from "react";
+import { View, FlatList } from 'react-native';
+import { ThemedText } from "@/components/ThemedText";
+import TabsNavigator from "./TabsNavigator";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+export function Home() {
+    return <TabsNavigator />;
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+const PushApp = () => {
+
+
+    return (
+        <View style={{ marginHorizontal: 10, marginTop: 5 }}>
+            <ThemedText
+                style={{
+                    marginTop: 10,
+                    fontWeight: 'bold',
+                    fontSize: 25,
+                }}
+            >
+                Notificaciones
+            </ThemedText>
+
+            {/* <FlatList
+                //data={notifications}
+                keyExtractor={(item) => item.request.identifier}
+                renderItem={({ item }) => (
+                    <View>
+                        <ThemedText style={{ fontWeight: 'bold' }}>
+                            {item.request.content.title}
+                        </ThemedText>
+                        <ThemedText>{item.request.content.body}</ThemedText>
+                        <ThemedText>
+                            {JSON.stringify(item.request.content.data, null, 2)}
+                        </ThemedText>
+                    </View>
+                )}
+                ItemSeparatorComponent={() => (
+                    <View style={{ height: 1, backgroundColor: 'grey', opacity: 0.3 }} />
+                )}
+            /> */}
+        </View>
+    );
+};
+
+export default Home;
+export { PushApp };
+
