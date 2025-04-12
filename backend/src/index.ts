@@ -41,8 +41,9 @@ app.get("/api/animales", async (_req, res) => {
 });
 
 // ✅ Verificar token de Firebase Auth
-app.post("/api/verify", async (req, res) => {
+const verifyToken = async (req: any, res: any) => {
   const authHeader = req.headers.authorization;
+
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Token no proporcionado o mal formado" });
   }
@@ -53,7 +54,8 @@ app.post("/api/verify", async (req, res) => {
     const decodedToken = await admin.auth().verifyIdToken(token);
     const uid = decodedToken.uid;
 
-    const userDoc = await db.collection("adoptantes").doc(uid).get();
+    // Recuperar datos del usuario desde Firestore (colección "adoptantes")
+    const userDoc = await admin.firestore().collection("adoptantes").doc(uid).get();
     const userData = userDoc.data();
 
     if (!userData) {
@@ -65,7 +67,10 @@ app.post("/api/verify", async (req, res) => {
     console.error("Error al verificar token:", error);
     return res.status(401).json({ error: "Token inválido" });
   }
-});
+};
+
+// Luego usar la función en la ruta
+app.post("/api/verify", verifyToken);
 
 // ✅ Crear animal
 app.post("/api/animales", async (req, res) => {
