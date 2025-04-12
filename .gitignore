@@ -1,2 +1,7 @@
 # credenciales de la bd 
 backend/pet-match-cloud-firebase-adminsdk-fbsvc-d30049cc21.json
+
+
+# dependencies
+/node_modules
+

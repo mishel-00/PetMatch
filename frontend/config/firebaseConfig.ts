@@ -3,12 +3,12 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_DOMINIO.firebaseapp.com",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_BUCKET",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID",
+  apiKey: "AIzaSyA03Te6mcqKgM1tDcdqaS1QfkRayhd6-Xs",
+  authDomain: "pet-match-cloud.firebaseapp.com",
+  projectId: "pet-match-cloud",
+  storageBucket: "pet-match-cloud.firebasestorage.app",
+  messagingSenderId: "186416761578",
+  appId: "1:186416761578:web:e69d62308331b5f9152593"
 };
 
 const app = initializeApp(firebaseConfig);
