@@ -1,22 +1,35 @@
-// Este archivo levanta el backend y crea las primeras rutas
+// index.ts
 
-
-import express, { Express, Request, Response } from 'express';
+import express from 'express';
 import cors from 'cors';
-import { admin, db } from './firebase';
+import dotenv from 'dotenv';
+import admin from 'firebase-admin';
 
-
+// ✅ Cargar variables de entorno
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ✅ Inicializar Firebase con variables de entorno
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    }),
+  });
+}
+
+const db = admin.firestore();
+
 app.get("/", (_req, res) => {
   res.send("PetMatch Backend funcionando 🐾");
 });
 
-
-// Ejemplo: Obtener lista de animales desde Firebase
+// ✅ Ruta para obtener animales
 app.get("/api/animales", async (_req, res) => {
   try {
     const snapshot = await db.collection("animales").get();
@@ -26,10 +39,10 @@ app.get("/api/animales", async (_req, res) => {
     res.status(500).json({ error: "Error al obtener animales" });
   }
 });
-//  Verificar token JWT de Firebase Auth
-const verifyToken = async (req: any, res: any) => {
-  const authHeader = req.headers.authorization;
 
+// ✅ Verificar token de Firebase Auth
+app.post("/api/verify", async (req, res) => {
+  const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Token no proporcionado o mal formado" });
   }
@@ -40,8 +53,7 @@ const verifyToken = async (req: any, res: any) => {
     const decodedToken = await admin.auth().verifyIdToken(token);
     const uid = decodedToken.uid;
 
-    // Recuperar datos del usuario desde Firestore (colección "adoptantes")
-    const userDoc = await admin.firestore().collection("adoptantes").doc(uid).get();
+    const userDoc = await db.collection("adoptantes").doc(uid).get();
     const userData = userDoc.data();
 
     if (!userData) {
@@ -53,12 +65,9 @@ const verifyToken = async (req: any, res: any) => {
     console.error("Error al verificar token:", error);
     return res.status(401).json({ error: "Token inválido" });
   }
-};
+});
 
-// Luego usar la función en la ruta
-app.post("/api/verify", verifyToken);
-
-// Ejemplo: Crear nuevo animal
+// ✅ Crear animal
 app.post("/api/animales", async (req, res) => {
   try {
     const data = req.body;
@@ -73,4 +82,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ PetMatch API corriendo en http://localhost:${PORT}`);
 });
-
