@@ -29,7 +29,7 @@ export const useAuthStore = create<AuthState>()(
             login: async (username, password) => {
                 try {
 
-                    const data = await postxxx("auth/login", { username, password });
+                    const data = await postxxx("http://localhost:3000auth/login", { username, password });
                     set({ reslogin: data.toString() });
 
                     console.log(" Datos del servidor:", data);

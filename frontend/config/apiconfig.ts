@@ -1,15 +1,15 @@
-import Constants from 'expo-constants';
+// import Constants from 'expo-constants';
 
-interface ExpoExtra {
-  apiUrl: string;
-  router: {
-    origin: boolean;
-  };
-}
+// interface ExpoExtra {
+//   apiUrl: string;
+//   router: {
+//     origin: boolean;
+//   };
+// }
 
-const extra = ((Constants.expoConfig as any)?.extra as ExpoExtra) 
+// const extra = ((Constants.expoConfig as any)?.extra as ExpoExtra) 
 
-export const API_URL = extra.apiUrl;
+// export const API_URL = extra.apiUrl;
 
-console.log("🚀 API_URL ==>", API_URL);
+// console.log("🚀 API_URL ==>", API_URL);
 
