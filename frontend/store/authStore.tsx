@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>()(
                 console.log("Token recibido:", idToken);
             
                 await AsyncStorage.setItem("token", idToken); // Guarda el token
-                const data = await postxxx(`api/adoptante/login`, {}); // el token se usa internamente en getHeaders()
+                const data = await postxxx(`api/login`, {});
 
                 console.log("API_URL:", API_URL);
 

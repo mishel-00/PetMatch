@@ -3,8 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import admin from 'firebase-admin';
-import adoptanteRoutes from "./routes/adoptante";
+// import adoptanteRoutes from "./routes/adoptante";
 import asociacionRoutes from "./routes/asociacion";
+import registroRoutes from "./routes/registro";
 
 
 // Cargar variables de entorno
@@ -32,8 +33,9 @@ app.get("/", (_req, res) => {
 });
 
 //Montar rutas de API necesarias 
-app.use("/api/adoptante", adoptanteRoutes); 
-app.use("/api/asociacion", asociacionRoutes);
+// app.use("/api/adopatante", adoptanteRoutes); 
+app.use("/api", asociacionRoutes);
+app.use("/api", registroRoutes);
 
 
 const PORT = process.env.PORT || 3000;
