@@ -7,7 +7,7 @@ import admin from "../firebase";
 
 const router = express.Router();
 
-router.get('/perfil', verificarTokenFireBase, async (req, res ) => {
+router.get('/auth/login', verificarTokenFireBase, async (req, res ) => {
   
   const uid = req.uid;
   
@@ -18,7 +18,7 @@ router.get('/perfil', verificarTokenFireBase, async (req, res ) => {
    return;
   }
 
-  const userDoc = await admin.firestore().collection("adoptantes").doc(uid).get();
+  const userDoc = await admin.firestore().collection("asociacion").doc(uid).get();
   const userData = userDoc.data();
 
   if (!userData) {
