@@ -30,7 +30,7 @@ app.get("/", (_req, res) => {
   res.send("PetMatch Backend funcionando 🐾");
 });
 
-// ✅ Ruta para obtener animales
+
 app.get("/api/animales", async (_req, res) => {
   try {
     const snapshot = await db.collection("animales").get();

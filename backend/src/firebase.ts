@@ -1,5 +1,4 @@
  // Esto es la conexión con firebase cloud -- mi base de datos 
- //? Cambios hechos para que funcione el desplique en Railway
  import admin from "firebase-admin";
 
 
@@ -16,4 +15,4 @@ if (!admin.apps.length) {
 }
 
 export const db = admin.firestore();
- 
+export default admin; 
