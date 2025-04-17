@@ -23,7 +23,7 @@ export default function LoginScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Iniciar Sesión</Text>
+      <Text style={styles.title}></Text>
       <Text style={styles.subtitle}>Bienvenido a PetMach</Text>
 
       <View style={styles.inputContainer}>
@@ -58,10 +58,11 @@ export default function LoginScreen({ navigation }: any) {
 
       {/* Botón de registro */}
       <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-        <Text style={styles.registerText}>
-          ¿No tienes cuenta? <Text style={styles.registerLink}>Regístrate</Text>
-        </Text>
-      </TouchableOpacity>
+  <Text style={styles.registerText}>
+    ¿No tienes cuenta? <Text style={styles.registerLink}>Regístrate</Text>
+  </Text>
+</TouchableOpacity>
+
     </View>
   );
 }

@@ -65,6 +65,7 @@ firestore.indexes.json
 firestore.rules
 storage.rules
 .config/
+firebase.ts
 
 # ----------------------------------------
 #  HUSKY / GIT HOOKS TEMP FILES
