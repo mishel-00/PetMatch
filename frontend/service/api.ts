@@ -117,10 +117,36 @@ export const getxxx = async (path: string, id?: number) => {
 // Función para manejar errores
 const handleError = (error: any, method: string) => {
     if (error.response) {
-        // console.error(`Axios ${method} Error Response:`, error.response.data);
-        throw new Error(error.response.data.message || "Error en la petición");
+      console.log(`❌ Axios ${method} Error Response:`, error.response.data); // ✅ log más útil
+      throw new Error(error.response.data.message || JSON.stringify(error.response.data));
+    } else if (error.request) {
+      console.log(`❌ Axios ${method} Error Request:`, error.request);
+      throw new Error("No se recibió respuesta del servidor");
     } else {
-        // console.error(`Axios ${method} Error:`, error.message);
-        throw new Error("Error de conexión con el servidor");
+      console.log(`❌ Axios ${method} Error:`, error.message);
+      throw new Error("Error desconocido");
     }
-};
+  };
+  
+
+export const registerUser = async (data: {
+    nombre: string;
+    email: string;
+    password: string;
+    telefono: string;
+    direccion: string;
+    rol: "adoptante" | "asociacion";
+  }) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/registro`, data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      return response.data;
+    } catch (error) {
+      handleError(error, "POST");
+    }
+  };
+  

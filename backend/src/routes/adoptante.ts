@@ -1,33 +1,35 @@
 
-// import {Request, Response} from "express";
-import express from "express";
-import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
-import admin from "../firebase";
+// // import {Request, Response} from "express";
+// import express from "express";
+// import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
+// import admin from "../firebase";
 
 
-const router = express.Router();
+// const router = express.Router();
 
-router.post('/login', verificarTokenFireBase, async (req, res) => {
-  console.log("📩 Petición recibida en /auth/login");
-  console.log("🔐 Headers:", req.headers);
+// router.post('/login', verificarTokenFireBase, async (req, res) => {
+//   console.log("📩 Petición recibida en /auth/login");
+//   console.log("🔐 Headers:", req.headers);
 
-    const uid = req.uid;
+//     const uid = req.uid;
     
-    console.log("Perfil de: ", uid);
-    if (!uid) {
-      res.status(401).json({ error: "Token inválido" });
-      return;
-    }
-    const userDoc = await admin.firestore().collection("adoptante").doc(uid).get();
-    const userData = userDoc.data();
 
-    if (!userData) {
-       res.status(404).json({ error: "Usuario no encontrado" });
-       return;
-    }
+//     console.log("Perfil de: ", uid);
+//     if (!uid) {
+//       res.status(401).json({ error: "Token inválido" });
+//       return;
+//     }
+//     const userDoc = await admin.firestore().collection("adoptante").doc(uid).get();
+//     const userData = userDoc.data();
 
-    res.status(200).json({ uid, ...userData });
 
-})
+//     if (!userData) {
+//        res.status(404).json({ error: "Usuario no encontrado" });
+//        return;
+//     }
 
-export default router;
+//     res.status(200).json({ uid, ...userData });
+
+// })
+
+// export default router;

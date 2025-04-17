@@ -16,7 +16,7 @@ interface AuthState {
     logout: () => void;
     reslogin: string;
 }
-
+//login
 export const useAuthStore = create<AuthState>()(
     persist(
         (set) => ({
@@ -37,7 +37,9 @@ export const useAuthStore = create<AuthState>()(
                 const idToken = await userCredential.user.getIdToken();
                 console.log("Token recibido:", idToken);
             
-                const data = await postxxx(`${API_URL}/auth/login`, { token: idToken });
+                await AsyncStorage.setItem("token", idToken); // Guarda el token
+                const data = await postxxx(`api/login`, {});
+
                 console.log("API_URL:", API_URL);
 
             

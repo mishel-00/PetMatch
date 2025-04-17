@@ -10,23 +10,59 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
+import { registerUser } from "@/service/api";
 
 
 export default function RegisterScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"adoptante" | "asociacion" | "">("");
+  const [nombre, setNombre] = useState("");
+const [telefono, setTelefono] = useState("");
+const [direccion, setDireccion] = useState("");
 
-  const handleRegister = () => {
-    if (!email || !password || !role) {
-      Alert.alert("Por favor completa todos los campos");
-      return;
-    }
+const isValidEmail = (email:string) => /\S+@\S+\.\S+/.test(email);
 
-    // Aquí podrías enviar los datos a tu backend
-    Alert.alert("Registro exitoso", `Rol: ${role}`);
+
+const handleRegister = async () => {
+  if (!email || !password || !role || !nombre || !telefono || !direccion) {
+    Alert.alert("Por favor completa todos los campos");
+    return;
+  }
+
+  if (!isValidEmail(email)) {
+    Alert.alert("Correo inválido", "Por favor ingresa un correo válido.");
+    return;
+  }
+
+  try {
+    const response = await registerUser({
+      nombre,
+      email,
+      password,
+      telefono,
+      direccion,
+      rol: role,
+    });
+
+    console.log("✅ Usuario registrado:", response);
+    Alert.alert("Registro exitoso", "Ahora puedes iniciar sesión.");
     navigation.navigate("Login");
-  };
+
+  } catch (error: any) {
+    const errorMsg = error?.response?.data?.error || error.message;
+    console.error("❌ Error al registrar:", errorMsg);
+
+    if (errorMsg.includes("already in use")) {
+      Alert.alert("Correo ya registrado", "Este correo ya está en uso.");
+    } else if (errorMsg.includes("email is improperly formatted")) {
+      Alert.alert("Correo inválido", "El formato del correo no es válido.");
+    } else {
+      Alert.alert("Error", errorMsg || "No se pudo registrar el usuario.");
+    }
+  }
+};
+
 
   return (
     <View style={styles.container}>
@@ -57,6 +93,40 @@ export default function RegisterScreen({ navigation }: any) {
           secureTextEntry
         />
       </View>
+      <View style={styles.inputContainer}>
+  <Feather name="user" size={20} style={styles.icon} />
+  <TextInput
+    style={styles.input}
+    placeholder="Nombre completo"
+    placeholderTextColor="#A67C52"
+    value={nombre}
+    onChangeText={setNombre}
+  />
+</View>
+
+<View style={styles.inputContainer}>
+  <Feather name="phone" size={20} style={styles.icon} />
+  <TextInput
+    style={styles.input}
+    placeholder="Teléfono"
+    placeholderTextColor="#A67C52"
+    value={telefono}
+    onChangeText={setTelefono}
+    keyboardType="phone-pad"
+  />
+</View>
+
+<View style={styles.inputContainer}>
+  <Feather name="map-pin" size={20} style={styles.icon} />
+  <TextInput
+    style={styles.input}
+    placeholder="Dirección"
+    placeholderTextColor="#A67C52"
+    value={direccion}
+    onChangeText={setDireccion}
+  />
+</View>
+
 
       <View style={styles.pickerContainer}>
         <Text style={styles.pickerLabel}>Soy:</Text>
