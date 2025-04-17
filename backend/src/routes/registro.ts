@@ -4,7 +4,8 @@ import admin from "../firebase";
 const router = express.Router();
 
 router.post("/registro", async (req, res) => {
-  console.log("Peticion llega al backend")
+
+  console.log("Peticion llega al backend /api/registro")
   const { nombre, email, password, telefono, direccion, rol } = req.body;
 
   if (!nombre || !email || !password || !rol) {
