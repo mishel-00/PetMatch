@@ -1,6 +1,6 @@
 
 
-import {Request, Response} from "express";
+
 import express from "express";
 import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
 import admin from "../firebase";
