@@ -13,8 +13,8 @@ export default function HomeScreen() {
             <View style={styles.overlay}>
                 <View style={styles.ctiContainer}>
                     <Text style={styles.headerText}>
-                        <Text style={styles.cti}>CTI</Text>
-                        <Text style={styles.control}>Control</Text>
+                        <Text style={styles.PETMATCH}>PETMATCH</Text>
+                       
                     </Text>
                 </View>
                 {/* <DeviceList /> Por ahora se queda asi*/}
@@ -41,10 +41,8 @@ const styles = StyleSheet.create({
         fontSize: 36,
         fontWeight: "bold",
     },
-    cti: {
-        color: "blue",
+    PETMATCH: {
+        color: "orange",
     },
-    control: {
-        color: "green",
-    },
+    
 });

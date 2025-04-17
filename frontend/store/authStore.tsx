@@ -2,8 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import zustandStorage from "./zustandStorage";
-import { postxxx } from "@/service/api";
-
+import { postxxx , API_URL } from "@/service/api";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/config/firebase";
 interface AuthState {
     username: string | null;
     password: string | null;
@@ -26,32 +27,30 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             isActive: false,
             reslogin: "",
-            login: async (username, password) => {
+            login: async (email, password) => {
                 try {
-
-                    const data = await postxxx("http://localhost:3000auth/login", { username, password });
-                    set({ reslogin: data.toString() });
-
-                    console.log(" Datos del servidor:", data);
-
-                    await AsyncStorage.setItem("token", data.token);
-                    await AsyncStorage.setItem("userId", data.userId.toString());
-
-
-                    set({
-                        username,
-                        token: data.token,
-                        userId: data.userId,
-                        isAuthenticated: true,
-                        isActive: true,
-                    });
-
-                    return true;
+                  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                  const idToken = await userCredential.user.getIdToken();
+              
+                  const data = await postxxx(`${API_URL}/auth/login`, { token: idToken });
+              
+                  await AsyncStorage.setItem("token", idToken);
+                  await AsyncStorage.setItem("userId", data.userId.toString());
+              
+                  set({
+                    username: email,
+                    token: idToken,
+                    userId: data.userId,
+                    isAuthenticated: true,
+                    isActive: true,
+                  });
+              
+                  return true;
                 } catch (error) {
-                    console.error(" Error en el inicio de sesión:", error);
-                    return false;
+                  console.error("Error en login Firebase:", error);
+                  return false;
                 }
-            },
+              },
 
 
 
