@@ -1,24 +1,24 @@
 // index.ts
-//? Prueba se ha cambiado
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import admin from 'firebase-admin';
+import adoptanteRoutes from "./routes/adoptante";
+import asociacionRoutes from "./routes/asociacion";
 
-// ✅ Cargar variables de entorno
+// Cargar variables de entorno
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Inicializar Firebase con variables de entorno
+
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      // Importante: usa comillas dobles en .env y sólo reemplaza los \n por saltos reales
       privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
     }),
   });
@@ -30,59 +30,9 @@ app.get("/", (_req, res) => {
   res.send("PetMatch Backend funcionando 🐾");
 });
 
-// ✅ Ruta para obtener animales
-app.get("/api/animales", async (_req, res) => {
-  try {
-    const snapshot = await db.collection("animales").get();
-    const animales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.status(200).json(animales);
-  } catch (error) {
-    res.status(500).json({ error: "Error al obtener animales" });
-  }
-});
-
-// ✅ Verificar token de Firebase Auth
-const verifyToken = async (req: any, res: any) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Token no proporcionado o mal formado" });
-  }
-
-  const token = authHeader.split("Bearer ")[1];
-
-  try {
-    const decodedToken = await admin.auth().verifyIdToken(token);
-    const uid = decodedToken.uid;
-
-    // Recuperar datos del usuario desde Firestore (colección "adoptantes")
-    const userDoc = await admin.firestore().collection("adoptantes").doc(uid).get();
-    const userData = userDoc.data();
-
-    if (!userData) {
-      return res.status(404).json({ error: "Usuario no encontrado" });
-    }
-
-    return res.status(200).json({ uid, ...userData });
-  } catch (error) {
-    console.error("Error al verificar token:", error);
-    return res.status(401).json({ error: "Token inválido" });
-  }
-};
-
-// Luego usar la función en la ruta
-app.post("/api/verify", verifyToken);
-
-// ✅ Crear animal
-app.post("/api/animales", async (req, res) => {
-  try {
-    const data = req.body;
-    const nuevo = await db.collection("animales").add(data);
-    res.status(201).json({ id: nuevo.id });
-  } catch (error) {
-    res.status(500).json({ error: "Error al crear animal" });
-  }
-});
+//Montar rutas de API necesarias 
+app.use("/api/adoptante", adoptanteRoutes); 
+app.use("/api/asociacion", asociacionRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
