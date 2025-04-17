@@ -7,7 +7,9 @@ import admin from "../firebase";
 
 const router = express.Router();
 
-router.get('/auth/login', verificarTokenFireBase, async (req, res) => {
+router.post('/auth/login', verificarTokenFireBase, async (req, res) => {
+  console.log("📩 Petición recibida en /auth/login");
+  console.log("🔐 Headers:", req.headers);
 
     const uid = req.uid;
     

@@ -28,28 +28,47 @@ export const useAuthStore = create<AuthState>()(
             isActive: false,
             reslogin: "",
             login: async (email, password) => {
-                try {
-                  const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                  const idToken = await userCredential.user.getIdToken();
-              
-                  const data = await postxxx(`${API_URL}/auth/login`, { token: idToken });
-              
-                  await AsyncStorage.setItem("token", idToken);
-                  await AsyncStorage.setItem("userId", data.userId.toString());
-              
-                  set({
-                    username: email,
-                    token: idToken,
-                    userId: data.userId,
-                    isAuthenticated: true,
-                    isActive: true,
-                  });
-              
-                  return true;
-                } catch (error) {
-                  console.error("Error en login Firebase:", error);
-                  return false;
+              try {
+                console.log("Intentando login con:", email, password);
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            
+                console.log("Usuario autenticado:", userCredential.user.email);
+            
+                const idToken = await userCredential.user.getIdToken();
+                console.log("Token recibido:", idToken);
+            
+                const data = await postxxx(`${API_URL}/auth/login`, { token: idToken });
+                console.log("API_URL:", API_URL);
+
+            
+                set({
+                  username: email,
+                  token: idToken,
+                  userId: data.userId,
+                  isAuthenticated: true,
+                  isActive: true,
+                });
+            
+                return true;
+              } catch (error: any) {
+                console.error("Firebase error code:", error.code);
+                console.error("Firebase error message:", error.message);
+            
+                if (error.code === "auth/user-not-found") {
+                  console.log("Usuario no encontrado.");
+                } else if (error.code === "auth/wrong-password") {
+                  console.log("Contraseña incorrecta.");
+                } else if (error.code === "auth/invalid-email") {
+                  console.log("Email inválido.");
+                } else if (error.code === "auth/invalid-credential") {
+                  console.log("Las credenciales son incorrectas.");
                 }
+            
+                return false;
+              }
+            
+            
+                
               },
 
 

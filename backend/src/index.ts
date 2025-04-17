@@ -6,6 +6,7 @@ import admin from 'firebase-admin';
 import adoptanteRoutes from "./routes/adoptante";
 import asociacionRoutes from "./routes/asociacion";
 
+
 // Cargar variables de entorno
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.get("/", (_req, res) => {
 //Montar rutas de API necesarias 
 app.use("/api/adoptante", adoptanteRoutes); 
 app.use("/api/asociacion", asociacionRoutes);
+app.use("/auth", authRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
