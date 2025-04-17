@@ -1,9 +1,11 @@
 
-export { Request } from "express";
+import * as express from 'express';
 
 
-declare module "express" {
-  export interface Request {
-    uid?: string;
+declare global {
+    namespace Express {
+      interface Request {
+        uid?: string;
+      }
+    }
   }
-}

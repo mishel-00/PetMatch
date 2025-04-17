@@ -7,22 +7,26 @@ import admin from "../firebase";
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.send("PetMatch Backend funcionando 🐾");
-});
-
-router.get('/asociacion', verificarTokenFireBase, async (req: Request, res: Response) => {
+router.get('/perfil', verificarTokenFireBase, async (req, res ) => {
   
   const uid = req.uid;
   
   console.log("Perfil de: ", uid);
 
+  if (!uid) {
+   res.status(401).json({ error: "Token inválido" });
+   return;
+  }
+
   const userDoc = await admin.firestore().collection("adoptantes").doc(uid).get();
   const userData = userDoc.data();
 
   if (!userData) {
-    return res.status(404).json({ error: "Usuario no encontrado" });
+    res.status(404).json({ error: "Usuario no encontrado" });
+    return;
   }
 
-  return res.status(200).json({ uid, ...userData });
+   res.status(200).json({ uid, ...userData });
 })  
+
+export default router;

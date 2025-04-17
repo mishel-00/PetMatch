@@ -6,11 +6,17 @@
 import { Request, Response, NextFunction } from "express";
 import admin from "../firebase";
 
-export const verificarTokenFireBase = async (req: Request, res: Response, next: NextFunction) => {   
+
+export const verificarTokenFireBase = async (
+    req: Request, 
+    res: Response, 
+    next: NextFunction
+): Promise<void> => {   
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "Token no proporcionado o mal formado" });
+      res.status(401).json({ error: "Token no proporcionado o mal formado" });
+      return; 
     }
 
     const token = authHeader.split("Bearer ")[1];
@@ -23,6 +29,7 @@ export const verificarTokenFireBase = async (req: Request, res: Response, next: 
       next();
     } catch (error) {
       console.error("Error al verificar token:", error);
-      return res.status(401).json({ error: "Token inválido" });
+      res.status(401).json({ error: "Token inválido" });
+      return; 
     }
 }
