@@ -18,7 +18,7 @@ router.post('/login', verificarTokenFireBase, async (req, res) => {
       res.status(401).json({ error: "Token inválido" });
       return;
     }
-    const userDoc = await admin.firestore().collection("adoptantes").doc(uid).get();
+    const userDoc = await admin.firestore().collection("adoptante").doc(uid).get();
     const userData = userDoc.data();
 
     if (!userData) {
