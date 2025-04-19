@@ -7,156 +7,167 @@ import {
   StyleSheet,
   Alert,
   Platform,
+  KeyboardAvoidingView,
+  ScrollView,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { registerUser } from "@/service/api";
-
 
 export default function RegisterScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"adoptante" | "asociacion" | "">("");
   const [nombre, setNombre] = useState("");
-const [telefono, setTelefono] = useState("");
-const [direccion, setDireccion] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [direccion, setDireccion] = useState("");
 
-const isValidEmail = (email:string) => /\S+@\S+\.\S+/.test(email);
+  const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
-
-const handleRegister = async () => {
-  if (!email || !password || !role || !nombre || !telefono || !direccion) {
-    Alert.alert("Por favor completa todos los campos");
-    return;
-  }
-
-  if (!isValidEmail(email)) {
-    Alert.alert("Correo inválido", "Por favor ingresa un correo válido.");
-    return;
-  }
-
-  try {
-    const response = await registerUser({
-      nombre,
-      email,
-      password,
-      telefono,
-      direccion,
-      rol: role,
-    });
-
-    console.log("✅ Usuario registrado:", response);
-    Alert.alert("Registro exitoso", "Ahora puedes iniciar sesión.");
-    navigation.navigate("Login");
-
-  } catch (error: any) {
-    const errorMsg = error?.response?.data?.error || error.message;
-    console.error("❌ Error al registrar:", errorMsg);
-
-    if (errorMsg.includes("already in use")) {
-      Alert.alert("Correo ya registrado", "Este correo ya está en uso.");
-    } else if (errorMsg.includes("email is improperly formatted")) {
-      Alert.alert("Correo inválido", "El formato del correo no es válido.");
-    } else {
-      Alert.alert("Error", errorMsg || "No se pudo registrar el usuario.");
+  const handleRegister = async () => {
+    if (!email || !password || !role || !nombre || !telefono || !direccion) {
+      Alert.alert("Por favor completa todos los campos");
+      return;
     }
-  }
-};
 
+    if (!isValidEmail(email)) {
+      Alert.alert("Correo inválido", "Por favor ingresa un correo válido.");
+      return;
+    }
+
+    try {
+      const response = await registerUser({
+        nombre,
+        email,
+        password,
+        telefono,
+        direccion,
+        rol: role,
+      });
+
+      console.log("✅ Usuario registrado:", response);
+      Alert.alert("Registro exitoso", "Ahora puedes iniciar sesión.");
+      navigation.navigate("Login");
+    } catch (error: any) {
+      const errorMsg = error?.response?.data?.error || error.message;
+      console.error("❌ Error al registrar:", errorMsg);
+
+      if (errorMsg.includes("already in use")) {
+        Alert.alert("Correo ya registrado", "Este correo ya está en uso.");
+      } else if (errorMsg.includes("email is improperly formatted")) {
+        Alert.alert("Correo inválido", "El formato del correo no es válido.");
+      } else {
+        Alert.alert("Error", errorMsg || "No se pudo registrar el usuario.");
+      }
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Crear cuenta</Text>
-      <Text style={styles.subtitle}>Regístrate en PetMach</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={100}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Crear cuenta</Text>
+        <Text style={styles.subtitle}>Regístrate en PetMach</Text>
 
-      <View style={styles.inputContainer}>
-        <Feather name="mail" size={20} style={styles.icon} />
-        <TextInput
-          style={styles.input}
-          placeholder="Correo electrónico"
-          placeholderTextColor="#A67C52"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Feather name="mail" size={20} style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Correo electrónico"
+            placeholderTextColor="#A67C52"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
 
-      <View style={styles.inputContainer}>
-        <Feather name="lock" size={20} style={styles.icon} />
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          placeholderTextColor="#A67C52"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-      </View>
-      <View style={styles.inputContainer}>
-  <Feather name="user" size={20} style={styles.icon} />
-  <TextInput
-    style={styles.input}
-    placeholder="Nombre completo"
-    placeholderTextColor="#A67C52"
-    value={nombre}
-    onChangeText={setNombre}
-  />
-</View>
+        <View style={styles.inputContainer}>
+          <Feather name="lock" size={20} style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña"
+            placeholderTextColor="#A67C52"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+        </View>
 
-<View style={styles.inputContainer}>
-  <Feather name="phone" size={20} style={styles.icon} />
-  <TextInput
-    style={styles.input}
-    placeholder="Teléfono"
-    placeholderTextColor="#A67C52"
-    value={telefono}
-    onChangeText={setTelefono}
-    keyboardType="phone-pad"
-  />
-</View>
+        <View style={styles.inputContainer}>
+          <Feather name="user" size={20} style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Nombre completo"
+            placeholderTextColor="#A67C52"
+            value={nombre}
+            onChangeText={setNombre}
+          />
+        </View>
 
-<View style={styles.inputContainer}>
-  <Feather name="map-pin" size={20} style={styles.icon} />
-  <TextInput
-    style={styles.input}
-    placeholder="Dirección"
-    placeholderTextColor="#A67C52"
-    value={direccion}
-    onChangeText={setDireccion}
-  />
-</View>
+        <View style={styles.inputContainer}>
+          <Feather name="phone" size={20} style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Teléfono"
+            placeholderTextColor="#A67C52"
+            value={telefono}
+            onChangeText={setTelefono}
+            keyboardType="phone-pad"
+          />
+        </View>
 
+        <View style={styles.inputContainer}>
+          <Feather name="map-pin" size={20} style={styles.icon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Dirección"
+            placeholderTextColor="#A67C52"
+            value={direccion}
+            onChangeText={setDireccion}
+          />
+        </View>
 
-      <View style={styles.pickerContainer}>
-        <Text style={styles.pickerLabel}>Soy:</Text>
-        <Picker
-          selectedValue={role}
-          onValueChange={(itemValue) => setRole(itemValue as any)}
-          style={styles.picker}
-          dropdownIconColor="#D35400"
-        >
-          <Picker.Item label="Selecciona una opción" value="" color="#A67C52" />
-          <Picker.Item label="Adoptante" value="adoptante" />
-          <Picker.Item label="Asociación" value="asociacion" />
-        </Picker>
-      </View>
+        <View style={styles.pickerContainer}>
+          <Text style={styles.pickerLabel}>Soy:</Text>
+          <Picker
+            selectedValue={role}
+            onValueChange={(itemValue) => setRole(itemValue as any)}
+            style={styles.picker}
+            dropdownIconColor="#D35400"
+          >
+            <Picker.Item
+              label="Selecciona una opción"
+              value=""
+              color="#A67C52"
+            />
+            <Picker.Item label="Adoptante" value="adoptante" />
+            <Picker.Item label="Asociación" value="asociacion" />
+          </Picker>
+        </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Registrarse</Text>
-        <Feather name="user-plus" size={20} style={styles.buttonIcon} />
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
+          <Text style={styles.buttonText}>Registrarse</Text>
+          <Feather name="user-plus" size={20} style={styles.buttonIcon} />
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#FFF5E6",
-    justifyContent: "center",
-    alignItems: "center",
     paddingHorizontal: 20,
+    paddingTop: 40,
+    paddingBottom: 60,
+    backgroundColor: "#FFF5E6",
+    alignItems: "center",
   },
   title: {
     fontSize: 30,

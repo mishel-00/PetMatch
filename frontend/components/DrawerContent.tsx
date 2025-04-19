@@ -32,9 +32,16 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
 
             {/* Botón para cerrar sesión si está autenticado */}
             {isAuthenticated && (
-                <TouchableOpacity onPress={logout} style={styles.logoutButton}>
-                    <Text style={styles.logoutText}>Cerrar sesión</Text>
-                </TouchableOpacity>
+                <TouchableOpacity
+                onPress={() => {
+                  logout(); // Limpia el estado
+                  navigation.navigate("Login"); // Redirige al login
+                }}
+                style={styles.logoutButton}
+              >
+                <Text style={styles.logoutText}>Cerrar sesión</Text>
+              </TouchableOpacity>
+              
             )}
         </View>
     );
