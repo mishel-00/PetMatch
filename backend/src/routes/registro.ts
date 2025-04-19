@@ -18,7 +18,7 @@ router.post("/registro", async (req, res) => {
     const userRecord = await admin.auth().createUser({email,password,});
     const uid = userRecord.uid;
 
-    //* ===Custom claims ROL=== 
+    //* ===Custom claims 'atributo personalizado' ROL=== 
     await admin.auth().setCustomUserClaims(uid, {rol});
     
     const collection = rol === "asociacion" ? "asociacion" : "adoptante";
