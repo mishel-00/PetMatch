@@ -4,6 +4,8 @@ import DrawerContent from "@/components/DrawerContent";
 import { createDrawerNavigator, DrawerContentComponentProps } from '@react-navigation/drawer';
 import TabsNavigator from "./(tabs)/TabsNavigator";
 import RegisterScreen from "./(tabs)/RegisterScreen";
+import HomeAdoptante from "@/components/HomeAdoptante";
+import HomeAsociacion from "@/components/HomeAsociacion";
 
 
 const Drawer = createDrawerNavigator();
@@ -13,17 +15,20 @@ export default function Layout() {
         <Drawer.Navigator
             drawerContent={(props: React.JSX.IntrinsicAttributes & DrawerContentComponentProps) => <DrawerContent {...props} />}
             screenOptions={{
-                headerShown: true, // Muestra el encabezado
-                headerTitleAlign: "center", // Alinea el título en el centro
+                headerShown: true, 
+                headerTitleAlign: "center", 
                 headerStyle: {
                     backgroundColor: "#fff",
                 },
-                headerTintColor: "#000", // Color del texto del encabezado
+                headerTintColor: "#000", 
             }}
         >
             <Drawer.Screen name="Home" component={TabsNavigator} options={{ headerTitle: "Home" }} />
             <Drawer.Screen name="Login" component={LoginScreen} options={{ headerTitle: "Iniciar Sesión" }} />
             <Drawer.Screen name="Register" component={RegisterScreen} options={{ headerTitle: "Registro" }} />
+            <Drawer.Screen name="HomeAdoptante" component={HomeAdoptante} options={{ headerTitle: "Inicio Adoptante" }} />
+            <Drawer.Screen name="HomeAsociacion" component={HomeAsociacion} options={{ headerTitle: "Inicio Asociación" }} />
+
 
         </Drawer.Navigator>
 
@@ -31,13 +36,3 @@ export default function Layout() {
 
     );
 }
-
-
-
-
-
-
-
-
-
-

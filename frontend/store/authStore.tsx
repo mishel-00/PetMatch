@@ -12,9 +12,11 @@ interface AuthState {
     userId: number | null;
     isAuthenticated: boolean;
     isActive: boolean;
-    login: (email: string, password: string) => Promise<boolean>;
+    login: (email: string, password: string) => Promise<"adoptante" | "asociacion" | null>;
     logout: () => void;
     reslogin: string;
+    rol: "adoptante" | "asociacion" | null;
+
 }
 //login
 export const useAuthStore = create<AuthState>()(
@@ -27,6 +29,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             isActive: false,
             reslogin: "",
+            rol: null,
             login: async (email, password) => {
               try {
                 console.log("Intentando login con:", email, password);
@@ -49,9 +52,11 @@ export const useAuthStore = create<AuthState>()(
                   userId: data.userId,
                   isAuthenticated: true,
                   isActive: true,
+                  rol: data.rol,
+
                 });
             
-                return true;
+                return data.rol;
               } catch (error: any) {
                 console.error("Firebase error code:", error.code);
                 console.error("Firebase error message:", error.message);
@@ -84,6 +89,8 @@ export const useAuthStore = create<AuthState>()(
                     userId: null,
                     isAuthenticated: false,
                     isActive: false,
+                    rol: null,
+
                 });
             },
         }),

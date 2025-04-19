@@ -4,22 +4,27 @@ import { useAuthStore } from "../store/authStore";
 import { Feather } from "@expo/vector-icons";
 
 export default function LoginScreen({ navigation }: any) {
-  const { username: savedEmail, password: savedPassword, login } = useAuthStore();
+  const { username: savedEmail, password: savedPassword, login,  } = useAuthStore();
   const [email, setEmail] = useState(savedEmail || "");
   const [password, setPassword] = useState(savedPassword || "");
 
   const handleLogin = async () => {
     try {
-      const success = await login(email, password);
-      if (success) {
-        navigation.navigate("Home");
+      const rol = await login(email, password); // rol es string o null
+  
+      if (rol === "adoptante") {
+        navigation.navigate("HomeAdoptante");
+      } else if (rol === "asociacion") {
+        navigation.navigate("HomeAsociacion");
       } else {
-        Alert.alert("Correo electrónico o contraseña incorrectos");
+        Alert.alert("Error", "Correo o contraseña incorrectos o rol no definido");
       }
     } catch (error) {
-      throw new Error("Algo salió mal");
+      Alert.alert("Error", "Algo salió mal al iniciar sesión.");
     }
   };
+  
+  
 
   return (
     <View style={styles.container}>
