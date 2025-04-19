@@ -23,6 +23,7 @@ export const verificarTokenFireBase = async (
 
     try {
       const decodedToken = await admin.auth().verifyIdToken(token);
+      const rol = decodedToken.rol;
       console.log("🔐 Token recibido:", req.headers.authorization);
 
       const uid = decodedToken.uid;

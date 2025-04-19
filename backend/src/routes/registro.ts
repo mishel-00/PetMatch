@@ -4,7 +4,8 @@ import admin from "../firebase";
 const router = express.Router();
 
 router.post("/registro", async (req, res) => {
-  console.log("Peticion llega al backend")
+
+  console.log("Peticion llega al backend /api/registro")
   const { nombre, email, password, telefono, direccion, rol } = req.body;
 
   if (!nombre || !email || !password || !rol) {
@@ -17,6 +18,8 @@ router.post("/registro", async (req, res) => {
     const userRecord = await admin.auth().createUser({email,password,});
     const uid = userRecord.uid;
 
+    //* ===Custom claims ROL=== 
+    await admin.auth().setCustomUserClaims(uid, {rol});
     
     const collection = rol === "asociacion" ? "asociacion" : "adoptante";
 
@@ -27,7 +30,6 @@ router.post("/registro", async (req, res) => {
       direccion,
       telefono,
       fecha_registro: new Date(),
-      rol,
     };
 
     if (rol === "adoptante") {

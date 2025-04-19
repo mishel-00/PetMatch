@@ -4,7 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import admin from 'firebase-admin';
 // import adoptanteRoutes from "./routes/adoptante";
-import asociacionRoutes from "./routes/asociacion";
+import loginRoutes from "./routes/login";
 import registroRoutes from "./routes/registro";
 
 
@@ -33,8 +33,7 @@ app.get("/", (_req, res) => {
 });
 
 //Montar rutas de API necesarias 
-// app.use("/api/adopatante", adoptanteRoutes); 
-app.use("/api", asociacionRoutes);
+app.use("/api", loginRoutes);
 app.use("/api", registroRoutes);
 
 

@@ -1,6 +1,4 @@
 
-
-
 import express from "express";
 import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
 import admin from "../firebase";
@@ -8,12 +6,17 @@ import admin from "../firebase";
 const router = express.Router();
 
 router.post('/login', verificarTokenFireBase, async (req, res): Promise<void> => {
+
+  console.log("📩 Petición recibida en /api/login");
+  console.log("🔐 Headers:", req.headers);
+  
   const uid = req.uid;
 
   if (!uid) {
     res.status(401).json({ error: "Token inválido" });
     return;
   }
+  
   console.log("Perfil de: ", uid);
 
   let userDoc = await admin.firestore().collection("adoptante").doc(uid).get();
