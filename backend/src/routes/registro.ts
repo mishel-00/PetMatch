@@ -28,7 +28,6 @@ router.post("/registro", async (req, res) => {
       direccion,
       telefono,
       fecha_registro: new Date(),
-      rol,
     };
 
     if (rol === "adoptante") {
