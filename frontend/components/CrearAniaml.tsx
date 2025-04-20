@@ -11,9 +11,16 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
-import { getxxx, postxxx } from "@/service/api";
+import { API_URL, getxxx, postxxx } from "@/service/api";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "react-native";
+
+import {uploadImageToFirebase} from "@/config/firebaseStorage"
+import uuid from "react-native-uuid"
+
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { auth } from "@/config/firebaseConfig";
+
 
 
 
@@ -34,7 +41,9 @@ export default function CrearAnimal() {
     fechaNacimiento: "",
     fechaIngreso: "",
   });
-
+  const [showNacimientoPicker, setShowNacimientoPicker] = useState(false);
+  const [showIngresoPicker, setShowIngresoPicker] = useState(false);
+  
   const seleccionarImagen = async () => {
     // Pedir permiso
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -56,6 +65,18 @@ export default function CrearAnimal() {
       handleChange("foto", uri);
     }
   };
+  const handleDateChange = (event: any, selectedDate: Date | undefined, field: "fechaNacimiento" | "fechaIngreso") => {
+    if (selectedDate) {
+      const isoDate = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
+      handleChange(field, isoDate);
+    }
+  
+    // Ocultar picker después de seleccionar (solo en Android)
+    if (Platform.OS === "android") {
+      if (field === "fechaNacimiento") setShowNacimientoPicker(false);
+      if (field === "fechaIngreso") setShowIngresoPicker(false);
+    }
+  };
   
 
   const pesoPerro = [
@@ -74,14 +95,42 @@ export default function CrearAnimal() {
 
   const handleSubmit = async () => {
     try {
-      await postxxx("/api/animal", form);
+      // ✅ Verificar sesión de Firebase antes de subir imagen
+      if (!auth.currentUser) {
+        Alert.alert("Error", "Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.");
+        return;
+      }
+  
+      const nombreArchivo = `animal_${uuid.v4()}.jpg`;
+  
+      // 🚀 Subir imagen
+      const imageUrl = await uploadImageToFirebase(form.foto, nombreArchivo);
+  
+      // 📦 Preparar y enviar datos
+      const datosFinales = {
+        foto: imageUrl,
+        nombre: form.nombre,
+        descripcion: form.descripcion,
+        estadoAdopcion: form.estado,
+        esterilizado: form.esterilizado,
+        especie: form.tipoAnimal, // <- Aquí está el campo que faltaba (especie)
+        tipoRaza: form.tipoRaza,
+        peso: form.peso,
+        fecha_nacimiento: form.fechaNacimiento,
+        fecha_ingreso: form.fechaIngreso,
+      };
+      
+  
+      await postxxx("api/animal", datosFinales);
+  
       Alert.alert("Éxito", "Animal creado exitosamente");
-      navigation.navigate("ListaAnimales" as never); // Regresa y refresca
+      navigation.navigate("ListaAnimales" as never);
     } catch (error) {
       Alert.alert("Error", "No se pudo crear el animal");
       console.error("Error al crear animal:", error);
     }
   };
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -97,10 +146,8 @@ export default function CrearAnimal() {
       {[
         { label: "Nombre", field: "nombre" },
         { label: "Descripción", field: "descripcion" },
-        { label: "Especie", field: "especie" },
         { label: "Tipo de Raza", field: "tipoRaza" },
-        { label: "Fecha de Nacimiento (YYYY-MM-DD)", field: "fechaNacimiento" },
-        { label: "Fecha de Ingreso (YYYY-MM-DD)", field: "fechaIngreso" },
+      
       ].map((input) => (
         <TextInput
           key={input.field}
@@ -110,6 +157,37 @@ export default function CrearAnimal() {
           style={styles.input}
         />
       ))}
+{/* FECHA DE NACIMIENTO */}
+<TouchableOpacity
+  style={styles.input}
+  onPress={() => setShowNacimientoPicker(true)}
+>
+  <Text>{form.fechaNacimiento || "📅 Fecha de Nacimiento"}</Text>
+</TouchableOpacity>
+{showNacimientoPicker && (
+  <DateTimePicker
+    value={form.fechaNacimiento ? new Date(form.fechaNacimiento) : new Date()}
+    mode="date"
+    display="default"
+    onChange={(e, date) => handleDateChange(e, date, "fechaNacimiento")}
+  />
+)}
+
+{/* FECHA DE INGRESO */}
+<TouchableOpacity
+  style={styles.input}
+  onPress={() => setShowIngresoPicker(true)}
+>
+  <Text>{form.fechaIngreso || "📅 Fecha de Ingreso"}</Text>
+</TouchableOpacity>
+{showIngresoPicker && (
+  <DateTimePicker
+    value={form.fechaIngreso ? new Date(form.fechaIngreso) : new Date()}
+    mode="date"
+    display="default"
+    onChange={(e, date) => handleDateChange(e, date, "fechaIngreso")}
+  />
+)}
 
       <Picker
         selectedValue={form.sexo}
@@ -136,7 +214,7 @@ export default function CrearAnimal() {
         onValueChange={(value) => handleChange("estado", value)}
         style={styles.picker}
       >
-        <Picker.Item label="Estado" value="en adopcion" />
+        <Picker.Item label="En adopcion" value="en adopcion" />
         <Picker.Item label="Reservado" value="reservado" />
         <Picker.Item label="Adoptado" value="adoptado" />
       </Picker>

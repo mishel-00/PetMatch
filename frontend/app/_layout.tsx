@@ -8,6 +8,7 @@ import HomeAdoptante from "@/components/HomeAdoptante";
 import HomeAsociacion from "@/components/HomeAsociacion";
 import ListaAnimales from "@/components/ListaAnimales";
 import CrearAnimal from "@/components/CrearAniaml";
+import AnimalDetalle from "@/components/AnimalDetalle";
 
 
 const Drawer = createDrawerNavigator();
@@ -40,7 +41,11 @@ export default function Layout() {
   component={CrearAnimal}
   options={{ drawerLabel: "Crear Animal" }}
 />
-
+<Drawer.Screen
+  name="AnimalDetalle"
+  component={AnimalDetalle}
+  options={{ drawerLabel: "Detalle del Animal" }}
+/>
 
 
         </Drawer.Navigator>

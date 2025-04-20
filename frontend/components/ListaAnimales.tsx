@@ -33,10 +33,27 @@ export default function ListaAnimales() {
   useEffect(() => {
     const fetchAnimales = async () => {
       try {
-        const data = await getxxx(`/api/animal`);
-        setAnimales(data);
-      } catch (error) {
-        Alert.alert("Error", "No se pudieron cargar los animales.");
+        const data = await getxxx("api/animal");
+        const mapped = data.map((item: any) => ({
+          id: item.id,
+          foto: item.foto,
+          nombre: item.nombre,
+          descripcion: item.descripcion,
+          sexo: item.sexo,
+          especie: item.especie,
+          tipoRaza: item.tipoRaza,
+          tipoAnimal: item.especie, // por compatibilidad
+          peso: item.peso,
+          estado: item.estadoAdopcion, // por compatibilidad
+          esterilizado: item.esterilizado,
+          fechaNacimiento: item.fecha_nacimiento,
+          fechaIngreso: item.fecha_ingreso,
+        }));
+        
+setAnimales(mapped);
+
+      } catch (error: any) {
+        Alert.alert("Error", `Error al cargar animales: ${error.message}`);
         console.error("Error al cargar animales:", error);
       } finally {
         setLoading(false);
@@ -56,27 +73,28 @@ export default function ListaAnimales() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.header}>Listado de Animales</Text>
-        <TouchableOpacity
-          style={styles.createButton}
-          onPress={() => navigation.navigate("CrearAnimal")}
-        >
-          <Text style={styles.createButtonText}>➕ Crear</Text>
-        </TouchableOpacity>
-      </View>
+     <View style={styles.headerContainer}>
+  <Text style={styles.header}>Listado de Animales</Text>
+  <TouchableOpacity
+    style={styles.createButton}
+    onPress={() => navigation.navigate("CrearAnimal")}
+  >
+    <Text style={styles.createButtonText}>➕ Crear</Text>
+  </TouchableOpacity>
+</View>
+
 
       {animales.length === 0 ? (
-        <Text style={styles.noDataText}>Aún no tienes ningún animal en la lista 🐾</Text>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>📭 Aún no tienes animales registrados.</Text>
+        </View>
       ) : (
         <FlatList
           data={animales}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ padding: 16 }}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate("AnimalDetalle", { animal: item })}
-            >
+            <TouchableOpacity onPress={() => navigation.navigate("AnimalDetalle", { animal: item })}>
               <View style={styles.card}>
                 <Image source={{ uri: item.foto }} style={styles.image} />
                 <Text style={styles.name}>{item.nombre}</Text>
@@ -108,42 +126,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF5E6",
   },
-  headerContainer: {
-    paddingHorizontal: 16,
-    marginTop: 20,
-    marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
   header: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#D35400",
-  },
-  createButton: {
-    backgroundColor: "#D35400",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-  },
-  createButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20,
   },
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  noDataText: {
-    textAlign: "center",
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 100,
+  },
+  emptyText: {
     fontSize: 16,
-    color: "#999",
-    marginTop: 50,
+    color: "#A67C52",
+    textAlign: "center",
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffff",
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -188,4 +195,26 @@ const styles = StyleSheet.create({
     backgroundColor: "#c8e6c9",
     color: "#2e7d32",
   },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 20,
+    marginHorizontal: 16,
+    marginBottom: 10,
+  },
+  
+  createButton: {
+    backgroundColor: "#D35400",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  
+  createButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  
 });

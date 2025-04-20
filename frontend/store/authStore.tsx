@@ -34,7 +34,7 @@ export const useAuthStore = create<AuthState>()(
               try {
                 console.log("Intentando login con:", email, password);
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            
+
                 console.log("Usuario autenticado:", userCredential.user.email);
             
                 const idToken = await userCredential.user.getIdToken();

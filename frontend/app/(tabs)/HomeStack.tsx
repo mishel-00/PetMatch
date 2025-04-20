@@ -8,6 +8,7 @@ import HomeAsociacion from "@/components/HomeAsociacion";
 import AnimalDetalle from "@/components/AnimalDetalle";
 import { Animal } from "@/types/types";
 import CrearAnimal from "@/components/CrearAniaml";
+import ListaAnimales from "@/components/ListaAnimales";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 
@@ -18,6 +19,7 @@ export type RootStackParamList = {
     Login: undefined;
     HomeAdoptante: undefined;
     HomeAsociacion: undefined;
+    ListaAnimales: undefined
     AnimalDetalle: { animal: Animal };
     CrearAnimal : undefined
 };
@@ -49,6 +51,11 @@ export default function HomeStack() {
             component={HomeAsociacion}
             options={{ headerShown: false }}
                 />
+                <Stack.Screen
+  name="ListaAnimales"
+  component={ListaAnimales}
+  options={{ headerTitle: "Lista de Animales" }}
+/>
                 <Stack.Screen
             name="AnimalDetalle"
   component={AnimalDetalle}
