@@ -5,7 +5,11 @@ import RegisterScreen from "./RegisterScreen";
 import LoginScreen from "../login";
 import HomeAdoptante from "@/components/HomeAdoptante";
 import HomeAsociacion from "@/components/HomeAsociacion";
+import AnimalDetalle from "@/components/AnimalDetalle";
+import { Animal } from "@/types/types";
+import CrearAnimal from "@/components/CrearAniaml";
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
 
 
 export type RootStackParamList = {
@@ -14,7 +18,9 @@ export type RootStackParamList = {
     Login: undefined;
     HomeAdoptante: undefined;
     HomeAsociacion: undefined;
-  };
+    AnimalDetalle: { animal: Animal };
+    CrearAnimal : undefined
+};
   
 
 export default function HomeStack() {
@@ -43,6 +49,18 @@ export default function HomeStack() {
             component={HomeAsociacion}
             options={{ headerShown: false }}
                 />
+                <Stack.Screen
+            name="AnimalDetalle"
+  component={AnimalDetalle}
+  options={{ headerTitle: "Detalles del Animal" }}
+
+/>
+<Stack.Screen
+  name="CrearAnimal"
+  component={CrearAnimal}
+  options={{ headerTitle: "CrearAnimal" }}
+/>
+
 
         </Stack.Navigator>
     );

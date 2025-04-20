@@ -6,6 +6,8 @@ import TabsNavigator from "./(tabs)/TabsNavigator";
 import RegisterScreen from "./(tabs)/RegisterScreen";
 import HomeAdoptante from "@/components/HomeAdoptante";
 import HomeAsociacion from "@/components/HomeAsociacion";
+import ListaAnimales from "@/components/ListaAnimales";
+import CrearAnimal from "@/components/CrearAniaml";
 
 
 const Drawer = createDrawerNavigator();
@@ -28,6 +30,17 @@ export default function Layout() {
             <Drawer.Screen name="Register" component={RegisterScreen} options={{ headerTitle: "Registro" }} />
             <Drawer.Screen name="HomeAdoptante" component={HomeAdoptante} options={{ headerTitle: "Inicio Adoptante" }} />
             <Drawer.Screen name="HomeAsociacion" component={HomeAsociacion} options={{ headerTitle: "Inicio Asociación" }} />
+            <Drawer.Screen
+  name="ListaAnimales"
+  component={ListaAnimales}
+  options={{ headerTitle: "Animales" }}
+/>
+<Drawer.Screen
+  name="CrearAnimal"
+  component={CrearAnimal}
+  options={{ drawerLabel: "Crear Animal" }}
+/>
+
 
 
         </Drawer.Navigator>
