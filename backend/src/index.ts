@@ -3,10 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import admin from 'firebase-admin';
-// import adoptanteRoutes from "./routes/adoptante";
 import loginRoutes from "./routes/login";
 import registroRoutes from "./routes/registro";
-
+import animalRoutes from "./routes/animal";
 
 // Cargar variables de entorno
 dotenv.config();
@@ -35,6 +34,7 @@ app.get("/", (_req, res) => {
 //Montar rutas de API necesarias 
 app.use("/api", loginRoutes);
 app.use("/api", registroRoutes);
+app.use("/api", animalRoutes);
 
 
 const PORT = process.env.PORT || 3000;
