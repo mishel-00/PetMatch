@@ -10,7 +10,7 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const firebase_admin_1 = __importDefault(require("firebase-admin"));
 // import adoptanteRoutes from "./routes/adoptante";
-const asociacion_1 = __importDefault(require("./routes/asociacion"));
+const login_1 = __importDefault(require("./routes/login"));
 const registro_1 = __importDefault(require("./routes/registro"));
 // Cargar variables de entorno
 dotenv_1.default.config();
@@ -31,8 +31,7 @@ app.get("/", (_req, res) => {
     res.send("PetMatch Backend funcionando 🐾");
 });
 //Montar rutas de API necesarias 
-// app.use("/api/adopatante", adoptanteRoutes); 
-app.use("/api", asociacion_1.default);
+app.use("/api", login_1.default);
 app.use("/api", registro_1.default);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
