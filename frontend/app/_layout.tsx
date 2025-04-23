@@ -10,7 +10,7 @@ import ListaAnimales from "@/components/ListaAnimales";
 import CrearAnimal from "@/components/CrearAniaml";
 import AnimalDetalle from "@/components/AnimalDetalle";
 
-
+//cambiar
 const Drawer = createDrawerNavigator();
 
 export default function Layout() {
