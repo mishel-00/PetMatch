@@ -41,11 +41,7 @@ export default function Layout() {
   component={CrearAnimal}
   options={{ drawerLabel: "Crear Animal" }}
 />
-<Drawer.Screen
-  name="AnimalDetalle"
-  component={AnimalDetalle}
-  options={{ drawerLabel: "Detalle del Animal" }}
-/>
+
 
 
         </Drawer.Navigator>

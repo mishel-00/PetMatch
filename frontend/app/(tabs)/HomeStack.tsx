@@ -9,6 +9,7 @@ import AnimalDetalle from "@/components/AnimalDetalle";
 import { Animal } from "@/types/types";
 import CrearAnimal from "@/components/CrearAniaml";
 import ListaAnimales from "@/components/ListaAnimales";
+import EditarAnimal from "@/components/EtidarAnimal";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 
@@ -22,6 +23,8 @@ export type RootStackParamList = {
     ListaAnimales: undefined
     AnimalDetalle: { animal: Animal };
     CrearAnimal : undefined
+    EditarAnimal: { animal: Animal };
+
 };
   
 
@@ -67,6 +70,8 @@ export default function HomeStack() {
   component={CrearAnimal}
   options={{ headerTitle: "CrearAnimal" }}
 />
+<Stack.Screen name="EditarAnimal" component={EditarAnimal} options={{ headerTitle: "Editar Animal" }} />
+
 
 
         </Stack.Navigator>

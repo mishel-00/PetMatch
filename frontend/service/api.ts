@@ -148,5 +148,32 @@ export const registerUser = async (data: {
     } catch (error) {
       handleError(error, "POST");
     }
+
+    
   };
+
+  export const updateAnimal = async (id: string, data: Partial<any>) => {
+    try {
+      const headers = await getHeaders(); // usamos tu getHeaders de AsyncStorage
+      const response = await axios.patch(`${API_URL}/api/animal/${id}`, data, { headers });
+      return response.data;
+    } catch (error: any) {
+      console.error("❌ Error al actualizar el animal:", error);
+      throw new Error(error.response?.data?.error || "Error al actualizar animal");
+    }
+  };
+
+  export const deleteAnimal = async (id: string) => {
+    try {
+      const headers = await getHeaders(); // o getHeaders() si usas eso
+      const response = await axios.delete(`${API_URL}/api/animal/${id}`, {
+        headers,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error("❌ Error al eliminar el animal:", error);
+      throw new Error(error.response?.data?.error || "Error al eliminar animal");
+    }
+  };
+  
   

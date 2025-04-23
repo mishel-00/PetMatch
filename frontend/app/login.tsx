@@ -1,38 +1,34 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from "react-native";
 import { useAuthStore } from "../store/authStore";
 import { Feather } from "@expo/vector-icons";
 
 export default function LoginScreen({ navigation }: any) {
-  const { username: savedEmail, password: savedPassword, login,  } = useAuthStore();
+  const { username: savedEmail, password: savedPassword, login } = useAuthStore();
   const [email, setEmail] = useState(savedEmail || "");
   const [password, setPassword] = useState(savedPassword || "");
 
   const handleLogin = async () => {
     try {
-      const rol = await login(email, password); // rol es string o null
-  
+      const rol = await login(email, password);
       if (rol === "adoptante") {
         navigation.navigate("HomeAdoptante");
       } else if (rol === "asociacion") {
         navigation.navigate("HomeAsociacion");
       } else {
-        Alert.alert("Error", "Correo o contraseña incorrectos o rol no definido");
+        Alert.alert( "Correo o contraseña incorrectos");
       }
     } catch (error) {
-      Alert.alert("Error", "Algo salió mal al iniciar sesión.");
+      Alert.alert( "Algo salió mal al iniciar sesión.");
     }
   };
-  
-  
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}></Text>
-      <Text style={styles.subtitle}>Bienvenido a PetMach</Text>
+      <Image source={require("@/assets/images/Logo_petMatch_con_letras.png")} style={styles.logo} resizeMode="contain" />
 
       <View style={styles.inputContainer}>
-        <Feather name="mail" size={20} style={styles.icon} />
+        <Feather name="mail" size={20} style={styles.iconBlue} />
         <TextInput
           style={styles.input}
           placeholder="Correo electrónico"
@@ -45,7 +41,7 @@ export default function LoginScreen({ navigation }: any) {
       </View>
 
       <View style={styles.inputContainer}>
-        <Feather name="lock" size={20} style={styles.icon} />
+        <Feather name="lock" size={20} style={styles.iconBlue} />
         <TextInput
           style={styles.input}
           placeholder="Contraseña"
@@ -61,13 +57,11 @@ export default function LoginScreen({ navigation }: any) {
         <Feather name="arrow-right" size={20} style={styles.buttonIcon} />
       </TouchableOpacity>
 
-      {/* Botón de registro */}
       <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-  <Text style={styles.registerText}>
-    ¿No tienes cuenta? <Text style={styles.registerLink}>Regístrate</Text>
-  </Text>
-</TouchableOpacity>
-
+        <Text style={styles.registerText}>
+          ¿No tienes cuenta? <Text style={styles.registerLink}>Regístrate</Text>
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -80,35 +74,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
   },
-  title: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#D35400",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: "#A67C52",
+  logo: {
+    width: 260,
+    height: 260,
     marginBottom: 30,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#F0A500",
+    borderWidth: 2,
+    borderColor: "#002aa1", // Azul intenso
     borderRadius: 8,
     paddingHorizontal: 15,
     paddingVertical: 12,
     marginBottom: 20,
     width: "100%",
     shadowColor: "#000",
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.05,
     shadowRadius: 5,
-    elevation: 3,
+    elevation: 2,
   },
-  icon: {
-    color: "#D35400",
+  iconBlue: {
+    color: "#002aa1",
     marginRight: 10,
   },
   input: {
@@ -119,7 +107,7 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#D35400",
+    backgroundColor: "#ef3d13", // Naranja Pet Match
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 8,
