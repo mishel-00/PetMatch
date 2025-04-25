@@ -24,12 +24,28 @@ export default function AnimalDetalle({ route }: any) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [animal, setAnimal] = useState<Animal | null>(null);
   const [loading, setLoading] = useState(true);
+  const normalizarEstado = (estado: string): "en adopcion" | "reservado" | "adoptado" => {
+    const limpio = estado.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (limpio === "adoptado") return "adoptado";
+    if (limpio === "reservado") return "reservado";
+    return "en adopcion";
+  };
+  
 
   useEffect(() => {
     const fetchAnimal = async () => {
       try {
         const data = await getxxx(`api/animal/${id}`);
-        setAnimal(data);
+        console.log(data),
+
+        setAnimal({
+          ...data,
+          estado: normalizarEstado(data.estadoAdopcion),
+          fechaNacimiento: data.fecha_nacimiento,
+          fechaIngreso: data.fecha_ingreso,
+          tipoAnimal: data.especie,
+
+        });
       } catch (error) {
         Alert.alert("Error", "No se pudo cargar el animal");
       } finally {
@@ -61,9 +77,16 @@ export default function AnimalDetalle({ route }: any) {
         <Text style={styles.label}>Tipo de Animal: <Text style={styles.value}>{animal.tipoAnimal}</Text></Text>
         <Text style={styles.label}>
           Estado de Adopción:{" "}
-          <Text style={[styles.badge, getEstadoStyle(animal.estado)]}>
-            {animal.estado.toUpperCase()}
-          </Text>
+          {animal.estado ? (
+  <Text style={[styles.badge, getEstadoStyle(animal.estado)]}>
+    {animal.estado.toUpperCase()}
+  </Text>
+) : (
+  <Text style={[styles.badge, styles.enAdopcion]}>
+    ESTADO DESCONOCIDO
+  </Text>
+)}
+
         </Text>
         <Text style={styles.label}>Esterilizado: <Text style={styles.value}>{animal.esterilizado ? "Sí" : "No"}</Text></Text>
         <Text style={styles.label}>Especie: <Text style={styles.value}>{animal.especie}</Text></Text>
