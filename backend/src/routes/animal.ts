@@ -64,6 +64,42 @@ router.get("/animal/:id", verificarTokenFireBase, async (req, res) => {
   }
 });
 
+//! PUT -> Actualizar un animal por su ID
+router.put("/animal/:id", verificarTokenFireBase, async (req, res): Promise<void> => {
+  const uidAsociacion = req.uid;
+  if (!uidAsociacion) {
+    res.status(401).json({ error: "Token inválido" });
+    return;
+  }
+
+  const { id } = req.params;
+  const dataActualizada = req.body;
+
+  try {
+    const docRef = admin.firestore().collection("animal").doc(id);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      res.status(404).json({ error: "Animal no encontrado" });
+      return;
+    }
+
+    const dataOriginal = doc.data();
+
+    if (dataOriginal?.asociacion_id !== uidAsociacion) {
+      res.status(403).json({ error: "No autorizado para editar este animal" });
+      return;
+    }
+    //* Solo modifica los campos que se han enviado y los demás se mantienen iguales
+    await docRef.update(dataActualizada);
+
+    res.status(200).json({ message: `Animal con ID ${id} actualizado correctamente` });
+  } catch (error: any) {
+    console.error("❌ Error al actualizar animal:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 //! DELETE -> Eliminar un animal por su ID
 router.delete("/animal/:id", verificarTokenFireBase, async (req, res): Promise<void> => {
   const uidAsociacion = req.uid;
