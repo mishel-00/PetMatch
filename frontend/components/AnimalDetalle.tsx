@@ -1,25 +1,53 @@
 import { RootStackParamList } from "@/app/(tabs)/HomeStack";
 import { RouteProp } from "@react-navigation/native";
-import React from "react";
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 
-import { deleteAnimal } from "@/service/api";
+import { deleteAnimal, getxxx } from "@/service/api";
 import { useNavigation } from "@react-navigation/native";
-
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-
-// al inicio del componente
-const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-type AnimalDetalleRouteProp = RouteProp<RootStackParamList, "AnimalDetalle">;
-
-interface Props {
-  route: AnimalDetalleRouteProp;
-}
+import type { Animal } from "@/types/types";
 
 
-export default function AnimalDetalle({ route }: Props) {
-  const { animal } = route.params;
+
+export default function AnimalDetalle({ route }: any) {
+  const { id } = route.params;
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [animal, setAnimal] = useState<Animal | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnimal = async () => {
+      try {
+        const data = await getxxx(`api/animal/${id}`);
+        setAnimal(data);
+      } catch (error) {
+        Alert.alert("Error", "No se pudo cargar el animal");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnimal();
+  }, [id]);
+
+  if (loading || !animal) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#D35400" />
+      </View>
+    );
+  }
+
   const sexoFormateado = animal.sexo === "macho" ? "Macho" : "Hembra";
 
   return (
@@ -49,43 +77,41 @@ export default function AnimalDetalle({ route }: Props) {
       <Text style={styles.description}>{animal.descripcion}</Text>
 
       <View style={styles.buttonContainer}>
-      <TouchableOpacity
-  style={styles.editButton}
-  onPress={() => navigation.navigate("EditarAnimal", { animal })}
->
-  <Text style={styles.buttonText}>✏️ Editar</Text>
-</TouchableOpacity>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => navigation.navigate("EditarAnimal", { id: animal.id })}
+        >
+          <Text style={styles.buttonText}>✏️ Editar</Text>
+        </TouchableOpacity>
 
-<TouchableOpacity
-  style={styles.deleteButton}
-  onPress={() => {
-    Alert.alert(
-      "¿Eliminar Animal?",
-      "¿Estás seguro de que quieres eliminar este animal?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteAnimal(animal.id);
-              Alert.alert("Éxito", "El animal fue eliminado.");
-              navigation.goBack(); // vuelve a la lista
-            } catch (error) {
-              Alert.alert("Error", "No se pudo eliminar el animal.");
-            }
-          },
-        },
-      ]
-    );
-  }}
->
-  <Text style={styles.buttonText}>🗑 Eliminar</Text>
-</TouchableOpacity>
-
-</View>
-
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => {
+            Alert.alert(
+              "¿Eliminar Animal?",
+              "¿Estás seguro de que quieres eliminar este animal?",
+              [
+                { text: "Cancelar", style: "cancel" },
+                {
+                  text: "Eliminar",
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      await deleteAnimal(animal.id);
+                      Alert.alert("Éxito", "El animal fue eliminado.");
+                      navigation.goBack();
+                    } catch (error) {
+                      Alert.alert("Error", "No se pudo eliminar el animal.");
+                    }
+                  },
+                },
+              ]
+            );
+          }}
+        >
+          <Text style={styles.buttonText}>🗑 Eliminar</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -96,6 +122,7 @@ const getEstadoStyle = (estado: string) => {
   return styles.enAdopcion;
 };
 
+// 🔽 Tus estilos se mantienen igual:
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -179,7 +206,7 @@ const styles = StyleSheet.create({
   },
   editButton: {
     flex: 1,
-    backgroundColor: "#002aa1", // azul PetMatch
+    backgroundColor: "#002aa1",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
@@ -187,7 +214,7 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     flex: 1,
-    backgroundColor: "#ef3d13", // naranja PetMatch
+    backgroundColor: "#ef3d13",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
@@ -198,5 +225,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 15,
   },
-  
 });
