@@ -2,7 +2,6 @@ import express from "express";
 import admin from "../firebase";
 import { ESTADOS_ADOPCION } from "../utils/enums";
 import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
-import { formatoFecha } from "../utils/fnDatosFront";
 
 const router = express.Router();
 //! Ruta general sin filtros aplicados
@@ -21,16 +20,10 @@ router.get ("/animal", verificarTokenFireBase, async (req, res) => {
     .where("asociacion_id", "==", uidAsociacion)
     .get();
     console.log("🐾 Animales encontrados:", snapshot.docs.length);
-    const animales = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        fecha_ingreso: formatoFecha(data.fecha_ingreso),
-        fecha_nacimiento: formatoFecha(data.fecha_nacimiento),
-        fecha_ultima_adopcion: formatoFecha(data.fecha_ultima_adopcion),
-      };
-    });
+    const animales = snapshot.docs.map((doc) => ({ 
+        id: doc.id, 
+        ...doc.data(), 
+    }));
     res.status(200).json(animales);
   } catch (error: any) {
     console.error("❌ Error al obtener animales:", error);
