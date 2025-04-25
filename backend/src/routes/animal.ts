@@ -12,6 +12,7 @@ router.get ("/animal", verificarTokenFireBase, async (req, res) => {
     return;
   }
 
+  
   try {
     const snapshot = await admin
     .firestore()
@@ -28,6 +29,72 @@ router.get ("/animal", verificarTokenFireBase, async (req, res) => {
     console.error("❌ Error al obtener animales:", error);
     res.status(500).json({ error: error.message });
     return;
+  }
+});
+//! GET -> Obtener un animal por su ID
+router.get("/animal/:id", verificarTokenFireBase, async (req, res) => {
+  const uidAsociacion = req.uid;
+  if (!uidAsociacion) {
+    res.status(401).json({ error: "Token inválido" });
+    return;
+  }
+
+  const { id } = req.params;
+
+  try {
+    const docRef = admin.firestore().collection("animal").doc(id);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      res.status(404).json({ error: "Animal no encontrado" });
+      return;
+    }
+
+    const data = doc.data();
+
+    // Aseguramos que el animal pertenece a la asociación autenticada
+    if (data?.asociacion_id !== uidAsociacion) {
+      res.status(403).json({ error: "No autorizado para ver este animal" });
+    }
+
+    res.status(200).json({ id: doc.id, ...data });
+  } catch (error: any) {
+    console.error("❌ Error al obtener animal por ID:", error);
+    res.status(500).json({ error: error.message }); 
+  }
+});
+
+//! DELETE -> Eliminar un animal por su ID
+router.delete("/animal/:id", verificarTokenFireBase, async (req, res): Promise<void> => {
+  const uidAsociacion = req.uid;
+  if (!uidAsociacion) {
+    res.status(401).json({ error: "Token inválido" });
+    return;
+  }
+
+  const { id } = req.params;
+
+  try {
+    const docRef = admin.firestore().collection("animal").doc(id);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      res.status(404).json({ error: "Animal no encontrado" });
+      return;
+    }
+
+    const data = doc.data();
+
+    if (data?.asociacion_id !== uidAsociacion) {
+      res.status(403).json({ error: "No autorizado para eliminar este animal" });
+      return;
+    }
+
+    await docRef.delete();
+    res.status(200).json({ message: `Animal con ID ${id} eliminado correctamente` });
+  } catch (error: any) {
+    console.error("❌ Error al eliminar animal:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
