@@ -21,9 +21,9 @@ export type RootStackParamList = {
     HomeAdoptante: undefined;
     HomeAsociacion: undefined;
     ListaAnimales: undefined
-    AnimalDetalle: { animal: Animal };
+    AnimalDetalle: {id : string };
     CrearAnimal : undefined
-    EditarAnimal: { animal: Animal };
+    EditarAnimal: { id : string };
 
 };
   
@@ -54,23 +54,26 @@ export default function HomeStack() {
             component={HomeAsociacion}
             options={{ headerShown: false }}
                 />
-                <Stack.Screen
-  name="ListaAnimales"
-  component={ListaAnimales}
-  options={{ headerTitle: "Lista de Animales" }}
-/>
-                <Stack.Screen
+            <Stack.Screen
+            name="ListaAnimales"
+            component={ListaAnimales}
+            options={{ headerTitle: "Lista de Animales" }}
+            />
+            <Stack.Screen
             name="AnimalDetalle"
-  component={AnimalDetalle}
-  options={{ headerTitle: "Detalles del Animal" }}
+            component={AnimalDetalle}
+            options={{ headerTitle: "Detalles del Animal" }}
 
-/>
-<Stack.Screen
-  name="CrearAnimal"
-  component={CrearAnimal}
-  options={{ headerTitle: "CrearAnimal" }}
-/>
-<Stack.Screen name="EditarAnimal" component={EditarAnimal} options={{ headerTitle: "Editar Animal" }} />
+            />
+            <Stack.Screen
+            name="CrearAnimal"
+            component={CrearAnimal}
+            options={{ headerTitle: "CrearAnimal" }}
+            />
+            <Stack.Screen 
+            name="EditarAnimal" 
+            component={EditarAnimal} 
+            options={{ headerTitle: "Editar Animal" }} />
 
 
 

@@ -107,7 +107,7 @@ export default function ListaAnimales() {
             const sexoFormateado = item.sexo === "macho" ? "Macho" : "Hembra";
 
             return (
-              <TouchableOpacity onPress={() => navigation.navigate("AnimalDetalle", { animal: item })}>
+              <TouchableOpacity onPress={() => navigation.navigate("AnimalDetalle", { id: item.id })}>
                 <View style={styles.card}>
                   <Image source={{ uri: item.foto }} style={styles.image} />
                   <Text style={styles.name}>{item.nombre}</Text>

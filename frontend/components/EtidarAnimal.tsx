@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, Alert, ActivityIndicator } from "react-native";
 import { RouteProp, useNavigation } from "@react-navigation/native";
-import { RootStackParamList } from "@/app/(tabs)/HomeStack"; // ajusta según tu estructura
-import { updateAnimal } from "@/service/api";
+import { RootStackParamList } from "@/app/(tabs)/HomeStack";
+import { updateAnimal, getxxx } from "@/service/api";
 import { Picker } from "@react-native-picker/picker";
-
+import type { Animal } from "@/types/types";
 
 type EditarAnimalRouteProp = RouteProp<RootStackParamList, "EditarAnimal">;
 
@@ -13,17 +13,39 @@ interface Props {
 }
 
 export default function EditarAnimal({ route }: Props) {
-  const { animal } = route.params;
+  const { id } = route.params;
   const navigation = useNavigation();
+  const [animal, setAnimal] = useState<Animal | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [nombre, setNombre] = useState(animal.nombre);
-  const [descripcion, setDescripcion] = useState(animal.descripcion);
-  const [peso, setPeso] = useState(animal.peso);
-  const [estado, setEstado] = useState(animal.estado);
+  const [nombre, setNombre] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [peso, setPeso] = useState("");
+  const [estado, setEstado] = useState<"en adopcion" | "reservado" | "adoptado">("en adopcion");
+
+  useEffect(() => {
+    const fetchAnimal = async () => {
+      try {
+        const data = await getxxx(`api/animal/${id}`);
+        setAnimal(data);
+        setNombre(data.nombre);
+        setDescripcion(data.descripcion);
+        setPeso(data.peso);
+        setEstado(data.estado);
+      } catch (error) {
+        Alert.alert("Error", "No se pudo cargar el animal.");
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnimal();
+  }, [id]);
 
   const handleSave = async () => {
     try {
-      await updateAnimal(animal.id, { nombre, descripcion, peso, estado });
+      await updateAnimal(id, { nombre, descripcion, peso, estado });
       Alert.alert("Éxito", "El animal fue actualizado correctamente.");
       navigation.goBack();
     } catch (error) {
@@ -32,6 +54,14 @@ export default function EditarAnimal({ route }: Props) {
     }
   };
 
+  if (loading || !animal) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#D35400" />
+      </View>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Editar Animal</Text>
@@ -39,16 +69,16 @@ export default function EditarAnimal({ route }: Props) {
       <TextInput style={styles.input} value={descripcion} onChangeText={setDescripcion} placeholder="Descripción" />
       <TextInput style={styles.input} value={peso} onChangeText={setPeso} placeholder="Peso" />
       <Picker
-  selectedValue={estado}
-  onValueChange={(itemValue) =>
-    setEstado(itemValue as "en adopcion" | "reservado" | "adoptado")
-}
-  style={styles.input}
->
-  <Picker.Item label="En adopción" value="en adopcion" />
-  <Picker.Item label="Reservado" value="reservado" />
-  <Picker.Item label="Adoptado" value="adoptado" />
-</Picker>
+        selectedValue={estado}
+        onValueChange={(itemValue) =>
+          setEstado(itemValue as "en adopcion" | "reservado" | "adoptado")
+        }
+        style={styles.input}
+      >
+        <Picker.Item label="En adopción" value="en adopcion" />
+        <Picker.Item label="Reservado" value="reservado" />
+        <Picker.Item label="Adoptado" value="adoptado" />
+      </Picker>
 
       <Button title="Guardar Cambios" onPress={handleSave} color="#D35400" />
     </ScrollView>
