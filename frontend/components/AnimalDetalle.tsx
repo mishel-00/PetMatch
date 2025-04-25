@@ -16,6 +16,7 @@ import { deleteAnimal, getxxx } from "@/service/api";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { Animal } from "@/types/types";
+import { formatoFecha } from "@/utils/formatoFecha";
 
 
 
@@ -92,8 +93,8 @@ export default function AnimalDetalle({ route }: any) {
         <Text style={styles.label}>Especie: <Text style={styles.value}>{animal.especie}</Text></Text>
         <Text style={styles.label}>Raza: <Text style={styles.value}>{animal.tipoRaza}</Text></Text>
         <Text style={styles.label}>Peso: <Text style={styles.value}>{animal.peso}</Text></Text>
-        <Text style={styles.label}>Fecha de Nacimiento: <Text style={styles.value}>{animal.fechaNacimiento}</Text></Text>
-        <Text style={styles.label}>Fecha de Ingreso: <Text style={styles.value}>{animal.fechaIngreso}</Text></Text>
+        <Text style={styles.label}>Fecha de Nacimiento: <Text style={styles.value}>{formatoFecha (animal.fechaNacimiento)}</Text></Text>
+        <Text style={styles.label}>Fecha de Ingreso: <Text style={styles.value}>{formatoFecha (animal.fechaIngreso)}</Text></Text>
       </View>
 
       <Text style={styles.descriptionTitle}>Descripción:</Text>

@@ -16,6 +16,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/app/(tabs)/HomeStack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import { formatoFecha } from "@/utils/formatoFecha";
 
 
 interface Animal {
@@ -46,6 +47,7 @@ export default function ListaAnimales() {
         try {
           setLoading(true);
           const data = await getxxx("api/animal");
+          console.log(data)
           const mapped = data.map((item: any) => ({
             id: item.id,
             foto: item.foto,
@@ -105,7 +107,7 @@ export default function ListaAnimales() {
           contentContainerStyle={{ padding: 16 }}
           renderItem={({ item }) => {
             const sexoFormateado = item.sexo === "macho" ? "Macho" : "Hembra";
-
+            
             return (
               <TouchableOpacity onPress={() => navigation.navigate("AnimalDetalle", { id: item.id })}>
                 <View style={styles.card}>
@@ -114,7 +116,7 @@ export default function ListaAnimales() {
 
                   <Text style={styles.detail}>⚧ Sexo: <Text style={styles.bold}>{sexoFormateado}</Text></Text>
                   <Text style={styles.detail}>🐾 Especie: <Text style={styles.bold}>{item.especie}</Text></Text>
-                  <Text style={styles.detail}>📅 Ingreso: <Text style={styles.ingreso}>{item.fechaIngreso}</Text></Text>
+                  <Text style={styles.detail}>📅 Ingreso: <Text style={styles.ingreso}>{formatoFecha (item.fechaIngreso)}</Text></Text>
 
                   <Text
                     style={[
