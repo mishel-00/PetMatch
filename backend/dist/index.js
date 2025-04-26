@@ -12,6 +12,7 @@ const firebase_admin_1 = __importDefault(require("firebase-admin"));
 const login_1 = __importDefault(require("./routes/login"));
 const registro_1 = __importDefault(require("./routes/registro"));
 const animal_1 = __importDefault(require("./routes/animal"));
+const horarioDisponible_1 = __importDefault(require("./routes/horarioDisponible"));
 // Cargar variables de entorno
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -34,6 +35,7 @@ app.get("/", (_req, res) => {
 app.use("/api", login_1.default);
 app.use("/api", registro_1.default);
 app.use("/api", animal_1.default);
+app.use("/api", horarioDisponible_1.default);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`✅ PetMatch API corriendo en http://localhost:${PORT}`);

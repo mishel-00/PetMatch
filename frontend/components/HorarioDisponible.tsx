@@ -48,8 +48,10 @@ export default function HorarioDisponible() {
 
     setLoading(true);
     try {
-      const fechaHoraFormateada = `${format(fechaSeleccionada, "yyyy-MM-dd")}T${format(horaSeleccionada, "HH:mm")}:00`;
-      await postxxx("api/horarioDisponible", { horarios: [{ fechaHora: fechaHoraFormateada }] });
+      const fecha = format(fechaSeleccionada, "yyyy-MM-dd");
+      const hora = format(horaSeleccionada, "HH:mm");
+      
+      await postxxx("api/horarioDisponible", { fecha, hora });      
 
       setHorarios(prev => [...prev, { fecha: fechaSeleccionada, hora: horaSeleccionada }]);
       setFechaSeleccionada(null);
