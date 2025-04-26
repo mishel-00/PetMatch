@@ -10,6 +10,7 @@ import { Animal } from "@/types/types";
 import CrearAnimal from "@/components/CrearAniaml";
 import ListaAnimales from "@/components/ListaAnimales";
 import EditarAnimal from "@/components/EtidarAnimal";
+import HorarioDisponible from "@/components/HorarioDisponible";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 
@@ -24,6 +25,7 @@ export type RootStackParamList = {
     AnimalDetalle: {id : string };
     CrearAnimal : undefined
     EditarAnimal: { id : string };
+    HorarioDisponible : undefined;
 
 };
   
@@ -74,6 +76,10 @@ export default function HomeStack() {
             name="EditarAnimal" 
             component={EditarAnimal} 
             options={{ headerTitle: "Editar Animal" }} />
+            <Stack.Screen 
+            name="HorarioDisponible" 
+            component={HorarioDisponible} 
+            options={{ headerTitle: "Horario Disponible" }} />
 
 
 
