@@ -11,6 +11,7 @@ import CrearAnimal from "@/components/CrearAniaml";
 import AnimalDetalle from "@/components/AnimalDetalle";
 import EditarAnimal from "@/components/EtidarAnimal"; // asegúrate que esté bien escrito
 import HomeStack from "./(tabs)/HomeStack";
+import HorarioDisponible from "@/components/HorarioDisponible";
 
 const Drawer = createDrawerNavigator();
 
@@ -36,6 +37,7 @@ export default function Layout() {
       <Drawer.Screen name="CrearAnimal" component={CrearAnimal} options={{ drawerLabel: "Crear Animal" }} />
       <Drawer.Screen name="AnimalDetalle" component={AnimalDetalle} options={{drawerLabel: "Animal detalle"}}/>
       <Drawer.Screen name="EditarAnimal" component={EditarAnimal} options={{drawerLabel: "Animal detall"}}/>
+      <Drawer.Screen name="HorarioDisponible" component={HorarioDisponible} options={{drawerLabel: "Horario Disponibles"}}/>
 
     </Drawer.Navigator>
   );
