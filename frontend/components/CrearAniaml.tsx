@@ -92,7 +92,23 @@ export default function CrearAnimal() {
   const handleChange = (field: string, value: string | boolean) => {
     setForm({ ...form, [field]: value });
   };
-
+  const resetForm = () => {
+    setForm({
+      foto: "",
+      nombre: "",
+      sexo: "",
+      tipoAnimal: "",
+      estado: "en adopcion",
+      descripcion: "",
+      esterilizado: false,
+      especie: "",
+      tipoRaza: "",
+      peso: "",
+      fechaNacimiento: "",
+      fechaIngreso: "",
+    });
+  };
+  
   const handleSubmit = async () => {
     try {
       // ✅ Verificar sesión de Firebase antes de subir imagen
@@ -118,12 +134,14 @@ export default function CrearAnimal() {
         peso: form.peso,
         fecha_nacimiento: form.fechaNacimiento,
         fecha_ingreso: form.fechaIngreso,
+        sexo: form.sexo
       };
       
   
       await postxxx("api/animal", datosFinales);
   
       Alert.alert("Éxito", "Animal creado exitosamente");
+      resetForm();
       navigation.navigate("ListaAnimales" as never);
     } catch (error) {
       Alert.alert("Error", "No se pudo crear el animal");

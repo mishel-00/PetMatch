@@ -106,7 +106,7 @@ export default function ListaAnimales() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ padding: 16 }}
           renderItem={({ item }) => {
-            const sexoFormateado = item.sexo === "macho" ? "Macho" : "Hembra";
+            const sexoFormateado = item.sexo.toLowerCase() === "macho" ? "Macho" : "Hembra";
             
             return (
               <TouchableOpacity onPress={() => navigation.navigate("AnimalDetalle", { id: item.id })}>

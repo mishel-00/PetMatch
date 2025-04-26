@@ -1,5 +1,5 @@
 import { RootStackParamList } from "@/app/(tabs)/HomeStack";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -33,29 +33,32 @@ export default function AnimalDetalle({ route }: any) {
   };
   
 
-  useEffect(() => {
-    const fetchAnimal = async () => {
-      try {
-        const data = await getxxx(`api/animal/${id}`);
-        console.log(data),
-
-        setAnimal({
-          ...data,
-          estado: normalizarEstado(data.estadoAdopcion),
-          fechaNacimiento: data.fecha_nacimiento,
-          fechaIngreso: data.fecha_ingreso,
-          tipoAnimal: data.especie,
-
-        });
-      } catch (error) {
-        Alert.alert("Error", "No se pudo cargar el animal");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAnimal();
-  }, [id]);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchAnimal = async () => {
+        try {
+          setLoading(true);
+          const data = await getxxx(`api/animal/${id}`);
+          console.log(data);
+  
+          setAnimal({
+            ...data,
+            estado: normalizarEstado(data.estadoAdopcion),
+            fechaNacimiento: data.fecha_nacimiento,
+            fechaIngreso: data.fecha_ingreso,
+            tipoAnimal: data.especie,
+          });
+        } catch (error) {
+          Alert.alert("Error", "No se pudo cargar el animal");
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchAnimal();
+    }, [id])  // <- importante pasar [id]
+  );
+  
 
   if (loading || !animal) {
     return (
@@ -65,7 +68,7 @@ export default function AnimalDetalle({ route }: any) {
     );
   }
 
-  const sexoFormateado = animal.sexo === "macho" ? "Macho" : "Hembra";
+  const sexoFormateado = animal.sexo.toLowerCase() === "macho" ? "Macho" : "Hembra";
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>

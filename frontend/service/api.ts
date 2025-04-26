@@ -155,7 +155,7 @@ export const registerUser = async (data: {
   export const updateAnimal = async (id: string, data: Partial<any>) => {
     try {
       const headers = await getHeaders(); // usamos tu getHeaders de AsyncStorage
-      const response = await axios.patch(`${API_URL}/api/animal/${id}`, data, { headers });
+      const response = await axios.put(`${API_URL}/api/animal/${id}`, data, { headers });
       return response.data;
     } catch (error: any) {
       console.error("❌ Error al actualizar el animal:", error);

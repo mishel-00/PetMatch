@@ -1,93 +1,138 @@
-import { View, Text, Image, FlatList, StyleSheet } from "react-native";
-
-const mascotas = [
-  {
-    id: "1",
-    nombre: "Luna",
-    edad: "2 años",
-    raza: "Labrador",
-    ubicacion: "Madrid",
-  },
-  {
-    id: "2",
-    nombre: "Simba",
-    edad: "1 año",
-    raza: "Golden Retriever",
-    ubicacion: "Barcelona",
-  },
-];
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from "react-native";
+import { getxxx } from "@/service/api";
 
 export default function HomeAsociacion() {
-  return (
-    <View style={{ flex: 1, backgroundColor: "#FFF5E6" }}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Bienvenida Asociación 🐾</Text>
-        <Text style={styles.subtitle}>¡Gracias por confiar en PetMatch!</Text>
+  const [animalesCount, setAnimalesCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchAnimales = async () => {
+      try {
+        setLoading(true);
+        const data = await getxxx("api/animal"); 
+        setAnimalesCount(data.length); 
+      } catch (error) {
+        Alert.alert("Error", "No se pudo cargar la información de animales.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnimales();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#D35400" />
       </View>
-      <FlatList
-        data={mascotas}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Image
-              source={{ uri: "https://via.placeholder.com/300x200.png?text=Mascota" }}
-              style={styles.image}
-              resizeMode="cover"
-            />
-            <Text style={styles.name}>{item.nombre}</Text>
-            <Text style={styles.details}>{item.edad} • {item.raza}</Text>
-            <Text style={styles.location}>📍 {item.ubicacion}</Text>
-          </View>
-        )}
-      />
-    </View>
+    );
+  }
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      {/* Banner */}
+      <View style={styles.banner}>
+        <Text style={styles.bannerText}>🐾 PetMatch</Text>
+      </View>
+
+      
+      {/* Estadísticas */}
+      <View style={styles.statsCard}>
+        <Text style={styles.statsTitle}>📊 Tus estadísticas</Text>
+
+        <View style={styles.statRow}>
+          <Text style={styles.statEmoji}>🐶</Text>
+          <Text style={styles.statText}>Animales publicados: <Text style={styles.bold}>{animalesCount}</Text></Text>
+        </View>
+
+        {/* Aquí luego agregarás citas, solicitudes y adopciones */}
+      </View>
+
+      <Text style={styles.footerMessage}>
+        "¡Sigamos encontrando hogares para más peluditos! 🏡"
+      </Text>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFF5E6",
+  },
+  container: {
     padding: 20,
+    backgroundColor: "#FFF5E6",
+    flexGrow: 1,
     alignItems: "center",
   },
-  title: {
+  banner: {
+    backgroundColor: "#D35400",
+    width: "100%",
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  bannerText: {
+    color: "white",
+    fontSize: 26,
+    fontWeight: "bold",
+  },
+  welcomeContainer: {
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  welcomeTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#D35400",
-    marginBottom: 10,
+    marginBottom: 6,
   },
-  subtitle: {
+  welcomeSubtitle: {
     fontSize: 16,
     color: "#A67C52",
   },
-  card: {
-    backgroundColor: "#ffffff",
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+  statsCard: {
+    backgroundColor: "#fff",
+    width: "100%",
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 30,
     elevation: 3,
   },
-  image: {
-    width: "100%",
-    height: 180,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  name: {
-    fontSize: 18,
+  statsTitle: {
+    fontSize: 20,
     fontWeight: "bold",
+    marginBottom: 14,
     color: "#D35400",
   },
-  details: {
-    fontSize: 16,
-    color: "#333",
+  statRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
   },
-  location: {
-    fontSize: 14,
-    color: "#777",
-    marginTop: 4,
+  statEmoji: {
+    fontSize: 22,
+    marginRight: 10,
+  },
+  statText: {
+    fontSize: 16,
+    color: "#555",
+  },
+  bold: {
+    fontWeight: "bold",
+    color: "#000",
+  },
+  footerMessage: {
+    textAlign: "center",
+    fontSize: 15,
+    color: "#A67C52",
+    paddingHorizontal: 10,
+    marginTop: 10,
   },
 });

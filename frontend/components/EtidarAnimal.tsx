@@ -11,11 +11,8 @@ import uuid from "react-native-uuid";
 
 type EditarAnimalRouteProp = RouteProp<RootStackParamList, "EditarAnimal">;
 
-interface Props {
-  route: EditarAnimalRouteProp;
-}
 
-export default function EditarAnimal({ route }: Props) {
+export default function EditarAnimal({ route }: any) {
   const { id } = route.params;
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
