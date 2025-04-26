@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert, ActivityIndicator, Platform } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+  Alert,
+  ActivityIndicator,
+  Platform,
+} from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -22,15 +32,13 @@ export default function HorarioDisponible() {
       try {
         const data = await getxxx("api/horarioDisponible");
         if (data && Array.isArray(data)) {
-          const horariosCargados = data.map((h: any) => {
-            const [fechaParte, horaParte] = h.fechaHora.split("T");
-            return {
-              id: h.id,
-              fecha: new Date(fechaParte),
-              hora: new Date(`1970-01-01T${horaParte}`),
-            };
-          });
-          setHorarios(horariosCargados);
+          const horariosCargados = data.map((h: any) => ({
+            id: h.id,
+            fecha: new Date(h.fecha),
+            hora: new Date(`1970-01-01T${h.hora}`),
+          }));
+          setHorarios(ordenarHorarios(horariosCargados));
+
         }
       } catch (error) {
         console.error(error);
@@ -39,7 +47,6 @@ export default function HorarioDisponible() {
         setLoadingInicial(false);
       }
     };
-
     cargarHorarios();
   }, []);
 
@@ -48,26 +55,64 @@ export default function HorarioDisponible() {
       Alert.alert("Error", "Selecciona fecha y hora antes de guardar.");
       return;
     }
-
+  
     setLoading(true);
     try {
       const fecha = format(fechaSeleccionada, "yyyy-MM-dd");
       const hora = format(horaSeleccionada, "HH:mm");
-
+  
       const response = await postxxx("api/horarioDisponible", { fecha, hora });
-
-      setHorarios(prev => [...prev, { id: response.id, fecha: fechaSeleccionada, hora: horaSeleccionada }]);
+  
+      setHorarios(prev => ordenarHorarios([...prev, { id: response.id, fecha: fechaSeleccionada, hora: horaSeleccionada }]));
       setFechaSeleccionada(null);
       setHoraSeleccionada(null);
-
+  
       Alert.alert("Éxito", "Horario guardado correctamente 🎉");
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "No se pudo guardar el horario.");
+    } catch (error: any) {
+      console.error(" Error al guardar horario:", error);
+  
+      let errorMessage = "No se pudo guardar el horario.";
+  
+      // Intentamos extraer mensaje bonito
+      if (error.message) {
+        try {
+          const parsedError = JSON.parse(error.message);
+          if (parsedError.error) {
+            errorMessage = parsedError.error; 
+          }
+        } catch (e) {
+          
+        }
+      }
+  
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }
   };
+  const ordenarHorarios = (lista: Horario[]) => {
+    return lista.sort((a, b) => {
+      const fechaHoraA = new Date(
+        a.fecha.getFullYear(),
+        a.fecha.getMonth(),
+        a.fecha.getDate(),
+        a.hora.getHours(),
+        a.hora.getMinutes()
+      );
+  
+      const fechaHoraB = new Date(
+        b.fecha.getFullYear(),
+        b.fecha.getMonth(),
+        b.fecha.getDate(),
+        b.hora.getHours(),
+        b.hora.getMinutes()
+      );
+  
+      return fechaHoraA.getTime() - fechaHoraB.getTime(); // Ascendente: más próximo arriba
+    });
+  };
+  
+  
 
   const eliminarHorario = async (index: number) => {
     const horario = horarios[index];
@@ -106,56 +151,61 @@ export default function HorarioDisponible() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Gestiona tus Horarios </Text>
+    <View style={styles.mainContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.title}>Gestiona tus Horarios</Text>
 
-      <TouchableOpacity
-        style={[styles.saveButtonTop, loading && { backgroundColor: "#bdc3c7" }]}
-        onPress={guardarHorario}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
+        <TouchableOpacity
+          style={[styles.saveButtonTop, loading && { backgroundColor: "#bdc3c7" }]}
+          onPress={guardarHorario}
+          disabled={loading}
+        >
           <View style={styles.saveContent}>
             <Ionicons name="save" size={24} color="#fff" />
             <Text style={styles.saveButtonText}>Guardar Horario</Text>
           </View>
-        )}
-      </TouchableOpacity>
-
-      <View style={styles.selectorsBox}>
-        <TouchableOpacity style={styles.selectorButton} onPress={() => setShowDatePicker(true)}>
-          <Ionicons name="calendar" size={20} color="#2980b9" />
-          <Text style={styles.selectorText}>{fechaSeleccionada ? format(fechaSeleccionada, "dd/MM/yyyy") : "Seleccionar Fecha"}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.selectorButton} onPress={() => setShowTimePicker(true)}>
-          <Ionicons name="time" size={20} color="#2980b9" />
-          <Text style={styles.selectorText}>{horaSeleccionada ? format(horaSeleccionada, "HH:mm") : "Seleccionar Hora"}</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.selectorsBox}>
+          <TouchableOpacity style={styles.selectorButton} onPress={() => setShowDatePicker(true)}>
+            <Ionicons name="calendar" size={20} color="#2980b9" />
+            <Text style={styles.selectorText}>
+              {fechaSeleccionada ? format(fechaSeleccionada, "dd/MM/yyyy") : "Seleccionar Fecha"}
+            </Text>
+          </TouchableOpacity>
 
-      <View style={styles.listBox}>
-        <FlatList
-          data={horarios}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          ListEmptyComponent={<Text style={styles.empty}>No has añadido horarios aún 🗓️</Text>}
-          renderItem={({ item, index }) => (
-            <View style={styles.card}>
-              <View>
-                <Text style={styles.cardDay}>{format(item.fecha, "EEEE", { locale: es }).toUpperCase()}</Text>
-                <Text style={styles.cardDate}>{format(item.fecha, "d 'de' MMMM", { locale: es })}</Text>
-                <Text style={styles.cardHour}>{format(item.hora, "HH:mm")}h</Text>
-              </View>
-              <TouchableOpacity onPress={() => eliminarHorario(index)}>
-                <Ionicons name="trash" size={26} color="#e74c3c" />
-              </TouchableOpacity>
-            </View>
+          <TouchableOpacity style={styles.selectorButton} onPress={() => setShowTimePicker(true)}>
+            <Ionicons name="time" size={20} color="#2980b9" />
+            <Text style={styles.selectorText}>
+              {horaSeleccionada ? format(horaSeleccionada, "HH:mm") : "Seleccionar Hora"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.listBox}>
+          {horarios.length === 0 ? (
+            <Text style={styles.empty}>No has añadido horarios aún 🗓️</Text>
+          ) : (
+            <FlatList
+              data={horarios}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false} // 👈 aquí: dejamos que ScrollView maneje el scroll
+              renderItem={({ item, index }) => (
+                <View style={styles.card}>
+                  <View>
+                    <Text style={styles.cardDay}>{format(item.fecha, "EEEE", { locale: es }).toUpperCase()}</Text>
+                    <Text style={styles.cardDate}>{format(item.fecha, "d 'de' MMMM", { locale: es })}</Text>
+                    <Text style={styles.cardHour}>{format(item.hora, "HH:mm")}h</Text>
+                  </View>
+                  <TouchableOpacity onPress={() => eliminarHorario(index)}>
+                    <Ionicons name="trash" size={26} color="#e74c3c" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            />
           )}
-        />
-      </View>
+        </View>
+      </ScrollView>
 
       {showDatePicker && (
         <DateTimePicker
@@ -186,10 +236,12 @@ export default function HorarioDisponible() {
   );
 }
 
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F9FAFB", padding: 20 },
+  mainContainer: { flex: 1, backgroundColor: "#F9FAFB" },
+  scrollContent: { padding: 20, paddingBottom: 100 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#F9FAFB" },
-  title: { fontSize: 30, fontWeight: "bold", color: "#D35400", marginBottom: 15, textAlign: "center" },
+  title: { fontSize: 28, fontWeight: "bold", color: "#D35400", marginBottom: 20, textAlign: "center" },
   saveButtonTop: { flexDirection: "row", justifyContent: "center", alignItems: "center", backgroundColor: "#27ae60", padding: 14, borderRadius: 12, marginBottom: 20 },
   saveContent: { flexDirection: "row", alignItems: "center", gap: 8 },
   saveButtonText: { color: "#fff", fontSize: 18, fontWeight: "bold", marginLeft: 8 },
