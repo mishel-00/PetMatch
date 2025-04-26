@@ -52,7 +52,7 @@ router.post("/horarioDisponible", verificarTokenFireBase, async (req, res): Prom
       const fechaHorario = new Date(fecha); 
       const ahora = new Date();
       const limiteMaximo = new Date();
-      limiteMaximo.setDate(ahora.getDate() + 7); // fecha límite: hoy + 7 días
+      limiteMaximo.setDate(ahora.getDate() + 6); // fecha límite: hoy + 6 días
       
       //* Comprobar si la fecha es anterior a la fecha actual
       if (fechaHorario < ahora) {
@@ -64,7 +64,20 @@ router.post("/horarioDisponible", verificarTokenFireBase, async (req, res): Prom
         res.status(400).json({ error: "El horario no puede ser con más de 6 días de antelación" });
         return;
       }
-  
+      const esHoy = fechaHorario.toDateString() === ahora.toDateString();
+
+      if (esHoy) {
+        const [horaSeleccionada, minutoSeleccionado] = hora.split(":").map(Number);
+    
+        const horaProgramada = new Date();
+        horaProgramada.setHours(horaSeleccionada, minutoSeleccionado, 0, 0);
+    
+        if (horaProgramada < ahora) {
+          res.status(400).json({ error: "No se puede crear un horario en una hora pasada" });
+          return;
+        }
+      }
+      
       //* Comprobar si el horario ya existe
       const horarioExistente = await admin.firestore()
         .collection("horarioDisponible")
