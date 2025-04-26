@@ -3,7 +3,7 @@ import { firestore } from "firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
 import admin from "../firebase";
 
-
+//PRUEBA
 //? Cuando hago una consulta que devuelve muchos documentos, debo recorrerlos uno por uno si quiero procesarlos individualmente
 export const limpiarHorariosPasados = async(): Promise<void> => {
   const fechaHoy = new Date();
