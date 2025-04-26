@@ -1,18 +1,36 @@
 
 import { firestore } from "firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
+import admin from "../firebase";
 
-//**Funciones para ser consumidas por el front-end
-export const formatoFecha = (fecha: firestore.Timestamp | null | undefined): string => {
-    if (!fecha || typeof fecha.toDate !== "function") {
-      return "--";
+
+//? Cuando hago una consulta que devuelve muchos documentos, debo recorrerlos uno por uno si quiero procesarlos individualmente
+export const limpiarHorariosPasados = async(): Promise<void> => {
+  const fechaHoy = new Date();
+  fechaHoy.setHours(0, 0, 0, 0);
+
+  const horariosPasados = await admin.firestore()
+    .collection("horarioDisponible")
+    .where("fecha", "<", fechaHoy)
+    .get();
+  
+   for (const horario of horariosPasados.docs) {
+    const idHorario = horario.id;
+  
+    const tieneCitasAsociadas = await admin.firestore()
+      .collection("citaPosible")
+      .where("id_HorarioDisponible", "==", idHorario)
+      .get();
+  
+    try {
+      if (tieneCitasAsociadas.empty) {
+        console.log("Borrando horario:", idHorario);
+        await horario.ref.delete();
+      } else {
+        console.log("Horario con citas asociadas, no se borra:", idHorario);
+      }
+    } catch (error) {
+      console.error("Error al borrar horario:", error);
     }
-  
-    const date = fecha.toDate(); 
-  
-    const dia = String(date.getDate()).padStart(2, "0"); 
-    const mes = String(date.getMonth() + 1).padStart(2, "0"); // 0 enero
-    const anio = date.getFullYear();
-  
-    return `${dia}-${mes}-${anio}`;
-  };
+  }
+};
