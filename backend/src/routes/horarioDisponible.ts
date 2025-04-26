@@ -197,3 +197,4 @@ router.get("/horarioDisponible/:id", verificarTokenFireBase, async (req, res) =>
     }
   });   
   
+  export default router;

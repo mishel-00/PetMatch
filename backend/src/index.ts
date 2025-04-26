@@ -6,6 +6,7 @@ import admin from 'firebase-admin';
 import loginRoutes from "./routes/login";
 import registroRoutes from "./routes/registro";
 import animalRoutes from "./routes/animal";
+import horarioRoutes from "./routes/horarioDisponible";
 
 // Cargar variables de entorno
 dotenv.config();
@@ -35,6 +36,7 @@ app.get("/", (_req, res) => {
 app.use("/api", loginRoutes);
 app.use("/api", registroRoutes);
 app.use("/api", animalRoutes);
+app.use("/api", horarioRoutes);
 
 
 const PORT = process.env.PORT || 3000;
