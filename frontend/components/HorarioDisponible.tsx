@@ -3,11 +3,13 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert, ActivityIndi
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { getxxx, postxxx } from "@/service/api";
+import { deletexxx, getxxx, postxxx } from "@/service/api";
 import { Ionicons } from "@expo/vector-icons";
 
+type Horario = { id: string; fecha: Date; hora: Date };
+
 export default function HorarioDisponible() {
-  const [horarios, setHorarios] = useState<{ fecha: Date; hora: Date }[]>([]);
+  const [horarios, setHorarios] = useState<Horario[]>([]);
   const [fechaSeleccionada, setFechaSeleccionada] = useState<Date | null>(null);
   const [horaSeleccionada, setHoraSeleccionada] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -23,6 +25,7 @@ export default function HorarioDisponible() {
           const horariosCargados = data.map((h: any) => {
             const [fechaParte, horaParte] = h.fechaHora.split("T");
             return {
+              id: h.id,
               fecha: new Date(fechaParte),
               hora: new Date(`1970-01-01T${horaParte}`),
             };
@@ -50,10 +53,10 @@ export default function HorarioDisponible() {
     try {
       const fecha = format(fechaSeleccionada, "yyyy-MM-dd");
       const hora = format(horaSeleccionada, "HH:mm");
-      
-      await postxxx("api/horarioDisponible", { fecha, hora });      
 
-      setHorarios(prev => [...prev, { fecha: fechaSeleccionada, hora: horaSeleccionada }]);
+      const response = await postxxx("api/horarioDisponible", { fecha, hora });
+
+      setHorarios(prev => [...prev, { id: response.id, fecha: fechaSeleccionada, hora: horaSeleccionada }]);
       setFechaSeleccionada(null);
       setHoraSeleccionada(null);
 
@@ -66,23 +69,28 @@ export default function HorarioDisponible() {
     }
   };
 
-  const eliminarHorario = (index: number) => {
+  const eliminarHorario = async (index: number) => {
     const horario = horarios[index];
-    const fechaFormateada = format(horario.fecha, "EEEE, d 'de' MMMM", { locale: es });
-    const horaFormateada = format(horario.hora, "HH:mm", { locale: es });
 
     Alert.alert(
       "Eliminar Horario",
-      `¿Seguro que quieres eliminar el horario del ${fechaFormateada} a las ${horaFormateada}h?`,
+      `¿Seguro que quieres eliminar el horario del ${format(horario.fecha, "EEEE, d 'de' MMMM", { locale: es })} a las ${format(horario.hora, "HH:mm")}h?`,
       [
         { text: "Cancelar", style: "cancel" },
         {
           text: "Eliminar",
           style: "destructive",
-          onPress: () => {
-            const nuevos = [...horarios];
-            nuevos.splice(index, 1);
-            setHorarios(nuevos);
+          onPress: async () => {
+            try {
+              await deletexxx(`api/horarioDisponible/${horario.id}`);
+              const nuevos = [...horarios];
+              nuevos.splice(index, 1);
+              setHorarios(nuevos);
+              Alert.alert("Éxito", "Horario eliminado correctamente 🎉");
+            } catch (error) {
+              console.error(error);
+              Alert.alert("Error", "No se pudo eliminar el horario.");
+            }
           },
         },
       ]
@@ -131,7 +139,7 @@ export default function HorarioDisponible() {
       <View style={styles.listBox}>
         <FlatList
           data={horarios}
-          keyExtractor={(_, index) => index.toString()}
+          keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 20 }}
           ListEmptyComponent={<Text style={styles.empty}>No has añadido horarios aún 🗓️</Text>}
           renderItem={({ item, index }) => (

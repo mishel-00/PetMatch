@@ -127,6 +127,16 @@ const handleError = (error: any, method: string) => {
       throw new Error("Error desconocido");
     }
   };
+  export const deletexxx = async (path: string) => {
+    try {
+      const headers = await getHeaders();
+      const response = await axios.delete(`${API_URL}/${path}`, { headers });
+      return response.data;
+    } catch (error) {
+      handleError(error, "DELETE");
+    }
+  };
+  
   
 
 export const registerUser = async (data: {
