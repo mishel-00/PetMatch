@@ -1,8 +1,9 @@
 import express from "express";
 import admin from "../firebase";
-import { ESTADOS_ADOPCION } from "../utils/enums";
 import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
-import { Timestamp } from "firebase-admin/firestore";
+
+//TODO: DELETE por ID que mire si tiene una cita asoaciada o no. Y luego PUT ver si le permitidos editar 
+//TODO: o no el horario si tiene una cita asociada. 
 
 const router = express.Router();
 //! Ruta general para obtener todos los horarios disponibles
