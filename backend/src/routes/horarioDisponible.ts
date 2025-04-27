@@ -7,31 +7,62 @@ import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
 
 const router = express.Router();
 //! Ruta general para obtener todos los horarios disponibles
-router.get ("/horarioDisponible", verificarTokenFireBase, async (req, res) => {
-  const uidAsociacion = req.uid;
-  if (!uidAsociacion) {
-    res.status(401).json({ error: "Token inválido" });
-    return;
-  }
-
-  try {
-    const snapshot = await admin
-    .firestore()
-    .collection("horarioDisponible")
-    .where("asociacion_id", "==", uidAsociacion)
-    .get();
-    console.log("🐾 Horarios disponibles encontrados:", snapshot.docs.length);
-    const horariosDisponibles = snapshot.docs.map((doc) => ({ 
-        id: doc.id, 
-        ...doc.data(), 
-    }));
-    res.status(200).json(horariosDisponibles);
-  } catch (error: any) {
-    console.error("❌ Error al obtener horarios disponibles:", error);
-    res.status(500).json({ error: error.message });
-    return;
-  }
-});
+router.get("/horarioDisponible", verificarTokenFireBase, async (req, res) => {
+    const uidAsociacion = req.uid;
+    if (!uidAsociacion) {
+      res.status(401).json({ error: "Token inválido" });
+      return;
+    }
+  
+    try {
+      const snapshot = await admin
+        .firestore()
+        .collection("horarioDisponible")
+        .where("asociacion_id", "==", uidAsociacion)
+        .get();
+  
+      console.log("🐾 Horarios encontrados:", snapshot.docs.length);
+  
+      const horariosDisponibles: any[] = [];
+  
+      const fechaHoy = new Date();
+      fechaHoy.setHours(0, 0, 0, 0);
+  
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        const idHorario = doc.id;
+  
+        const fechaHorario = data.fecha.toDate ? data.fecha.toDate() : new Date(data.fecha); 
+  
+        if (fechaHorario >= fechaHoy) {
+          const citasAsociadas = await admin.firestore()
+            .collection("citaPosible")
+            .where("id_HorarioDisponible", "==", idHorario)
+            .get();
+  
+          // Comprobar que no haya citas asociadas
+          if (citasAsociadas.empty) {
+            horariosDisponibles.push({
+              id: doc.id,
+              ...data,
+            });
+          } else {
+            console.log(`📌 Horario ${idHorario} tiene cita, no se muestra`);
+          }
+        } else {
+          console.log(`📌 Horario ${idHorario} es de fecha pasada, no se muestra`);
+        }
+      }
+  
+      res.status(200).json(horariosDisponibles);
+    } catch (error: any) {
+      console.error("❌ Error al obtener horarios disponibles:", error);
+      res.status(500).json({ error: error.message });
+      return;
+    }
+  });
+  
+  
 
 //! Post Crear un nuevo horario disponible 
 router.post("/horarioDisponible", verificarTokenFireBase, async (req, res): Promise<void> => {
