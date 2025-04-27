@@ -7,6 +7,7 @@ import loginRoutes from "./routes/login";
 import registroRoutes from "./routes/registro";
 import animalRoutes from "./routes/animal";
 import horarioRoutes from "./routes/horarioDisponible";
+import asociacionRoutes from "./routes/asociacion";
 import cron from "node-cron";
 import { limpiarHorariosPasados } from './utils/fnDatosFront';
 
@@ -39,6 +40,7 @@ app.use("/api", loginRoutes);
 app.use("/api", registroRoutes);
 app.use("/api", animalRoutes);
 app.use("/api", horarioRoutes);
+app.use("/api", asociacionRoutes);
 
 
 const PORT = process.env.PORT || 3000;
