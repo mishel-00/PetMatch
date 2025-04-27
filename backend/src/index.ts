@@ -49,7 +49,7 @@ app.listen(PORT, () => {
 //* ===============================CRON PROGRAMAR TAREA PARA LIMPIAR HORARIOS PASADOS ===============================
 //* Tarea programada para limpiar horarios pasados
 //* Cada horario que pase es un día, se limpia sino tiene citaPosible asociada
-cron.schedule("*/1 * * * *", async () => {
+cron.schedule("0 * * * *", async () => {
   console.log("Ejecutando limpieza automática de horarios pasados...");
   try {
     await limpiarHorariosPasados();
@@ -58,5 +58,7 @@ cron.schedule("*/1 * * * *", async () => {
     console.error("❌ Error al ejecutar la limpieza automática:", error);
   }
 });
-// LO NORMAL --> 0 0 * * *
+// A las 12.00 AM --> 0 0 * * *
 // 1 MINS --> "*/1 * * * *"
+// 1 HOUR --> "0 * * * *"
+// 1 DAY --> "0 0 * * *"
