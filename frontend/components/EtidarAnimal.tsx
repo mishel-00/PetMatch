@@ -1,3 +1,4 @@
+//En esta pantalla la asociacion puede edirtar un animal que anteriromente ha subido por si quiere cambiar algun dato 
 import React, { useEffect, useState } from "react";
 import { View, Text, Alert, ScrollView, ActivityIndicator, StyleSheet, TouchableOpacity, Image, Platform, TextInput } from "react-native";
 import { useNavigation, RouteProp } from "@react-navigation/native";
@@ -9,7 +10,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import uuid from "react-native-uuid";
 
-type EditarAnimalRouteProp = RouteProp<RootStackParamList, "EditarAnimal">;
+//type EditarAnimalRouteProp = RouteProp<RootStackParamList, "EditarAnimal">;
 
 
 export default function EditarAnimal({ route }: any) {
@@ -37,7 +38,7 @@ export default function EditarAnimal({ route }: any) {
   const handleChange = (field: string, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
-
+  //Aqui pedimos los datos del animal para el formulario salga relleno con los datos del animal
   useEffect(() => {
     const fetchAnimal = async () => {
       try {
@@ -103,7 +104,7 @@ export default function EditarAnimal({ route }: any) {
         const nombreArchivo = `animal_${uuid.v4()}.jpg`;
         imageUrl = await uploadImageToFirebase(form.foto, nombreArchivo);
       }
-
+      //Aqui llamamos a la funcion que esta Api para enviarle los datos actulizados
       await updateAnimal(id, {
         foto: imageUrl,
         nombre: form.nombre,
@@ -162,7 +163,7 @@ export default function EditarAnimal({ route }: any) {
           style={styles.input}
         />
       ))}
-
+    {/* El formulario */}
       <TouchableOpacity style={styles.input} onPress={() => setShowNacimientoPicker(true)}>
         <Text>{form.fechaNacimiento || "📅 Fecha de Nacimiento"}</Text>
       </TouchableOpacity>

@@ -1,3 +1,4 @@
+//Pantalla de asociacion donde aqui podra crear un animal con todos sus datos para posterirormente publicarlo y poder editarlo tambien
 import React, { useState } from "react";
 import {
   View,
@@ -111,7 +112,8 @@ export default function CrearAnimal() {
   
   const handleSubmit = async () => {
     try {
-      // ✅ Verificar sesión de Firebase antes de subir imagen
+      // Hay que verificar que esta activa la sesion de firebase para poder mandarle la foto en formato png para que luego 
+      // me devuleva un url de esa foto y hasta que no me  mnada correctamente esa url yo no le mando los datos del animal creado 
       if (!auth.currentUser) {
         Alert.alert("Error", "Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.");
         return;
@@ -119,17 +121,17 @@ export default function CrearAnimal() {
   
       const nombreArchivo = `animal_${uuid.v4()}.jpg`;
   
-      // 🚀 Subir imagen
+      // Aqui subimos la imagen 
       const imageUrl = await uploadImageToFirebase(form.foto, nombreArchivo);
   
-      // 📦 Preparar y enviar datos
+      // Preparamos los datos para enviarlo al backend y que coincidan los datos
       const datosFinales = {
         foto: imageUrl,
         nombre: form.nombre,
         descripcion: form.descripcion,
         estadoAdopcion: form.estado,
         esterilizado: form.esterilizado,
-        especie: form.tipoAnimal, // <- Aquí está el campo que faltaba (especie)
+        especie: form.tipoAnimal,
         tipoRaza: form.tipoRaza,
         peso: form.peso,
         fecha_nacimiento: form.fechaNacimiento,
@@ -153,7 +155,7 @@ export default function CrearAnimal() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Crear Animal</Text>
- {/* 📸 Botón para seleccionar imagen */}
+ {/*  Botón para seleccionar imagen y subirla */}
  <TouchableOpacity onPress={seleccionarImagen} style={styles.imagePicker}>
       {form.foto ? (
         <Image source={{ uri: form.foto }} style={styles.imagePreview} />
@@ -175,7 +177,7 @@ export default function CrearAnimal() {
           style={styles.input}
         />
       ))}
-{/* FECHA DE NACIMIENTO */}
+{/*  Este es el boton de la fecha de nacimiento */}
 <TouchableOpacity
   style={styles.input}
   onPress={() => setShowNacimientoPicker(true)}
@@ -191,7 +193,7 @@ export default function CrearAnimal() {
   />
 )}
 
-{/* FECHA DE INGRESO */}
+{/*  Este es el boton de la fecha de cuando ingreso a la asociacion */}
 <TouchableOpacity
   style={styles.input}
   onPress={() => setShowIngresoPicker(true)}

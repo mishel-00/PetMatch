@@ -1,28 +1,31 @@
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from "react-native";
+//Esta es la pantalla pirncipal del adopnate que le sale al inciar sescion se le carga todos las asociaciones
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
-import { getxxx } from "@/service/api"; 
+import { getxxx } from "@/service/api";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from "@/app/(tabs)/HomeStack";
 
 type Asociacion = {
   id: string;
   nombre: string;
   direccion: string;
   telefono: string;
- 
-  
 };
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, "HomeAdoptante">;
 
 export default function HomeAdoptante() {
   const [asociaciones, setAsociaciones] = useState<Asociacion[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const navigation = useNavigation<NavigationProp>();;
+  //Peticion para pedir las asociaciones con el GET
   useEffect(() => {
     const cargarAsociaciones = async () => {
       try {
-        const data = await getxxx("api/asociaciones"); 
-        setAsociaciones(data); 
+        const data = await getxxx("api/asociaciones");
+        setAsociaciones(data);
       } catch (error) {
         console.error(error);
-        // Puedes poner un mensaje de error aquí si quieres
       } finally {
         setLoading(false);
       }
@@ -49,17 +52,22 @@ export default function HomeAdoptante() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingVertical: 20 }}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          //Boton para navefar a otra pantalla
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("AnimalesAsociacion", { asociacionId: item.id, nombre: item.nombre })}
+          >
             <Text style={styles.cardTitle}>{item.nombre}</Text>
             <Text style={styles.cardDetail}>📍 {item.direccion}</Text>
             <Text style={styles.cardDetail}>📞 {item.telefono}</Text>
-          </View>
+          </TouchableOpacity>
         )}
         ListEmptyComponent={<Text style={styles.empty}>No hay asociaciones disponibles.</Text>}
       />
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
