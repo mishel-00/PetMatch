@@ -31,7 +31,7 @@ export type RootStackParamList = {
     EditarAnimal: { id : string };
     HorarioDisponible : undefined;
     AnimalesAsociacion: { asociacionId: string; nombre: string };
-    AnimalDetalleAdopnate : {id : string }
+    AnimalDetalleAdoptante : {id : string }
 
 };
   
@@ -89,7 +89,7 @@ export default function HomeStack() {
             component={AnimalesAsociacion} />
 
             <Stack.Screen 
-            name="AnimalDetalleAdopnate" 
+            name="AnimalDetalleAdoptante" 
             component={AnimalDetalleAdoptante} 
             options={{ headerTitle: "Horario Disponible" }} />
 

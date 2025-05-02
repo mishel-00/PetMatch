@@ -55,6 +55,7 @@ router.get("/animal/:id", verificarTokenFireBase, async (req, res) => {
     // Aseguramos que el animal pertenece a la asociación autenticada
     if (data?.asociacion_id !== uidAsociacion) {
       res.status(403).json({ error: "No autorizado para ver este animal" });
+      return;
     }
 
     res.status(200).json({ id: doc.id, ...data });
