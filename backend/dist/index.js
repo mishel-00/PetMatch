@@ -13,6 +13,9 @@ const login_1 = __importDefault(require("./routes/login"));
 const registro_1 = __importDefault(require("./routes/registro"));
 const animal_1 = __importDefault(require("./routes/animal"));
 const horarioDisponible_1 = __importDefault(require("./routes/horarioDisponible"));
+const asociacion_1 = __importDefault(require("./routes/asociacion"));
+const node_cron_1 = __importDefault(require("node-cron"));
+const fnDatosFront_1 = require("./utils/fnDatosFront");
 // Cargar variables de entorno
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -36,7 +39,25 @@ app.use("/api", login_1.default);
 app.use("/api", registro_1.default);
 app.use("/api", animal_1.default);
 app.use("/api", horarioDisponible_1.default);
+app.use("/api", asociacion_1.default);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`✅ PetMatch API corriendo en http://localhost:${PORT}`);
 });
+//* ===============================CRON PROGRAMAR TAREA PARA LIMPIAR HORARIOS PASADOS ===============================
+//* Tarea programada para limpiar horarios pasados
+//* Cada horario que pase es un día, se limpia sino tiene citaPosible asociada
+node_cron_1.default.schedule("0 * * * *", async () => {
+    console.log("Ejecutando limpieza automática de horarios pasados...");
+    try {
+        await (0, fnDatosFront_1.limpiarHorariosPasados)();
+        console.log("✅ Limpieza de horarios pasada ejecutada correctamente.");
+    }
+    catch (error) {
+        console.error("❌ Error al ejecutar la limpieza automática:", error);
+    }
+});
+// A las 12.00 AM --> 0 0 * * *
+// 1 MINS --> "*/1 * * * *"
+// 1 HOUR --> "0 * * * *"
+// 1 DAY --> "0 0 * * *"
