@@ -15,13 +15,21 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/app/(tabs)/HomeStack";
 import { API_URL } from "@/service/api";
+import { formatoFecha } from "@/utils/formatoFecha";
 
 type Animal = {
   id: string;
   nombre: string;
+  sexo: string;
   especie: string;
-  foto?: string;
-  asocciacionId: string
+  tipoRaza: string;
+  peso: string;
+  estado: string;
+  descripcion: string;
+  esterilizado: boolean;
+  fechaNacimiento: string;
+  fechaIngreso: string;
+  foto: string;
 };
 
 export default function AnimalesAsociacion({ route }: any) {
@@ -36,25 +44,38 @@ export default function AnimalesAsociacion({ route }: any) {
       try {
         const user = getAuth().currentUser;
         if (!user) throw new Error("No autenticado");
-
+  
         const token = await user.getIdToken();
         const response = await axios.get(`${API_URL}/api/obtenerAnimales/${asociacionId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        
-        setAnimales(response.data);
+  
+        // 🔧 Aquí haces el mapeo para transformar los nombres
+        const mapped = response.data.map((item: any) => ({
+          id: item.id,
+          nombre: item.nombre,
+          especie: item.especie,
+          sexo: item.sexo,
+          foto: item.foto,
+          fechaIngreso: item.fechaIngreso, 
+          estado: item.estadoAdopcion, // 👈 añadir esto
+          // mapeo explícito
+        }));
+  
+        setAnimales(mapped);
       } catch (error) {
-        console.error(" Error al obtener animales:", error);
+        console.error("Error al obtener animales:", error);
         Alert.alert("Error", "No se pudieron cargar los animales.");
       } finally {
         setLoading(false);
       }
     };
-
+  
     cargarAnimales();
   }, [asociacionId]);
+  
 
   if (loading) {
     return (
@@ -71,8 +92,8 @@ export default function AnimalesAsociacion({ route }: any) {
         data={animales}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-<TouchableOpacity onPress={() => navigation.navigate("AnimalDetalleAdoptante", { id: item.id, asociacionId })}>
-<View style={styles.card}>
+          <TouchableOpacity onPress={() => navigation.navigate("AnimalDetalleAdoptante", { id: item.id, asociacionId })}>
+            <View style={styles.card}>
               {item.foto && (
                 <Image
                   source={{ uri: item.foto }}
@@ -80,10 +101,32 @@ export default function AnimalesAsociacion({ route }: any) {
                 />
               )}
               <Text style={styles.name}>{item.nombre}</Text>
-              <Text style={styles.type}>Especie: {item.especie}</Text>
+              <Text style={styles.row}>
+                <Text style={styles.icon}>♀️</Text> Sexo: <Text style={styles.bold}>{item.sexo}</Text>
+              </Text>
+              <Text style={styles.row}>
+                <Text style={styles.icon}>🐾</Text> Especie: <Text style={styles.bold}>{item.especie}</Text>
+              </Text>
+              <Text style={styles.row}>
+                <Text style={styles.icon}>📅</Text> Ingreso: <Text style={styles.bold}>{formatoFecha (item.fechaIngreso)}</Text>
+              </Text>
+              <Text
+  style={[
+    styles.estado,
+    item.estado === "adoptado"
+      ? styles.adoptado
+      : item.estado === "reservado"
+      ? styles.reservado
+      : styles.enAdopcion,
+  ]}
+>
+  {item.estado?.toUpperCase()}
+</Text>
+
             </View>
           </TouchableOpacity>
         )}
+        
         ListEmptyComponent={<Text style={styles.empty}>No hay animales aún 🐾</Text>}
       />
     </View>
@@ -98,4 +141,31 @@ const styles = StyleSheet.create({
   name: { fontSize: 16, fontWeight: "bold", color: "#2c3e50" },
   type: { fontSize: 14, color: "#555" },
   empty: { textAlign: "center", marginTop: 20, color: "#999" },
+  row: { fontSize: 14, color: "#333", marginTop: 4 },
+icon: { fontSize: 14 },
+bold: { fontWeight: "bold", color: "#2c3e50" },
+estado: {
+  marginTop: 10,
+  fontWeight: "bold",
+  paddingVertical: 6,
+  paddingHorizontal: 10,
+  borderRadius: 14,
+  alignSelf: "flex-start",
+  overflow: "hidden",
+  fontSize: 12,
+},
+adoptado: {
+  backgroundColor: "#d1c4e9",
+  color: "#5e35b1",
+},
+reservado: {
+  backgroundColor: "#ffe082",
+  color: "#ef6c00",
+},
+enAdopcion: {
+  backgroundColor: "#c8e6c9",
+  color: "#2e7d32",
+},
+
+
 });

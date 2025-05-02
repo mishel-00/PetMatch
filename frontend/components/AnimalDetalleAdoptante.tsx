@@ -1,5 +1,5 @@
-//En esta pantalla salen ya todos los datos del animal especifico que ha pinchado anteiiroemnte el adoptante y abajo sale un boton
-// donde podra le saldran los diferemntes hoarios  disponibles para que pida cita
+//Panatlla donde salen tdoos los datos del animal para asi adopnate ver con detalle el animal y si quiere 
+// Pueda pedir cita a ese animal y que le llegue a la asociacion
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -9,8 +9,13 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Modal,
+  TouchableOpacity,
+  FlatList,
 } from "react-native";
-import { getxxx } from "@/service/api";
+import { Calendar } from "react-native-calendars";
+import Icon from "react-native-vector-icons/FontAwesome5";
+import { getxxx, postxxx } from "@/service/api";
 import { formatoFecha } from "@/utils/formatoFecha";
 
 interface Animal {
@@ -29,9 +34,15 @@ interface Animal {
 }
 
 export default function AnimalDetalleAdoptante({ route }: any) {
-  const { id, asociacionId } = route.params; // <- Asegúrate de pasar esto al navegar
+  const { id, asociacionId } = route.params;
   const [animal, setAnimal] = useState<Animal | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [horariosDisponibles, setHorariosDisponibles] = useState<string[]>([]);
+  const [horarioSeleccionado, setHorarioSeleccionado] = useState<string | null>(null);
+
 
   useEffect(() => {
     const fetchAnimal = async () => {
@@ -53,6 +64,41 @@ export default function AnimalDetalleAdoptante({ route }: any) {
     fetchAnimal();
   }, [id, asociacionId]);
 
+  const cargarHorarios = async (fecha: string) => {
+    try {
+      const data = await getxxx(`api/horario/disponibles/${asociacionId}?fecha=${fecha}`);
+      setHorariosDisponibles(data); // debe ser array de strings
+    } catch (error) {
+      Alert.alert("Error", "No se pudieron cargar los horarios.");
+    }
+  };
+
+  const onSelectDate = (day: any) => {
+    const fechaSeleccionada = day.dateString;
+    setSelectedDate(fechaSeleccionada);
+    cargarHorarios(fechaSeleccionada);
+  };
+  const handleConfirmarCita = async () => {
+    try {
+      if (!selectedDate || !horarioSeleccionado) return;
+  
+      const cita = {
+        animalId: id,
+        asociacionId,
+        fecha: selectedDate,
+        hora: horarioSeleccionado,
+      };
+  
+      await postxxx("api/citas/crear", cita); // <-- adapta tu endpoint real
+  
+      Alert.alert("Éxito", "Tu cita ha sido solicitada correctamente.");
+      setModalVisible(false);
+      setHorarioSeleccionado(null);
+      setSelectedDate(null);
+    } catch (error) {
+      Alert.alert("Error", "No se pudo solicitar la cita.");
+    }
+  };
 
   if (loading || !animal) {
     return (
@@ -67,8 +113,15 @@ export default function AnimalDetalleAdoptante({ route }: any) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>
       <Image source={{ uri: animal.foto }} style={styles.image} />
+      {/* Botón de patita */}
+      <View style={styles.nameRow}>
+  <Text style={styles.name}>{animal.nombre}</Text>
+  <TouchableOpacity style={styles.patitaBtnSmall} onPress={() => setModalVisible(true)}>
+    <Icon name="paw" size={18} color="#fff" />
+    <Text style={styles.patitaText}>Pedir cita</Text>
+  </TouchableOpacity>
+</View>
 
-      <Text style={styles.name}>{animal.nombre}</Text>
 
       <View style={styles.infoBox}>
         <Text style={styles.label}>Sexo: <Text style={styles.value}>{sexoFormateado}</Text></Text>
@@ -83,6 +136,55 @@ export default function AnimalDetalleAdoptante({ route }: any) {
 
       <Text style={styles.descriptionTitle}>Descripción:</Text>
       <Text style={styles.description}>{animal.descripcion}</Text>
+
+      
+
+      {/* Modal con calendario */}
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Calendar
+              onDayPress={onSelectDate}
+              markedDates={selectedDate ? { [selectedDate]: { selected: true } } : {}}
+            />
+
+            {selectedDate && (
+              <>
+                <Text style={styles.modalTitle}>Horarios disponibles para {formatoFecha(selectedDate)}</Text>
+                <FlatList
+                  data={horariosDisponibles}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity onPress={() => setHorarioSeleccionado(item)}>
+                      <Text style={[
+                        styles.horario,
+                        horarioSeleccionado === item && styles.horarioSeleccionado
+                      ]}>
+                        {item}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  
+                  ListEmptyComponent={<Text style={styles.empty}>No hay horarios disponibles</Text>}
+                />
+              </>
+            )}
+            {horarioSeleccionado && (
+  <TouchableOpacity
+    style={styles.confirmarBtn}
+    onPress={handleConfirmarCita}
+  >
+    <Text style={{ color: "#fff", fontWeight: "bold" }}>Confirmar cita</Text>
+  </TouchableOpacity>
+)}
+
+
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
+              <Text style={{ color: "#fff", fontWeight: "bold" }}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -114,4 +216,87 @@ const styles = StyleSheet.create({
   enAdopcion: { backgroundColor: "#c8e6c9", color: "#2e7d32" },
   descriptionTitle: { fontSize: 18, fontWeight: "bold", marginTop: 20, color: "#A04000" },
   description: { fontSize: 15, color: "#5D6D7E", lineHeight: 20, backgroundColor: "#fff", padding: 12, borderRadius: 10, marginTop: 4, elevation: 1 },
+
+  // Botón para patita
+  patitaBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#D35400",
+    padding: 12,
+    marginTop: 20,
+    borderRadius: 10,
+    alignSelf: "center",
+    gap: 10,
+  },
+  patitaText: {
+    color: "#fff",
+    fontWeight: "bold",
+    marginLeft: 6,
+    fontSize: 15,
+  },
+  horarioSeleccionado: {
+    backgroundColor: "#D35400",
+    color: "#fff",
+  },
+  
+
+  // dialog que le salga el calnedario para pedir cita
+  modalContainer: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", alignItems: "center" },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    width: "90%",
+    padding: 20,
+    maxHeight: "90%",
+  },
+  modalTitle: {
+    marginTop: 12,
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "#333",
+    textAlign: "center",
+  },
+  horario: {
+    padding: 8,
+    textAlign: "center",
+    backgroundColor: "#FAD7A0",
+    borderRadius: 6,
+    marginTop: 6,
+  },
+  empty: {
+    marginTop: 10,
+    textAlign: "center",
+    color: "#999",
+  },
+  closeBtn: {
+    backgroundColor: "#D35400",
+    marginTop: 20,
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  nameRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  patitaBtnSmall: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#D35400",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  confirmarBtn: {
+    backgroundColor: "#28A745",
+    marginTop: 12,
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  
+  
+  
 });
