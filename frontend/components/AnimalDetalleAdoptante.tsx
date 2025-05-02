@@ -37,11 +37,12 @@ export default function AnimalDetalleAdoptante({ route }: any) {
   const { id, asociacionId } = route.params;
   const [animal, setAnimal] = useState<Animal | null>(null);
   const [loading, setLoading] = useState(true);
-
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [horariosDisponibles, setHorariosDisponibles] = useState<string[]>([]);
+  const [horariosDisponibles, setHorariosDisponibles] = useState<any[]>([]);
+  const [horasDelDia, setHorasDelDia] = useState<string[]>([]);
   const [horarioSeleccionado, setHorarioSeleccionado] = useState<string | null>(null);
+  const [citaConfirmada, setCitaConfirmada] = useState(false);
 
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export default function AnimalDetalleAdoptante({ route }: any) {
           fechaNacimiento: data.fecha_nacimiento,
           fechaIngreso: data.fecha_ingreso,
         });
-      } catch (error) {
+      } catch {
         Alert.alert("Error", "No se pudo cargar el animal.");
       } finally {
         setLoading(false);
@@ -64,42 +65,49 @@ export default function AnimalDetalleAdoptante({ route }: any) {
     fetchAnimal();
   }, [id, asociacionId]);
 
-  const cargarHorarios = async (fecha: string) => {
+  const cargarHorarios = async () => {
     try {
-      const data = await getxxx(`api/horario/disponibles/${asociacionId}?fecha=${fecha}`);
-      setHorariosDisponibles(data); // debe ser array de strings
-    } catch (error) {
+      const data = await getxxx(`api/horarioDisponible/asociacion/${asociacionId}`);
+      setHorariosDisponibles(data);
+    } catch {
       Alert.alert("Error", "No se pudieron cargar los horarios.");
     }
   };
 
   const onSelectDate = (day: any) => {
-    const fechaSeleccionada = day.dateString;
-    setSelectedDate(fechaSeleccionada);
-    cargarHorarios(fechaSeleccionada);
+    const fecha = day.dateString;
+    setSelectedDate(fecha);
+    setHorarioSeleccionado(null);
+
+    const encontrado = horariosDisponibles.find(h => h.fecha === fecha);
+    setHorasDelDia(encontrado ? encontrado.horas : []);
   };
+
   const handleConfirmarCita = async () => {
-    try {
-      if (!selectedDate || !horarioSeleccionado) return;
+    if (!selectedDate || !horarioSeleccionado) return;
   
-      const cita = {
+    try {
+      await postxxx("api/citas/crear", {
         animalId: id,
         asociacionId,
         fecha: selectedDate,
         hora: horarioSeleccionado,
-      };
+      });
   
-      await postxxx("api/citas/crear", cita); // <-- adapta tu endpoint real
+      setCitaConfirmada(true);
   
-      Alert.alert("Éxito", "Tu cita ha sido solicitada correctamente.");
-      setModalVisible(false);
-      setHorarioSeleccionado(null);
-      setSelectedDate(null);
-    } catch (error) {
+      // Esperar 2 segundos antes de cerrar el modal
+      setTimeout(() => {
+        setModalVisible(false);
+        setCitaConfirmada(false);
+        setHorarioSeleccionado(null);
+        setSelectedDate(null);
+      }, 2000);
+    } catch {
       Alert.alert("Error", "No se pudo solicitar la cita.");
     }
   };
-
+  
   if (loading || !animal) {
     return (
       <View style={styles.center}>
@@ -113,15 +121,19 @@ export default function AnimalDetalleAdoptante({ route }: any) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>
       <Image source={{ uri: animal.foto }} style={styles.image} />
-      {/* Botón de patita */}
       <View style={styles.nameRow}>
-  <Text style={styles.name}>{animal.nombre}</Text>
-  <TouchableOpacity style={styles.patitaBtnSmall} onPress={() => setModalVisible(true)}>
-    <Icon name="paw" size={18} color="#fff" />
-    <Text style={styles.patitaText}>Pedir cita</Text>
-  </TouchableOpacity>
-</View>
-
+        <Text style={styles.name}>{animal.nombre}</Text>
+        <TouchableOpacity
+          style={styles.patitaBtnSmall}
+          onPress={() => {
+            setModalVisible(true);
+            cargarHorarios();
+          }}
+        >
+          <Icon name="paw" size={18} color="#fff" />
+          <Text style={styles.patitaText}>Pedir cita</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.infoBox}>
         <Text style={styles.label}>Sexo: <Text style={styles.value}>{sexoFormateado}</Text></Text>
@@ -137,9 +149,7 @@ export default function AnimalDetalleAdoptante({ route }: any) {
       <Text style={styles.descriptionTitle}>Descripción:</Text>
       <Text style={styles.description}>{animal.descripcion}</Text>
 
-      
-
-      {/* Modal con calendario */}
+      {/* Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -147,38 +157,33 @@ export default function AnimalDetalleAdoptante({ route }: any) {
               onDayPress={onSelectDate}
               markedDates={selectedDate ? { [selectedDate]: { selected: true } } : {}}
             />
-
             {selectedDate && (
               <>
-                <Text style={styles.modalTitle}>Horarios disponibles para {formatoFecha(selectedDate)}</Text>
+                <Text style={styles.modalTitle}>Horarios para {formatoFecha(selectedDate)}</Text>
                 <FlatList
-                  data={horariosDisponibles}
+                  data={horasDelDia}
                   keyExtractor={(item, index) => index.toString()}
                   renderItem={({ item }) => (
                     <TouchableOpacity onPress={() => setHorarioSeleccionado(item)}>
                       <Text style={[
                         styles.horario,
                         horarioSeleccionado === item && styles.horarioSeleccionado
-                      ]}>
-                        {item}
-                      </Text>
+                      ]}>{item}</Text>
                     </TouchableOpacity>
                   )}
-                  
-                  ListEmptyComponent={<Text style={styles.empty}>No hay horarios disponibles</Text>}
+                  ListEmptyComponent={<Text style={styles.empty}>No hay horarios</Text>}
                 />
+                {citaConfirmada && (
+  <Text style={styles.successMessage}>✅ Cita enviada correctamente</Text>
+)}
+
               </>
             )}
             {horarioSeleccionado && (
-  <TouchableOpacity
-    style={styles.confirmarBtn}
-    onPress={handleConfirmarCita}
-  >
-    <Text style={{ color: "#fff", fontWeight: "bold" }}>Confirmar cita</Text>
-  </TouchableOpacity>
-)}
-
-
+              <TouchableOpacity style={styles.confirmarBtn} onPress={handleConfirmarCita}>
+                <Text style={{ color: "#fff", fontWeight: "bold" }}>Confirmar cita</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
               <Text style={{ color: "#fff", fontWeight: "bold" }}>Cerrar</Text>
             </TouchableOpacity>
@@ -194,6 +199,10 @@ const getEstadoColor = (estado: string) => {
   if (estado === "reservado") return styles.reservado;
   return styles.enAdopcion;
 };
+
+// (los estilos son los mismos que ya tienes, no hace falta repetirlos aquí)
+
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF5E6", padding: 16 },
@@ -295,6 +304,13 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     alignItems: "center",
+  },
+  successMessage: {
+    marginTop: 12,
+    textAlign: "center",
+    color: "#28A745",
+    fontWeight: "bold",
+    fontSize: 16,
   },
   
   
