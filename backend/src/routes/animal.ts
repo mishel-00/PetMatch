@@ -278,9 +278,8 @@ router.post("/animal", verificarTokenFireBase, async (req, res) => {
   }
 });
 
-//Prueba
-//? Get -> Obtener todos los animales de una asociacion
-//Todo ============ Esto puede ser que tenga que cambiar de sitio a adoptante.ts ============
+
+//? [Adoptante] -> GET -> Obtener todos los animales de una asociacion
 router.get("/obtenerAnimales/:idAsociacion", verificarTokenFireBase, async (req, res) => {
   const { idAsociacion } = req.params;
 
@@ -289,7 +288,7 @@ router.get("/obtenerAnimales/:idAsociacion", verificarTokenFireBase, async (req,
       .firestore()
       .collection("animal")
       .where("asociacion_id", "==", idAsociacion)
-      .where("estadoAdopcion", "==", "en adopcion")
+      // .where("estadoAdopcion", "==", "en adopcion")
       .get();
 
     const animales = snapshot.docs.map((doc) => {
@@ -313,5 +312,33 @@ router.get("/obtenerAnimales/:idAsociacion", verificarTokenFireBase, async (req,
     res.status(500).json({ error: error.message });
   }
 });
+
+//? [Adoptante] -> GET -> Obtener un animal por su ID && su asociacion
+router.get("/animal/:idAnimal/asociacion/:idAsociacion", verificarTokenFireBase, async (req, res) => {
+  const { idAnimal, idAsociacion } = req.params;
+
+  try {
+    const docRef = admin.firestore().collection("animal").doc(idAnimal);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      res.status(404).json({ error: "Animal no encontrado" });
+      return;
+    }
+
+    const data = doc.data();
+
+    if (data?.asociacion_id !== idAsociacion) {
+     res.status(403).json({ error: "Este animal no pertenece a esta asociación" });
+     return;
+    }
+
+    res.status(200).json({ id: doc.id, ...data });
+  } catch (error: any) {
+    console.error("❌ Error al obtener animal por ID y asociación:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 export default router;
