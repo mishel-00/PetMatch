@@ -21,6 +21,7 @@ type Animal = {
   nombre: string;
   especie: string;
   foto?: string;
+  asocciacionId: string
 };
 
 export default function AnimalesAsociacion({ route }: any) {
@@ -70,8 +71,8 @@ export default function AnimalesAsociacion({ route }: any) {
         data={animales}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => navigation.navigate("AnimalDetalleAdoptante", { id: item.id })}>
-            <View style={styles.card}>
+<TouchableOpacity onPress={() => navigation.navigate("AnimalDetalleAdoptante", { id: item.id, asociacionId })}>
+<View style={styles.card}>
               {item.foto && (
                 <Image
                   source={{ uri: item.foto }}

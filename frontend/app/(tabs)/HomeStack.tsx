@@ -31,7 +31,7 @@ export type RootStackParamList = {
     EditarAnimal: { id : string };
     HorarioDisponible : undefined;
     AnimalesAsociacion: { asociacionId: string; nombre: string };
-    AnimalDetalleAdoptante : {id : string }
+    AnimalDetalleAdoptante : {id : string, asociacionId : string }
 
 };
   

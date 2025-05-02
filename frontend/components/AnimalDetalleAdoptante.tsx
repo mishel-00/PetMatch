@@ -29,14 +29,14 @@ interface Animal {
 }
 
 export default function AnimalDetalleAdoptante({ route }: any) {
-  const { id } = route.params;
+  const { id, asociacionId } = route.params; // <- Asegúrate de pasar esto al navegar
   const [animal, setAnimal] = useState<Animal | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAnimal = async () => {
       try {
-        const data = await getxxx(`api/animal/${id}`);
+        const data = await getxxx(`api/animal/${id}/asociacion/${asociacionId}`);
         setAnimal({
           ...data,
           estado: data.estadoAdopcion,
@@ -51,7 +51,8 @@ export default function AnimalDetalleAdoptante({ route }: any) {
     };
 
     fetchAnimal();
-  }, [id]);
+  }, [id, asociacionId]);
+
 
   if (loading || !animal) {
     return (
