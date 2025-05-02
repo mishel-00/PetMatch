@@ -12,6 +12,8 @@ import {
   Modal,
   TouchableOpacity,
   FlatList,
+  TextInput,
+
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import Icon from "react-native-vector-icons/FontAwesome5";
@@ -43,6 +45,8 @@ export default function AnimalDetalleAdoptante({ route }: any) {
   const [horasDelDia, setHorasDelDia] = useState<string[]>([]);
   const [horarioSeleccionado, setHorarioSeleccionado] = useState<string | null>(null);
   const [citaConfirmada, setCitaConfirmada] = useState(false);
+  const [observaciones, setObservaciones] = useState("");
+
 
 
   useEffect(() => {
@@ -86,27 +90,38 @@ export default function AnimalDetalleAdoptante({ route }: any) {
   const handleConfirmarCita = async () => {
     if (!selectedDate || !horarioSeleccionado) return;
   
+    // Encuentra el objeto de ese día en el array
+    const diaSeleccionado = horariosDisponibles.find(h => h.fecha === selectedDate);
+  
+    if (!diaSeleccionado) {
+      Alert.alert("Error", "No se encontró el día seleccionado.");
+      return;
+    }
+  
     try {
-      await postxxx("api/citas/crear", {
-        animalId: id,
-        asociacionId,
-        fecha: selectedDate,
+      await postxxx("api/citaPosible", {
+        horarioDisponible_id: diaSeleccionado.id, // <- este ID lo necesita el backend
         hora: horarioSeleccionado,
+        fecha: selectedDate,
+        asociacion_id: asociacionId,
+        observaciones, // puedes dejarlo vacío o agregar un input en el modal
       });
   
       setCitaConfirmada(true);
-  
-      // Esperar 2 segundos antes de cerrar el modal
+      
+      //Para limpiar los campos
       setTimeout(() => {
         setModalVisible(false);
         setCitaConfirmada(false);
         setHorarioSeleccionado(null);
         setSelectedDate(null);
+        setObservaciones("");
       }, 2000);
     } catch {
       Alert.alert("Error", "No se pudo solicitar la cita.");
     }
   };
+  
   
   if (loading || !animal) {
     return (
@@ -173,6 +188,14 @@ export default function AnimalDetalleAdoptante({ route }: any) {
                   )}
                   ListEmptyComponent={<Text style={styles.empty}>No hay horarios</Text>}
                 />
+                <Text style={styles.modalLabel}>Observaciones (opcional)</Text>
+<TextInput
+  style={styles.textInput}
+  placeholder="Escribe algo..."
+  value={observaciones}
+  onChangeText={setObservaciones}
+/>
+
                 {citaConfirmada && (
   <Text style={styles.successMessage}>✅ Cita enviada correctamente</Text>
 )}
@@ -312,7 +335,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  
-  
-  
+  modalLabel: {
+    marginTop: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 6,
+    backgroundColor: "#fff",
+  },
 });

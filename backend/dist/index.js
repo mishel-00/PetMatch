@@ -14,6 +14,7 @@ const registro_1 = __importDefault(require("./routes/registro"));
 const animal_1 = __importDefault(require("./routes/animal"));
 const horarioDisponible_1 = __importDefault(require("./routes/horarioDisponible"));
 const asociacion_1 = __importDefault(require("./routes/asociacion"));
+const citaPosible_1 = __importDefault(require("./routes/citaPosible"));
 const node_cron_1 = __importDefault(require("node-cron"));
 const fnDatosFront_1 = require("./utils/fnDatosFront");
 // Cargar variables de entorno
@@ -40,6 +41,7 @@ app.use("/api", registro_1.default);
 app.use("/api", animal_1.default);
 app.use("/api", horarioDisponible_1.default);
 app.use("/api", asociacion_1.default);
+app.use("/api", citaPosible_1.default);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`✅ PetMatch API corriendo en http://localhost:${PORT}`);
