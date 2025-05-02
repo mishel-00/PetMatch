@@ -70,7 +70,7 @@ export default function AnimalesAsociacion({ route }: any) {
         data={animales}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => navigation.navigate("AnimalDetalleAdopnate", { id: item.id })}>
+          <TouchableOpacity onPress={() => navigation.navigate("AnimalDetalleAdoptante", { id: item.id })}>
             <View style={styles.card}>
               {item.foto && (
                 <Image
