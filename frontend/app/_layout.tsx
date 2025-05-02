@@ -1,3 +1,4 @@
+//Mismo archivo que el HomeStack para el tema de la negacion que este todo claro entre las pantallas y saber donde navega cada una
 import React from "react";
 import LoginScreen from "./login";
 import DrawerContent from "@/components/DrawerContent";
@@ -12,6 +13,8 @@ import AnimalDetalle from "@/components/AnimalDetalle";
 import EditarAnimal from "@/components/EtidarAnimal"; // asegúrate que esté bien escrito
 import HomeStack from "./(tabs)/HomeStack";
 import HorarioDisponible from "@/components/HorarioDisponible";
+import AnimalesAsociacion from "@/components/AnimalesAsociacion";
+import AnimalDetalleAdoptante from "@/components/AnimalDetalleAdoptante";
 
 const Drawer = createDrawerNavigator();
 
@@ -28,6 +31,8 @@ export default function Layout() {
         headerTintColor: "#000",
       }}
     >
+      {/* cambios */}
+      {/* Las diferentes pantallas de navegacion */}
       <Drawer.Screen name="Home" component={TabsNavigator} options={{ headerTitle: "Home" }} />
       <Drawer.Screen name="Login" component={LoginScreen} options={{ headerTitle: "Iniciar Sesión" }} />
       <Drawer.Screen name="Register" component={RegisterScreen} options={{ headerTitle: "Registro" }} />
@@ -38,7 +43,10 @@ export default function Layout() {
       <Drawer.Screen name="AnimalDetalle" component={AnimalDetalle} options={{drawerLabel: "Animal detalle"}}/>
       <Drawer.Screen name="EditarAnimal" component={EditarAnimal} options={{drawerLabel: "Animal detall"}}/>
       <Drawer.Screen name="HorarioDisponible" component={HorarioDisponible} options={{drawerLabel: "Horario Disponibles"}}/>
+      <Drawer.Screen name="AnimalesAsociacion" component={AnimalesAsociacion} options={{drawerLabel: "Animales Asociacion"}}/>
+      <Drawer.Screen name="AnimalDetalleAdoptante" component={AnimalDetalleAdoptante} options={{drawerLabel: "AnimalDetalleAdoptante"}}/>
 
+      
     </Drawer.Navigator>
   );
 }

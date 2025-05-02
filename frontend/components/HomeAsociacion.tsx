@@ -1,3 +1,4 @@
+//Pantalla principal de asociacion donde saldran las estadisticas e informacion de la asociacion 
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { getxxx } from "@/service/api";
@@ -10,6 +11,7 @@ export default function HomeAsociacion() {
     const fetchAnimales = async () => {
       try {
         setLoading(true);
+        //Aqui pedimos los animales de la asocion y solo mostramos los la cantidad que tiene publicados
         const data = await getxxx("api/animal"); 
         setAnimalesCount(data.length); 
       } catch (error) {
