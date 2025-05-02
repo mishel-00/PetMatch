@@ -8,6 +8,7 @@ import registroRoutes from "./routes/registro";
 import animalRoutes from "./routes/animal";
 import horarioRoutes from "./routes/horarioDisponible";
 import asociacionRoutes from "./routes/asociacion";
+import citaPosibleRoutes from "./routes/citaPosible";
 import cron from "node-cron";
 import { limpiarHorariosPasados } from './utils/fnDatosFront';
 
@@ -41,7 +42,7 @@ app.use("/api", registroRoutes);
 app.use("/api", animalRoutes);
 app.use("/api", horarioRoutes);
 app.use("/api", asociacionRoutes);
-
+app.use("/api", citaPosibleRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
