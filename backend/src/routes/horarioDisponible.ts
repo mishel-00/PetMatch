@@ -386,5 +386,68 @@ router.get("/horarioDisponible/:id", verificarTokenFireBase, async (req, res) =>
       res.status(500).json({ error: error.message });
     }
   });   
-  
+
+   //? [Adoptante] -> GET -> Obtener todos los hoarios disponibles de una asociacion
+  router.get("/horarioDisponible/asociacion/:idAsociacion", verificarTokenFireBase, async (req, res) => {
+  const { idAsociacion } = req.params;
+
+    try {
+      const snapshot = await admin
+        .firestore()
+        .collection("horarioDisponible")
+        .where("asociacion_id", "==", idAsociacion)
+        .get();
+
+      const fechaHoy = new Date();
+      fechaHoy.setHours(0, 0, 0, 0);
+
+      const horariosDisponibles: any[] = [];
+
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        const idHorario = doc.id;
+
+        const fechaDoc = new Date(data.fecha); 
+        fechaDoc.setHours(0, 0, 0, 0);
+
+        
+        if (fechaDoc < fechaHoy) continue;
+
+        const todasLasHoras = data.horas || [];
+
+        
+        const citasSnapshot = await admin.firestore()
+          .collection("citaPosible")
+          .where("id_HorarioDisponible", "==", idHorario)
+          .get();
+
+        
+        const horasOcupadas = citasSnapshot.docs.map((cita) => cita.data().hora);
+        const horasLibres = todasLasHoras.filter((h: string) => !horasOcupadas.includes(h));
+
+        if (horasLibres.length > 0) {
+          horariosDisponibles.push({
+            id: doc.id,
+            fecha: data.fecha,
+            horas: horasLibres,
+          });
+        } else {
+          console.log(`📌 Día ${data.fecha} tiene todas las horas ocupadas`);
+        }
+      }
+      // Ordenar por fecha ascendente
+      horariosDisponibles.sort((a, b) => {
+      const dateA = new Date(a.fecha);
+      const dateB = new Date(b.fecha);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    const tresDias = horariosDisponibles.slice(0, 3);
+
+      res.status(200).json(tresDias);
+    } catch (error: any) {
+      console.error("❌ Error al obtener horarios filtrados:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }); 
   export default router;
