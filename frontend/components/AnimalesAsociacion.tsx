@@ -1,4 +1,3 @@
-//Esta pantalla es la que le sale la lista de animales cuando pincha en una asociacion
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -10,10 +9,12 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import { getxxx } from "@/service/api";
+import axios from "axios";
+import { getAuth } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/app/(tabs)/HomeStack";
+import { API_URL } from "@/service/api";
 
 type Animal = {
   id: string;
@@ -27,14 +28,24 @@ export default function AnimalesAsociacion({ route }: any) {
   const [animales, setAnimales] = useState<Animal[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  //Petcion para pedir los animales de una asociacion concreta con ese id 
+  console.log("id de la asociacion", asociacionId),
+
   useEffect(() => {
     const cargarAnimales = async () => {
       try {
-        const data = await getxxx(`api/animal/asociacion/${asociacionId}`);
-        setAnimales(data);
+        const user = getAuth().currentUser;
+        if (!user) throw new Error("No autenticado");
+
+        const token = await user.getIdToken();
+        const response = await axios.get(`${API_URL}/api/obtenerAnimales/${asociacionId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        setAnimales(response.data);
       } catch (error) {
-        console.error(error);
+        console.error(" Error al obtener animales:", error);
         Alert.alert("Error", "No se pudieron cargar los animales.");
       } finally {
         setLoading(false);
