@@ -31,6 +31,7 @@ export default function Layout() {
         headerTintColor: "#000",
       }}
     >
+      {/* cambios */}
       {/* Las diferentes pantallas de navegacion */}
       <Drawer.Screen name="Home" component={TabsNavigator} options={{ headerTitle: "Home" }} />
       <Drawer.Screen name="Login" component={LoginScreen} options={{ headerTitle: "Iniciar Sesión" }} />
