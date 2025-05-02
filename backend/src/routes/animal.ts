@@ -341,5 +341,4 @@ router.get("/animal/:idAnimal/asociacion/:idAsociacion", verificarTokenFireBase,
   }
 });
 
-
 export default router;
