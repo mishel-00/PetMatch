@@ -9,7 +9,7 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
-import { getxxx, patchxxx } from "@/service/api";
+import { getxxx, patchxxx, postxxx } from "@/service/api";
 import { formatoFecha } from "@/utils/formatoFecha";
 
 interface Cita {
@@ -51,13 +51,18 @@ export default function ListaCitasAsociacion() {
 
   const actualizarEstado = async (id: string, nuevoEstado: "aceptada" | "rechazada") => {
     try {
-      await patchxxx(`api/citaPosible/${id}`, { estado: nuevoEstado });
+      await postxxx(`api/citaPosible/validar`, {
+        idCitaPosible: id,
+        nuevoEstado: nuevoEstado,
+      });
       Alert.alert("Éxito", `Cita ${nuevoEstado === "aceptada" ? "aceptada" : "rechazada"} correctamente`);
       cargarCitas(); // refrescar lista
-    } catch (error) {
-      Alert.alert("Error", "No se pudo actualizar la cita.");
+    } catch (error:any) {
+      const mensaje = error?.response?.data?.error || "No se pudo actualizar la cita.";
+      Alert.alert("Error", mensaje);
     }
   };
+  
 
   if (loading) {
     return (

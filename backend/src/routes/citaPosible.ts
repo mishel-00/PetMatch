@@ -97,6 +97,19 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
       .firestore()
       .collection("citaPosible")
       .add(citaData);
+      // Asociar el animal a la cita (añadi este const)
+const animal_id = req.body.animal_id;
+if (!animal_id) {
+  res.status(400).json({ error: "Falta el ID del animal" });
+  return;
+}
+//
+
+await admin.firestore().collection("citasAnimal").add({
+  citaPosible_id: nuevaCita.path, // Usa .path, no .id
+  animal_id: `animal/${animal_id}` // Path completo
+});
+
 
     await admin
       .firestore()

@@ -104,6 +104,8 @@ export default function AnimalDetalleAdoptante({ route }: any) {
         fecha: selectedDate,
         asociacion_id: asociacionId,
         observaciones,
+        animal_id: id, 
+
       });
   
       setCitaConfirmada(true);
