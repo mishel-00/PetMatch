@@ -140,11 +140,17 @@ if (!fecha || !hora) {
 
 try {
   const fechaObj = new Date(fecha);
+
+  const fechaSoloDia = new Date(fechaObj);
+  fechaSoloDia.setHours(0, 0, 0, 0);
+
   const ahora = new Date();
+  ahora.setHours(0, 0, 0, 0);
+
   const limiteMaximo = new Date();
   limiteMaximo.setDate(ahora.getDate() + 6); // 6 días de antelación
 
-  if (fechaObj.toDateString() < ahora.toDateString()) {
+  if (fechaSoloDia.getTime() < ahora.getTime()) {
     res.status(400).json({ error: "No se puede crear un horario en una fecha pasada" });
     return;
   }
@@ -154,7 +160,7 @@ try {
     return;
   }
 
-  const esHoy = fechaObj.toDateString() === ahora.toDateString();
+  const esHoy = fechaSoloDia.getTime() === ahora.getTime();
   if (esHoy) {
     const [h, m] = hora.split(":").map(Number);
     const horaProgramada = new Date();
