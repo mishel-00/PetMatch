@@ -31,14 +31,21 @@ export default function HorarioDisponible() {
     const cargarHorarios = async () => {
       try {
         const data = await getxxx("api/horarioDisponible");
+  
         if (data && Array.isArray(data)) {
-          const horariosCargados = data.map((h: any) => ({
-            id: h.id,
-            fecha: new Date(h.fecha),
-            hora: new Date(`1970-01-01T${h.hora}`),
-          }));
+          const horariosCargados = data.flatMap((h: any) => {
+            if (!Array.isArray(h.horas)) return [];
+  
+            return h.horas
+              .filter((hora: string) => /^\d{2}:\d{2}$/.test(hora)) // Validar formato HH:mm
+              .map((hora: string) => ({
+                id: `${h.id}-${hora}`, // ID único por hora
+                fecha: new Date(h.fecha),
+                hora: new Date(`1970-01-01T${hora}:00`),
+              }));
+          });
+  
           setHorarios(ordenarHorarios(horariosCargados));
-
         }
       } catch (error) {
         console.error(error);
@@ -47,8 +54,10 @@ export default function HorarioDisponible() {
         setLoadingInicial(false);
       }
     };
+  
     cargarHorarios();
   }, []);
+  
 
   const guardarHorario = async () => {
     if (!fechaSeleccionada || !horaSeleccionada) {

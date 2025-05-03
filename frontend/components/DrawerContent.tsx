@@ -66,6 +66,20 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
     <Text style={styles.menuButtonText}>Horario Disponible</Text>
   </View>
   </TouchableOpacity>
+  <TouchableOpacity
+  style={{
+    backgroundColor: "#1abc9c",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  }}
+  onPress={() => navigation.navigate("ListaCitasAsociacion")}
+>
+  <Text style={{ color: "white", fontWeight: "bold", textAlign: "center" }}>
+    📅 Citas
+  </Text>
+</TouchableOpacity>
+
         </View>
       )}
     </View>

@@ -184,6 +184,30 @@ export const registerUser = async (data: {
       console.error("❌ Error al eliminar el animal:", error);
       throw new Error(error.response?.data?.error || "Error al eliminar animal");
     }
+
+    
   };
+
+  export const patchxxx = async (url: string, body: any) => {
+    try {
+      const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/${url}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+  
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText);
+      }
+  
+      return await res.json();
+    } catch (error) {
+      throw error;
+    }
+  };
+  
   
   
