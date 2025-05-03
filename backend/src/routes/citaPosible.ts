@@ -222,7 +222,8 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           solicitudes_activas: admin.firestore.FieldValue.increment(-1),
         });
 
-      return res.status(200).json({ message: "Cita rechazada correctamente" });
+     res.status(200).json({ message: "Cita rechazada correctamente" });
+     return; 
     }
 
     
@@ -235,19 +236,22 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         .get();
 
       if (citasAnimalSnap.empty) {
-        return res.status(400).json({ error: "No se encontró animal asociado a esta cita" });
+         res.status(400).json({ error: "No se encontró animal asociado a esta cita" });
+         return;
       }
 
       const animalRefPath = citasAnimalSnap.docs[0].data().animal_id;
       const animalRef = admin.firestore().doc(animalRefPath);
       await animalRef.update({ estadoAdopcion: "reservado" });
 
-      return res.status(200).json({ message: "Cita aceptada y animal reservado" });
+       res.status(200).json({ message: "Cita aceptada y animal reservado" });
+       return;
     }
 
   } catch (error: any) {
     console.error("❌ Error al validar cita:", error);
-    return res.status(500).json({ error: error.message });
+     res.status(500).json({ error: error.message });
+     return;
   }
 });
 
