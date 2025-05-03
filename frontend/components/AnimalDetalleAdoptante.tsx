@@ -90,7 +90,6 @@ export default function AnimalDetalleAdoptante({ route }: any) {
   const handleConfirmarCita = async () => {
     if (!selectedDate || !horarioSeleccionado) return;
   
-    // Encuentra el objeto de ese día en el array
     const diaSeleccionado = horariosDisponibles.find(h => h.fecha === selectedDate);
   
     if (!diaSeleccionado) {
@@ -100,16 +99,15 @@ export default function AnimalDetalleAdoptante({ route }: any) {
   
     try {
       await postxxx("api/citaPosible", {
-        horarioDisponible_id: diaSeleccionado.id, // <- este ID lo necesita el backend
+        horarioDisponible_id: diaSeleccionado.id,
         hora: horarioSeleccionado,
         fecha: selectedDate,
         asociacion_id: asociacionId,
-        observaciones, // puedes dejarlo vacío o agregar un input en el modal
+        observaciones,
       });
   
       setCitaConfirmada(true);
-      
-      //Para limpiar los campos
+  
       setTimeout(() => {
         setModalVisible(false);
         setCitaConfirmada(false);
@@ -117,10 +115,12 @@ export default function AnimalDetalleAdoptante({ route }: any) {
         setSelectedDate(null);
         setObservaciones("");
       }, 2000);
-    } catch {
-      Alert.alert("Error", "No se pudo solicitar la cita.");
+    } catch (error: any) {
+      const mensaje = error?.response?.data?.error || "No se pudo solicitar la cita.";
+      Alert.alert(mensaje);
     }
   };
+  
   
   
   if (loading || !animal) {
