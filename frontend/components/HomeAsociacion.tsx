@@ -6,6 +6,8 @@ import { getxxx } from "@/service/api";
 export default function HomeAsociacion() {
   const [animalesCount, setAnimalesCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [citasPendientes, setCitasPendientes] = useState<any[]>([]);
+
 
   useEffect(() => {
     const fetchAnimales = async () => {
@@ -23,6 +25,29 @@ export default function HomeAsociacion() {
 
     fetchAnimales();
   }, []);
+
+  useEffect(() => {
+    const fetchDatos = async () => {
+      try {
+        setLoading(true);
+  
+        const animales = await getxxx("api/animal");
+        setAnimalesCount(animales.length);
+  
+        const idAsociacion = "X_TU_ID_ASOCIACION_X"; // ← cámbialo dinámicamente según corresponda
+        const citas = await getxxx(`api/citas/pendientes?asociacion_id=${idAsociacion}`);
+        setCitasPendientes(citas);
+        
+      } catch (error) {
+        Alert.alert("Error", "No se pudo cargar la información.");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchDatos();
+  }, []);
+  
 
   if (loading) {
     return (
@@ -50,6 +75,34 @@ export default function HomeAsociacion() {
         </View>
 
         {/* Aquí luego agregarás citas, solicitudes y adopciones */}
+        <View style={styles.statsCard}>
+  <Text style={styles.statsTitle}>📊 Tus estadísticas</Text>
+
+  <View style={styles.statRow}>
+    <Text style={styles.statEmoji}>🐶</Text>
+    <Text style={styles.statText}>Animales publicados: <Text style={styles.bold}>{animalesCount}</Text></Text>
+  </View>
+
+  <View style={styles.statRow}>
+    <Text style={styles.statEmoji}>📅</Text>
+    <Text style={styles.statText}>Citas pendientes: <Text style={styles.bold}>{citasPendientes.length}</Text></Text>
+  </View>
+</View>
+
+{/* Lista breve de las próximas citas */}
+{citasPendientes.length > 0 && (
+  <View style={styles.statsCard}>
+    <Text style={styles.statsTitle}>🕐 Próximas citas</Text>
+    {citasPendientes.slice(0, 3).map((cita, index) => (
+      <View key={index} style={styles.statRow}>
+        <Text style={styles.statText}>
+          {cita.fecha} {cita.hora}h – {cita.animal} con {cita.adoptante}
+        </Text>
+      </View>
+    ))}
+  </View>
+)}
+
       </View>
 
       <Text style={styles.footerMessage}>

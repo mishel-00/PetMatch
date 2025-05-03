@@ -15,6 +15,7 @@ import EditarAnimal from "@/components/EtidarAnimal";
 import HorarioDisponible from "@/components/HorarioDisponible";
 import AnimalesAsociacion from "@/components/AnimalesAsociacion";
 import AnimalDetalleAdoptante from "@/components/AnimalDetalleAdoptante";
+import ListaCitasAsociacion from "@/components/ListaCitasAsociacion";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 
@@ -32,6 +33,7 @@ export type RootStackParamList = {
     HorarioDisponible : undefined;
     AnimalesAsociacion: { asociacionId: string; nombre: string };
     AnimalDetalleAdoptante : {id : string, asociacionId : string }
+    ListaCitasAsociacion : undefined;
 
 };
   
@@ -69,17 +71,17 @@ export default function HomeStack() {
             <Stack.Screen
             name="AnimalDetalle"
             component={AnimalDetalle}
-            options={{ headerTitle: "Detalles del Animal" }} />
+            options={{ headerTitle: "Perfil del Animal" }} />
 
             <Stack.Screen
             name="CrearAnimal"
             component={CrearAnimal}
-            options={{ headerTitle: "CrearAnimal" }} />
+            options={{ headerTitle: "Crear Animal" }} />
 
             <Stack.Screen 
             name="EditarAnimal" 
             component={EditarAnimal} 
-            options={{ headerTitle: "Editar Animal" }} />
+            options={{ headerTitle: "Editar Ficha" }} />
             <Stack.Screen 
             name="HorarioDisponible" 
             component={HorarioDisponible} 
@@ -91,7 +93,11 @@ export default function HomeStack() {
             <Stack.Screen 
             name="AnimalDetalleAdoptante" 
             component={AnimalDetalleAdoptante} 
-            options={{ headerTitle: "Horario Disponible" }} />
+            options={{ headerTitle: "Perfil Animal" }} />
+             <Stack.Screen 
+            name="ListaCitasAsociacion" 
+            component={ListaCitasAsociacion} 
+            options={{ headerTitle: "Lista Citas" }} />
 
 
         </Stack.Navigator>
