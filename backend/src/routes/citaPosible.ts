@@ -59,10 +59,10 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
       .get();
       
     const citasMaximas = snapshot.docs.length;
-    if (citasMaximas >= 5) {
-      res.status(400).json({ error: "No se pueden registrar más citas" });
-      return;
-    }
+    // if (citasMaximas >= 5) {
+    //   res.status(400).json({ error: "No se pueden registrar más citas" });
+    //   return;
+    // }
 
     const citaData = {
       horarioDisponible_id,
@@ -81,11 +81,19 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
     .where("hora", "==", hora)
     .get();
 
-    if (!citaExistente.empty) {
-     res.status(400).json({ error: "Esa hora ya está reservada por otra persona" });
-     return;
-    }
+    // if (!citaExistente.empty) {
+    //  res.status(400).json({ error: "Esa hora ya está reservada por otra persona" });
+    //  return;
+    // }
 
+    if (!citaExistente.empty || snapshot.docs.length >= 5) {
+      return res.status(400).json({ 
+        error: !citaExistente.empty
+          ? "Esa hora ya está reservada por otra persona"
+          : "Ya tiene 5 solicitudes activas. No se pueden registrar más citas. Debes esperar a que se liberen las citas pasadas.",
+      });
+    }
+    
     const nuevaCita = await admin
       .firestore()
       .collection("citaPosible")
