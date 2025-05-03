@@ -177,4 +177,78 @@ router.get("/citaPosible/pendientes/asociacion",verificarTokenFireBase, async (r
     }
   }
 );
+
+//* [Asociacion] -> POST -> CitaPosible x Adoptante
+router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => {
+  const uidAsociacion = req.uid;
+  if (!uidAsociacion) {
+    res.status(401).json({ error: "Token inválido" });
+    return;
+  }
+
+  const { idCitaPosible, nuevoEstado } = req.body;
+
+  if (!idCitaPosible || !["aceptada", "rechazada"].includes(nuevoEstado)) {
+   res.status(400).json({ error: "Datos inválidos" });
+   return;
+  }
+
+  try {
+    
+    const citaRef = admin.firestore().collection("citaPosible").doc(idCitaPosible);
+    const citaDoc = await citaRef.get();
+
+    if (!citaDoc.exists) {
+     res.status(404).json({ error: "Cita no encontrada" });
+     return; 
+    }
+
+    const citaData = citaDoc.data();
+    if (citaData?.asociacion_id !== uidAsociacion) {
+     res.status(403).json({ error: "No autorizado para validar esta cita" });
+     return; 
+    }
+
+    
+    await citaRef.update({ estado: nuevoEstado });
+
+    
+    if (nuevoEstado === "rechazada") {
+      await admin
+        .firestore()
+        .collection("adoptante")
+        .doc(citaData.adoptante_id)
+        .update({
+          solicitudes_activas: admin.firestore.FieldValue.increment(-1),
+        });
+
+      return res.status(200).json({ message: "Cita rechazada correctamente" });
+    }
+
+    
+    if (nuevoEstado === "aceptada") {
+      const citasAnimalSnap = await admin
+        .firestore()
+        .collection("citasAnimal")
+        .where("citaPosible_id", "==", citaRef.path)
+        .limit(1)
+        .get();
+
+      if (citasAnimalSnap.empty) {
+        return res.status(400).json({ error: "No se encontró animal asociado a esta cita" });
+      }
+
+      const animalRefPath = citasAnimalSnap.docs[0].data().animal_id;
+      const animalRef = admin.firestore().doc(animalRefPath);
+      await animalRef.update({ estadoAdopcion: "reservado" });
+
+      return res.status(200).json({ message: "Cita aceptada y animal reservado" });
+    }
+
+  } catch (error: any) {
+    console.error("❌ Error al validar cita:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
