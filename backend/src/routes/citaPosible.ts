@@ -86,6 +86,7 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
     //  return;
     // }
 
+    //Todo -------------------- Si esto no funciona, hay que cambiar el orden de comprobacion ------------------
     if (!citaExistente.empty || snapshot.docs.length >= 5) {
       return res.status(400).json({ 
         error: !citaExistente.empty
