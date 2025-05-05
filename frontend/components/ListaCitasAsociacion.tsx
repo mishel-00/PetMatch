@@ -9,7 +9,7 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
-import { getxxx, patchxxx, postxxx } from "@/service/api";
+import { getxxx, postxxx } from "@/service/api";
 import { formatoFecha } from "@/utils/formatoFecha";
 
 interface Cita {
