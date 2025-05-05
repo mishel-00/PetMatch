@@ -50,7 +50,6 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
   .firestore()
   .collection("citasAnimal")
   .where("animal_id", "==", animal_id)
-  .where("adoptante_id", "==", uidAdoptante)
   .get();
 
 if (!yaExisteCitaParaAnimal.empty) {
