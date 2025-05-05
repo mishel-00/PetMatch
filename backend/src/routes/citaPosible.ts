@@ -95,7 +95,7 @@ if (!yaExisteCitaParaAnimal.empty) {
     // }
 
     //Todo -------------------- Si esto no funciona, hay que cambiar el orden de comprobacion ------------------
-    if (!citaExistente.empty || snapshot.docs.length >= 10) {
+    if (!citaExistente.empty || snapshot.docs.length >= 5) {
       res.status(400).json({
         error: !citaExistente.empty
           ? "Esa hora ya está reservada por otra persona"
