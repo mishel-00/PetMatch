@@ -260,7 +260,7 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
       const citasAnimalSnap = await admin
         .firestore()
         .collection("citasAnimal")
-        .where("citaPosible_id", "==", `/citaPosible/${idCitaPosible}`)
+        .where("citaPosible_id", "==", `citaPosible/${idCitaPosible}`)
         .limit(1)
         .get();
 
