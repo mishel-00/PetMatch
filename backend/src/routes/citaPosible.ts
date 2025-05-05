@@ -118,6 +118,8 @@ if (!yaExisteCitaParaAnimal.empty) {
   }
 
 
+  console.log("🧪 citaPosible path guardado:", nuevaCita.path);  
+
 await admin.firestore().collection("citasAnimal").add({
   citaPosible_id: nuevaCita.path, // Usa .path, no .id
   animal_id: `animal/${animal_id}` // Path completo
@@ -253,7 +255,8 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
      return; 
     }
 
-    
+    console.log("_____Buscando en citasAnimal con citaPosible_id____:", `/citaPosible/${idCitaPosible}`);
+
     if (nuevoEstado === "aceptada") {
       const citasAnimalSnap = await admin
         .firestore()
