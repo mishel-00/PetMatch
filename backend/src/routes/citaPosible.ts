@@ -39,13 +39,25 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
     return;
   }
 
-  const { horarioDisponible_id, hora, fecha, asociacion_id, observaciones } =
-    req.body;
+  const { horarioDisponible_id, hora, fecha, asociacion_id, observaciones, animal_id } = req.body;
 
-  if (!horarioDisponible_id || !hora || !fecha || !asociacion_id) {
+  if (!horarioDisponible_id || !hora || !fecha || !asociacion_id || !animal_id) {
     res.status(400).json({ error: "Faltan campos obligatorios" });
     return;
   }
+  
+  const yaExisteCitaParaAnimal = await admin
+  .firestore()
+  .collection("citasAnimal")
+  .where("animal_id", "==", animal_id)
+  .where("adoptante_id", "==", uidAdoptante)
+  .get();
+
+if (!yaExisteCitaParaAnimal.empty) {
+   res.status(400).json({error: "Ya has solicitado una cita para este animal",});
+  return; 
+  }
+
 
   try {
     const snapshot = await admin
@@ -98,12 +110,13 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
       .collection("citaPosible")
       .add(citaData);
       // Asociar el animal a la cita (añadi este const)
-const animal_id = req.body.animal_id;
-if (!animal_id) {
-  res.status(400).json({ error: "Falta el ID del animal" });
-  return;
-}
-//
+
+      // const animal_id = req.body.animal_id;
+    if (!animal_id) {
+    res.status(400).json({ error: "Falta el ID del animal" });
+    return;
+  }
+
 
 await admin.firestore().collection("citasAnimal").add({
   citaPosible_id: nuevaCita.path, // Usa .path, no .id
