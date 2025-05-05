@@ -182,8 +182,9 @@ router.get("/citaPosible/pendientes/asociacion",verificarTokenFireBase, async (r
           nombre: nombreAnimal,
         },
       });
-      res.status(200).json(citasConInfo);
     }
+    res.status(200).json(citasConInfo);
+
     } catch (error: any) {
       console.error("❌ Error al obtener citas:", error);
       res.status(500).json({ error: error.message });
