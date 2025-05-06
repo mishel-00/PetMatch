@@ -29,7 +29,83 @@ router.get("/asociaciones", verificarTokenFireBase, async (req, res) => {
   }
 });
 
+//! GET -> Mostrar las citas aceptadas por la asociacion
+router.get("/citaPosible/aceptadas/asociacion", verificarTokenFireBase, async (req, res) => {
+  const uidAsociacion = req.uid;
+  if (!uidAsociacion) {
+    res.status(401).json({ error: "Token inválido" });
+    return;
+  }
+  try {
+    const snapshot = await admin
+    .firestore()
+    .collection("citaPosible")
+    .where("asociacion_id", "==", uidAsociacion)
+    .where("estado", "==", "aceptada")
+    .get();
 
+  const citasConInfo = [];
+
+  for (const doc of snapshot.docs) {
+    const cita = doc.data();
+
+    
+    const adoptanteSnap = await admin
+      .firestore()
+      .collection("adoptante")
+      .doc(cita.adoptante_id)
+      .get();
+
+    const nombreAdoptante = adoptanteSnap.exists
+      ? adoptanteSnap.data()?.nombre
+      : "Desconocido";
+
+    
+    const animalRelSnap = await admin
+      .firestore()
+      .collection("citasAnimal")
+      .where("citaPosible_id", "==", doc.ref.path)
+      .limit(1)
+      .get();
+
+    let nombreDelAnimal = "No asignado";
+    let especieAnimal = "Desconocido";
+    let animalId = null;
+
+    if (!animalRelSnap.empty) {
+      animalId = animalRelSnap.docs[0].data().animal_id; // path tipo 'animal/FD1G...'
+      const animalDoc = await admin.firestore().doc(animalId).get();
+
+      if (animalDoc.exists) {
+        const animalData = animalDoc.data();
+        nombreDelAnimal = animalData?.nombre || "Sin nombre";
+        especieAnimal = animalData?.especie || "Desconocida";
+      }
+    }
+
+    citasConInfo.push({
+      id: doc.id,
+      fecha: cita.fecha,
+      hora: cita.hora,
+      adoptante: {
+        id: cita.adoptante_id,
+        nombre: nombreAdoptante,
+      },
+      animal: {
+        id: animalId,
+        nombre: nombreDelAnimal,
+        especie: especieAnimal,
+      },
+    });
+  }
+
+  res.status(200).json(citasConInfo);
+    
+  } catch (error: any) {
+    console.error("❌ Error al obtener citas aceptadas:", error);
+    res.status(500).json({ error: error.message }); 
+  }
+});
 // //? Get -> Obtener todos los animales de una asociacion
 // //Todo ============ Esto puede ser que tenga que cambiar de sitio a adoptante.ts ============
 // router.get("/obtenerAnimales/:idAsociacion", verificarTokenFireBase, async (req, res) => {
