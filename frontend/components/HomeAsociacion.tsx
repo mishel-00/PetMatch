@@ -7,7 +7,9 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { getxxx } from "@/service/api";
+ import { getxxx } from "@/service/api";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { formatoFecha } from "@/utils/formatoFecha";
 
 interface Cita {
   fecha: string;
@@ -29,18 +31,26 @@ export default function HomeAsociacion() {
     const fetchDatos = async () => {
       try {
         setLoading(true);
-
+  
         const animales = await getxxx("api/animal");
         setAnimalesCount(animales.length);
-
+  
         let citas: Cita[] = await getxxx("api/citaPosible/aceptadas/asociacion");
-
+  
+        // Filtrar solo citas futuras
+        const ahora = new Date();
+        citas = citas.filter((cita) => {
+          const fechaHoraCita = new Date(`${cita.fecha}T${cita.hora}`);
+          return fechaHoraCita.getTime() >= ahora.getTime();
+        });
+  
+        // Ordenar por fecha y hora más próximas
         citas.sort((a, b) => {
           const fechaHoraA = new Date(`${a.fecha}T${a.hora}`);
           const fechaHoraB = new Date(`${b.fecha}T${b.hora}`);
           return fechaHoraA.getTime() - fechaHoraB.getTime();
         });
-
+  
         setCitasPendientes(citas);
       } catch (error) {
         Alert.alert("Error", "No se pudo cargar la información.");
@@ -48,9 +58,10 @@ export default function HomeAsociacion() {
         setLoading(false);
       }
     };
-
+  
     fetchDatos();
   }, []);
+  
 
   if (loading) {
     return (
@@ -62,9 +73,7 @@ export default function HomeAsociacion() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.banner}>
-        <Text style={styles.bannerText}>🐾 PetMatch</Text>
-      </View>
+      
 
       <View style={styles.statsCard}>
         <Text style={styles.statsTitle}>📊 Tus estadísticas</Text>
@@ -87,22 +96,40 @@ export default function HomeAsociacion() {
       {citasPendientes.length > 0 && (
         <View style={styles.statsCard}>
           <Text style={styles.statsTitle}>🕐 Próximas citas</Text>
-          {citasPendientes.slice(0, 3).map((cita, index) => {
-  const icono =
-    cita.animal?.especie?.toLowerCase() === "perro"
-      ? "🐶"
-      : cita.animal?.especie?.toLowerCase() === "gato"
-      ? "🐱"
-      : "🐾";
+          {citasPendientes.map((cita, index) => {
+  const especie = cita.animal?.especie?.toLowerCase();
+  const nombreAnimal = cita.animal?.nombre;
+  const nombreAdoptante = cita.adoptante?.nombre;
+
+  let iconName: any = "paw";
+  let iconColor = "#555";
+
+  if (especie === "perro") {
+    iconName = "dog";
+    iconColor = "#D35400";
+  } else if (especie === "gato") {
+    iconName = "cat";
+    iconColor = "#8e44ad";
+  }
 
   return (
     <View key={index} style={styles.statRow}>
+      <FontAwesome5
+        name={iconName}
+        size={20}
+        color={iconColor}
+        style={{ marginRight: 8 }}
+      />
       <Text style={styles.statText}>
-        {icono} {cita.fecha} {cita.hora}h – {cita.animal?.nombre ?? "🐾"} con {cita.adoptante?.nombre ?? "👤"}
+        {formatoFecha(cita.fecha)} {(cita.hora)}h –{" "}
+        {nombreAnimal && nombreAnimal !== "No asignado" ? nombreAnimal : "Animal no asignado"}{" "}
+        con {nombreAdoptante ?? "Adoptante"}
       </Text>
     </View>
   );
 })}
+
+
 
         </View>
       )}
