@@ -2,6 +2,7 @@ import express from "express";
 import admin from "../firebase";
 import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
 
+
 //Todo: PUT cuando se actualiza citaPosible a estado 'Cancelada' hay que actualizar el numero de solicitudes activas del adoptante
 
 //Todo: Hacer el get [Asociacion] -> CloudMessaging Firebase
@@ -124,7 +125,6 @@ await admin.firestore().collection("citasAnimal").add({
   animal_id: `animal/${animal_id}` // Path completo
 });
 
-
     await admin
       .firestore()
       .collection("adoptante")
@@ -137,6 +137,49 @@ await admin.firestore().collection("citasAnimal").add({
     return;
   }
 });
+
+//* [Adoptante] -> GET -> Ver las citas aceptadas por la asociación
+router.get("/citaPosible/aceptadas",verificarTokenFireBase, async (req, res) => {
+  const uidAdoptante = req.uid;
+
+  try {
+    const snapshot = await admin
+      .firestore()
+      .collection("citaPosible")
+      .where("adoptante_id", "==", uidAdoptante)
+      .where("estado", "==", "aceptada")
+      .get();
+    
+      const citas = await Promise.all(
+        snapshot.docs.map(async (doc) => {
+          const data = doc.data();
+          const { animal_id, asociacion_id, fecha, hora } = data;
+  
+          
+          const animalSnap = await animal_id.get();
+          const animalData = animalSnap.data();
+  
+          
+          const asociacionSnap = await asociacion_id.get();
+          const asociacionData = asociacionSnap.data();
+  
+          return {
+            uidAsociacion: asociacionSnap.id,
+            asociacionNombre: asociacionData?.nombre || "",
+            nombreAnimal: animalData?.nombre || "",
+            especie: animalData?.especie || "",
+            fecha,
+            hora,
+          };
+        })
+      );
+  
+      res.status(200).json(citas);
+    } catch (error: any) {
+      console.error("❌ Error obteniendo citas aceptadas:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
 
 //* [Asociacion] -> GET -> CitasPosibles x Adoptantes
 router.get("/citaPosible/pendientes/asociacion",verificarTokenFireBase, async (req, res) => {
