@@ -32,6 +32,22 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
           <Text style={styles.loginText}>Iniciar Sesión</Text>
         </TouchableOpacity>
       )}
+      {isAuthenticated && rol === "adoptante" && (
+  <View style={styles.section}>
+    <Text style={styles.sectionTitle}>Citas</Text>
+
+    <TouchableOpacity
+      onPress={() => navigation.navigate("CitasAdoptante")}
+      style={[styles.menuButton, { backgroundColor: "#5DADE2" }]}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+        <Icon name="calendar-check" size={20} color="#fff" style={{ marginRight: 8 }} />
+        <Text style={styles.menuButtonText}>Mis Citas</Text>
+      </View>
+    </TouchableOpacity>
+  </View>
+)}
+
 
       {/* Botón para cerrar sesión si está autenticado */}
       {isAuthenticated && (

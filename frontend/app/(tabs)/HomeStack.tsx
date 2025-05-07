@@ -16,6 +16,7 @@ import HorarioDisponible from "@/components/HorarioDisponible";
 import AnimalesAsociacion from "@/components/AnimalesAsociacion";
 import AnimalDetalleAdoptante from "@/components/AnimalDetalleAdoptante";
 import ListaCitasAsociacion from "@/components/ListaCitasAsociacion";
+import CitasAdoptante from "@/components/CitasAdoptante";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 
@@ -34,6 +35,7 @@ export type RootStackParamList = {
     AnimalesAsociacion: { asociacionId: string; nombre: string };
     AnimalDetalleAdoptante : {id : string, asociacionId : string }
     ListaCitasAsociacion : undefined;
+    CitasAdoptante: undefined;
 
 };
   
@@ -98,6 +100,18 @@ export default function HomeStack() {
             name="ListaCitasAsociacion" 
             component={ListaCitasAsociacion} 
             options={{ headerTitle: "Lista Citas" }} />
+
+            <Stack.Screen 
+            name="CitasAdoptante" 
+            component={CitasAdoptante} 
+            options={{ headerTitle: "Mis Citas" }} />
+            
+            {/* <Stack.Screen 
+            name="CitaDetalle" 
+            component={CitaDetalle} 
+            options={{ headerTitle: " CodigoQR" }} /> */}
+
+
 
 
         </Stack.Navigator>
