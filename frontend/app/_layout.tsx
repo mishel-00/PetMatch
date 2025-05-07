@@ -16,6 +16,7 @@ import HorarioDisponible from "@/components/HorarioDisponible";
 import AnimalesAsociacion from "@/components/AnimalesAsociacion";
 import AnimalDetalleAdoptante from "@/components/AnimalDetalleAdoptante";
 import ListaCitasAsociacion from "@/components/ListaCitasAsociacion";
+import CitasAdoptante from "@/components/CitasAdoptante";
 
 const Drawer = createDrawerNavigator();
 
@@ -47,8 +48,10 @@ export default function Layout() {
       <Drawer.Screen name="AnimalesAsociacion" component={AnimalesAsociacion} options={{drawerLabel: "Animales Asociacion"}}/>
       <Drawer.Screen name="AnimalDetalleAdoptante" component={AnimalDetalleAdoptante} options={{drawerLabel: "Animal Detalle "}}/>
       <Drawer.Screen name="ListaCitasAsociacion" component={ListaCitasAsociacion} options={{drawerLabel: "Lista Citas "}}/>
+      <Drawer.Screen name="CitasAdoptante" component={CitasAdoptante} options={{drawerLabel: "Mis Citas "}}/>
 
 
+      CitasAdoptante
       
     </Drawer.Navigator>
   );
