@@ -151,11 +151,12 @@ router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) =>
       .where("estado", "==", "aceptada")
       .where("fecha", "==", hoy)
       .get();
-    
+
     const citas = await Promise.all(
       snapshot.docs.map(async (doc) => {
         const data = doc.data();
         const { animal_id, asociacion_id, fecha, hora } = data;
+
 
         const animalSnap = await animal_id.get();
         const animalData = animalSnap.data();
@@ -168,18 +169,47 @@ router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) =>
           asociacionNombre: asociacionData?.nombre || "",
           nombreAnimal: animalData?.nombre || "",
           especie: animalData?.especie || "",
+
+        let nombreAnimal = "No asignado";
+        let especie = "Desconocido";
+        let asociacionNombre = "";
+        let uidAsociacion = "";
+
+       
+        if (animal_id && typeof animal_id.get === "function") {
+          const animalSnap = await animal_id.get();
+          const animalData = animalSnap.data();
+          nombreAnimal = animalData?.nombre || nombreAnimal;
+          especie = animalData?.especie || especie;
+        }
+
+     
+        if (asociacion_id && typeof asociacion_id.get === "function") {
+          const asociacionSnap = await asociacion_id.get();
+          const asociacionData = asociacionSnap.data();
+          asociacionNombre = asociacionData?.nombre || "";
+          uidAsociacion = asociacionSnap.id;
+        }
+
+        return {
+          id: doc.id,
+          asociacion_id: uidAsociacion,
+          asociacion_nombre: asociacionNombre,
+          nombreAnimal,
+          especie,
           fecha,
           hora,
         };
       })
     );
-  
+
       res.status(200).json(citas);
     } catch (error: any) {
       console.error("❌ Error obteniendo citas aceptadas:", error);
       res.status(500).json({ error: error.message });
     }
   });
+
 
 //* [Asociacion] -> GET -> CitasPosibles x Adoptantes
 router.get("/citaPosible/pendientes/asociacion",verificarTokenFireBase, async (req, res) => {

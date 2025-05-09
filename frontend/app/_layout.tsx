@@ -51,7 +51,7 @@ export default function Layout() {
       <Drawer.Screen name="CitasAdoptante" component={CitasAdoptante} options={{drawerLabel: "Mis Citas "}}/>
 
 
-      CitasAdoptante
+      
       
     </Drawer.Navigator>
   );

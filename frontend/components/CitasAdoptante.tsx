@@ -23,13 +23,14 @@ interface Cita {
   hora: string;
 }
 
-export default function Citas() {
+export default function CitasAdoptante() {
   const [citas, setCitas] = useState<Cita[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
   useEffect(() => {
     const fetchCitas = async () => {
+        
       try {
         const data: Cita[] = await getxxx("api/citaPosible/aceptadas");
         data.sort((a, b) => {
