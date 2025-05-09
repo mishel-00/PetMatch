@@ -118,11 +118,9 @@ if (!yaExisteCitaParaAnimal.empty) {
   }
 
 
-  console.log("🧪 citaPosible path guardado:", nuevaCita.path);  
-
 await admin.firestore().collection("citasAnimal").add({
-  citaPosible_id: nuevaCita.path, // Usa .path, no .id
-  animal_id: `animal/${animal_id}` // Path completo
+  citaPosible_id: nuevaCita.path, 
+  animal_id: `animal/${animal_id}` 
 });
 
     await admin
@@ -139,40 +137,42 @@ await admin.firestore().collection("citasAnimal").add({
 });
 
 //* [Adoptante] -> GET -> Ver las citas aceptadas por la asociación
-router.get("/citaPosible/aceptadas",verificarTokenFireBase, async (req, res) => {
+router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) => {
   const uidAdoptante = req.uid;
 
   try {
+   
+    const hoy = new Date().toISOString().split('T')[0];
+
     const snapshot = await admin
       .firestore()
       .collection("citaPosible")
       .where("adoptante_id", "==", uidAdoptante)
       .where("estado", "==", "aceptada")
+      .where("fecha", "==", hoy)
       .get();
     
-      const citas = await Promise.all(
-        snapshot.docs.map(async (doc) => {
-          const data = doc.data();
-          const { animal_id, asociacion_id, fecha, hora } = data;
-  
-          
-          const animalSnap = await animal_id.get();
-          const animalData = animalSnap.data();
-  
-          
-          const asociacionSnap = await asociacion_id.get();
-          const asociacionData = asociacionSnap.data();
-  
-          return {
-            uidAsociacion: asociacionSnap.id,
-            asociacionNombre: asociacionData?.nombre || "",
-            nombreAnimal: animalData?.nombre || "",
-            especie: animalData?.especie || "",
-            fecha,
-            hora,
-          };
-        })
-      );
+    const citas = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const data = doc.data();
+        const { animal_id, asociacion_id, fecha, hora } = data;
+
+        const animalSnap = await animal_id.get();
+        const animalData = animalSnap.data();
+
+        const asociacionSnap = await asociacion_id.get();
+        const asociacionData = asociacionSnap.data();
+
+        return {
+          uidAsociacion: asociacionSnap.id,
+          asociacionNombre: asociacionData?.nombre || "",
+          nombreAnimal: animalData?.nombre || "",
+          especie: animalData?.especie || "",
+          fecha,
+          hora,
+        };
+      })
+    );
   
       res.status(200).json(citas);
     } catch (error: any) {
