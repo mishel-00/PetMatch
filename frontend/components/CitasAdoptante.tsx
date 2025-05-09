@@ -23,16 +23,16 @@ interface Cita {
   hora: string;
 }
 
-export default function CitasAdoptante() {
+export default function Citas() {
   const [citas, setCitas] = useState<Cita[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
   useEffect(() => {
     const fetchCitas = async () => {
-        
       try {
         const data: Cita[] = await getxxx("api/citaPosible/aceptadas");
+        console.log(data)
         data.sort((a, b) => {
           const fechaA = new Date(`${a.fecha}T${a.hora}`);
           const fechaB = new Date(`${b.fecha}T${b.hora}`);

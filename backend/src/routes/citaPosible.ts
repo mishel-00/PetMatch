@@ -135,13 +135,12 @@ await admin.firestore().collection("citasAnimal").add({
     return;
   }
 });
-
+//? "Quiero todas las citas con estado: 'aceptada', adoptante_id: X y ordenadas por fecha" -> índice Firebase
 //* [Adoptante] -> GET -> Ver las citas aceptadas por la asociación
 router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) => {
   const uidAdoptante = req.uid;
 
   try {
-   
     const hoy = new Date().toISOString().split('T')[0];
 
     const snapshot = await admin
@@ -149,37 +148,57 @@ router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) =>
       .collection("citaPosible")
       .where("adoptante_id", "==", uidAdoptante)
       .where("estado", "==", "aceptada")
-      .where("fecha", "==", hoy)
+      .where("fecha", ">=", hoy)
       .get();
-    
+
     const citas = await Promise.all(
       snapshot.docs.map(async (doc) => {
         const data = doc.data();
         const { animal_id, asociacion_id, fecha, hora } = data;
 
-        const animalSnap = await animal_id.get();
-        const animalData = animalSnap.data();
+        let nombreDelAnimal = "No asignado";
+        let especieAnimal = "Desconocido";
+        let asociacionNombre = "";
 
-        const asociacionSnap = await asociacion_id.get();
-        const asociacionData = asociacionSnap.data();
+        // Verificamos que los IDs existan y sean válidos
+        if (animal_id && typeof animal_id === "string") {
+          const animalRef = admin.firestore().doc(animal_id);
+          const animalSnap = await animalRef.get();
+          const animalData = animalSnap.data();
+          if (animalData) {
+            nombreDelAnimal = animalData.nombre || nombreDelAnimal;
+            especieAnimal = animalData.especie || especieAnimal;
+          }
+        }
+
+        if (asociacion_id && typeof asociacion_id === "string") {
+          const asociacionRef = admin.firestore().doc(asociacion_id);
+          const asociacionSnap = await asociacionRef.get();
+          const asociacionData = asociacionSnap.data();
+          if (asociacionData) {
+            asociacionNombre = asociacionData.nombre || "";
+          }
+        }
 
         return {
-          uidAsociacion: asociacionSnap.id,
-          asociacionNombre: asociacionData?.nombre || "",
-          nombreAnimal: animalData?.nombre || "",
-          especie: animalData?.especie || "",
+          uidAsociacion: asociacion_id || "",
+          asociacionNombre,
+          nombreAnimal: nombreDelAnimal,
+          especie: especieAnimal,
           fecha,
           hora,
         };
       })
     );
-  
-      res.status(200).json(citas);
-    } catch (error: any) {
-      console.error("❌ Error obteniendo citas aceptadas:", error);
-      res.status(500).json({ error: error.message });
-    }
-  });
+
+    res.status(200).json(citas);
+  } catch (error: any) {
+    console.error("❌ Error obteniendo citas aceptadas:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 
 
 
