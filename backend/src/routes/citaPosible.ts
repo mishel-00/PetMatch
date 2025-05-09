@@ -139,7 +139,7 @@ await admin.firestore().collection("citasAnimal").add({
 });
 
 //* [Adoptante] -> GET -> Ver las citas aceptadas por la asociación
-router.get("/citaPosible/aceptadas",verificarTokenFireBase, async (req, res) => {
+router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) => {
   const uidAdoptante = req.uid;
 
   try {
@@ -149,37 +149,52 @@ router.get("/citaPosible/aceptadas",verificarTokenFireBase, async (req, res) => 
       .where("adoptante_id", "==", uidAdoptante)
       .where("estado", "==", "aceptada")
       .get();
-    
-      const citas = await Promise.all(
-        snapshot.docs.map(async (doc) => {
-          const data = doc.data();
-          const { animal_id, asociacion_id, fecha, hora } = data;
-  
-          
+
+    const citas = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const data = doc.data();
+        const { animal_id, asociacion_id, fecha, hora } = data;
+
+        let nombreAnimal = "No asignado";
+        let especie = "Desconocido";
+        let asociacionNombre = "";
+        let uidAsociacion = "";
+
+        // 🔍 Validar que animal_id sea referencia válida
+        if (animal_id && typeof animal_id.get === "function") {
           const animalSnap = await animal_id.get();
           const animalData = animalSnap.data();
-  
-          
+          nombreAnimal = animalData?.nombre || nombreAnimal;
+          especie = animalData?.especie || especie;
+        }
+
+        // 🔍 Validar que asociacion_id sea referencia válida
+        if (asociacion_id && typeof asociacion_id.get === "function") {
           const asociacionSnap = await asociacion_id.get();
           const asociacionData = asociacionSnap.data();
-  
-          return {
-            uidAsociacion: asociacionSnap.id,
-            asociacionNombre: asociacionData?.nombre || "",
-            nombreAnimal: animalData?.nombre || "",
-            especie: animalData?.especie || "",
-            fecha,
-            hora,
-          };
-        })
-      );
-  
-      res.status(200).json(citas);
-    } catch (error: any) {
-      console.error("❌ Error obteniendo citas aceptadas:", error);
-      res.status(500).json({ error: error.message });
-    }
-  });
+          asociacionNombre = asociacionData?.nombre || "";
+          uidAsociacion = asociacionSnap.id;
+        }
+
+        return {
+          id: doc.id,
+          asociacion_id: uidAsociacion,
+          asociacion_nombre: asociacionNombre,
+          nombreAnimal,
+          especie,
+          fecha,
+          hora,
+        };
+      })
+    );
+
+    res.status(200).json(citas);
+  } catch (error: any) {
+    console.error("❌ Error obteniendo citas aceptadas:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 //* [Asociacion] -> GET -> CitasPosibles x Adoptantes
 router.get("/citaPosible/pendientes/asociacion",verificarTokenFireBase, async (req, res) => {
