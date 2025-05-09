@@ -154,25 +154,41 @@ router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) =>
     const citas = await Promise.all(
       snapshot.docs.map(async (doc) => {
         const data = doc.data();
-        const { animal_id, asociacion_id, fecha, hora } = data;
+        // animal_id no está directamente en 'data' de citaPosible, se obtiene de 'citasAnimal'
+        const { asociacion_id, fecha, hora } = data;
 
         let nombreDelAnimal = "No asignado";
         let especieAnimal = "Desconocido";
         let asociacionNombre = "";
+        let animalIdParaRetornar: string | null = null; // Variable para guardar el animal_id
 
-        // Verificamos que los IDs existan y sean válidos
-        if (animal_id && typeof animal_id === "string") {
-          const animalRef = admin.firestore().doc(animal_id);
-          const animalSnap = await animalRef.get();
-          const animalData = animalSnap.data();
-          if (animalData) {
-            nombreDelAnimal = animalData.nombre || nombreDelAnimal;
-            especieAnimal = animalData.especie || especieAnimal;
+        // 1. Obtener información del animal (Corregido)
+        // Consultar la colección citasAnimal usando la ruta de referencia del documento citaPosible actual
+        const citasAnimalSnapshot = await admin
+          .firestore()
+          .collection("citasAnimal")
+          .where("citaPosible_id", "==", doc.ref.path) // Usar la ruta de referencia del documento citaPosible
+          .limit(1)
+          .get();
+
+        if (!citasAnimalSnapshot.empty) {
+          const animalDocPath = citasAnimalSnapshot.docs[0].data().animal_id; // Esta es la ruta completa como "animal/animalDocId"
+          animalIdParaRetornar = animalDocPath; // Guardamos el animal_id
+          if (animalDocPath && typeof animalDocPath === "string") {
+            const animalRef = admin.firestore().doc(animalDocPath); // Usar la ruta de citasAnimal
+            const animalSnap = await animalRef.get();
+            const animalData = animalSnap.data();
+            if (animalData) {
+              nombreDelAnimal = animalData.nombre || nombreDelAnimal;
+              especieAnimal = animalData.especie || especieAnimal;
+            }
           }
         }
 
+        // 2. Obtener información de la asociación (Corregido)
         if (asociacion_id && typeof asociacion_id === "string") {
-          const asociacionRef = admin.firestore().doc(asociacion_id);
+          // Asumiendo que asociacion_id es el ID del documento en la colección "asociacion"
+          const asociacionRef = admin.firestore().collection("asociacion").doc(asociacion_id);
           const asociacionSnap = await asociacionRef.get();
           const asociacionData = asociacionSnap.data();
           if (asociacionData) {
@@ -181,8 +197,9 @@ router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) =>
         }
 
         return {
-          uidAsociacion: asociacion_id || "",
+          uidAsociacion: asociacion_id || "", 
           asociacionNombre,
+          animalId: animalIdParaRetornar, // Añadido animal_id aquí
           nombreAnimal: nombreDelAnimal,
           especie: especieAnimal,
           fecha,
