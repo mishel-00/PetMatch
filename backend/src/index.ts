@@ -31,9 +31,10 @@ if (DEBUG_MODE) {
   console.log("___DEBUG_MODE activado___");
   const debugPath = path.join(__dirname, '../../debug-app/build');
   app.use('/debug', express.static(debugPath));
-  app.get('/debug/*', (_, res) => {
+  app.get('/debug/:path(*)', (_, res) => {
     res.sendFile(path.join(debugPath, 'index.html'));
   });
+  
 }
 
 if (!admin.apps.length) {
