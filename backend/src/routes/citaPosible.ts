@@ -1,6 +1,12 @@
 import express from "express";
 import admin from "../firebase";
 import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
+const { Storage } = require('@google-cloud/storage');
+const QRCode = require('qrcode');
+const storage = new Storage(); // Usa las credenciales del backend (service account)
+
+const bucketName = 'pet-match-cloud.appspot.com'; 
+const bucket = storage.bucket(bucketName);
 
 
 //Todo: PUT cuando se actualiza citaPosible a estado 'Cancelada' hay que actualizar el numero de solicitudes activas del adoptante
@@ -109,9 +115,7 @@ if (!yaExisteCitaParaAnimal.empty) {
       .firestore()
       .collection("citaPosible")
       .add(citaData);
-      // Asociar el animal a la cita (añadi este const)
 
-      // const animal_id = req.body.animal_id;
     if (!animal_id) {
     res.status(400).json({ error: "Falta el ID del animal" });
     return;
@@ -154,28 +158,27 @@ router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) =>
     const citas = await Promise.all(
       snapshot.docs.map(async (doc) => {
         const data = doc.data();
-        // animal_id no está directamente en 'data' de citaPosible, se obtiene de 'citasAnimal'
+        
         const { asociacion_id, fecha, hora } = data;
 
         let nombreDelAnimal = "No asignado";
         let especieAnimal = "Desconocido";
         let asociacionNombre = "";
-        let animalIdParaRetornar: string | null = null; // Variable para guardar el animal_id
+        let animalIdParaRetornar: string | null = null; 
 
-        // 1. Obtener información del animal (Corregido)
-        // Consultar la colección citasAnimal usando la ruta de referencia del documento citaPosible actual
+        
         const citasAnimalSnapshot = await admin
           .firestore()
           .collection("citasAnimal")
-          .where("citaPosible_id", "==", doc.ref.path) // Usar la ruta de referencia del documento citaPosible
+          .where("citaPosible_id", "==", doc.ref.path) 
           .limit(1)
           .get();
 
         if (!citasAnimalSnapshot.empty) {
-          const animalDocPath = citasAnimalSnapshot.docs[0].data().animal_id; // Esta es la ruta completa como "animal/animalDocId"
-          animalIdParaRetornar = animalDocPath; // Guardamos el animal_id
+          const animalDocPath = citasAnimalSnapshot.docs[0].data().animal_id; 
+          animalIdParaRetornar = animalDocPath;
           if (animalDocPath && typeof animalDocPath === "string") {
-            const animalRef = admin.firestore().doc(animalDocPath); // Usar la ruta de citasAnimal
+            const animalRef = admin.firestore().doc(animalDocPath); 
             const animalSnap = await animalRef.get();
             const animalData = animalSnap.data();
             if (animalData) {
@@ -185,9 +188,8 @@ router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) =>
           }
         }
 
-        // 2. Obtener información de la asociación (Corregido)
-        if (asociacion_id && typeof asociacion_id === "string") {
-          // Asumiendo que asociacion_id es el ID del documento en la colección "asociacion"
+  
+        if (asociacion_id && typeof asociacion_id === "string") {        
           const asociacionRef = admin.firestore().collection("asociacion").doc(asociacion_id);
           const asociacionSnap = await asociacionRef.get();
           const asociacionData = asociacionSnap.data();
@@ -199,7 +201,7 @@ router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) =>
         return {
           uidAsociacion: asociacion_id || "", 
           asociacionNombre,
-          animalId: animalIdParaRetornar, // Añadido animal_id aquí
+          animalId: animalIdParaRetornar, 
           nombreAnimal: nombreDelAnimal,
           especie: especieAnimal,
           fecha,
@@ -214,10 +216,6 @@ router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) =>
     res.status(500).json({ error: error.message });
   }
 });
-
-
-
-
 
 //* [Asociacion] -> GET -> CitasPosibles x Adoptantes
 router.get("/citaPosible/pendientes/asociacion",verificarTokenFireBase, async (req, res) => {
@@ -298,31 +296,72 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
   const { idCitaPosible, nuevoEstado } = req.body;
 
   if (!idCitaPosible || !["aceptada", "rechazada"].includes(nuevoEstado)) {
-   res.status(400).json({ error: "Datos inválidos" });
-   return;
+    res.status(400).json({ error: "Datos inválidos" });
+    return;
   }
 
   try {
-    
     const citaRef = admin.firestore().collection("citaPosible").doc(idCitaPosible);
     const citaDoc = await citaRef.get();
 
     if (!citaDoc.exists) {
-     res.status(404).json({ error: "Cita no encontrada" });
-     return; 
+      res.status(404).json({ error: "Cita no encontrada" });
+      return;
     }
 
     const citaData = citaDoc.data();
     if (citaData?.asociacion_id !== uidAsociacion) {
-     res.status(403).json({ error: "No autorizado para validar esta cita" });
-     return; 
+      res.status(403).json({ error: "No autorizado para validar esta cita" });
+      return;
     }
 
-    
-    await citaRef.update({ estado: nuevoEstado });
+  
+    const updateData: { estado: string; qrCodeURL?: string } = { estado: nuevoEstado };
 
-    
-    if (nuevoEstado === "rechazada") {
+    if (nuevoEstado === "aceptada") {
+      try {
+        const citasAnimalSnap = await admin
+          .firestore()
+          .collection("citasAnimal")
+          .where("citaPosible_id", "==", `citaPosible/${idCitaPosible}`)
+          .limit(1)
+          .get();
+
+        if (citasAnimalSnap.empty) {
+          res.status(400).json({ error: "No se encontró animal asociado a esta cita" });
+          return;
+        }
+
+        const animalRefPath = citasAnimalSnap.docs[0].data().animal_id;
+
+        if (!animalRefPath || typeof animalRefPath !== "string") {
+          res.status(400).json({ error: "ID del animal inválido" });
+          return;
+        }
+        const animalId = animalRefPath.split("/").pop();
+        const qrDataToEncode = `https://petmatch.com/fichaAnimal?id=${animalId}`;
+        const qrCodeBuffer = await QRCode.toBuffer(qrDataToEncode);
+        const fileName = `qrCodes/cita_${idCitaPosible}.png`;
+
+        const bucket = admin.storage().bucket();
+        const file = bucket.file(fileName);
+
+        await file.save(qrCodeBuffer, {
+          metadata: { contentType: "image/png" },
+          public: true,
+        });
+
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+        updateData.qrCodeURL = publicUrl;
+
+        const animalRef = admin.firestore().doc(animalRefPath);
+        await animalRef.update({ estadoAdopcion: "reservado" });
+
+      } catch (qrError) {
+        console.error("❌ Error generando o subiendo el QR Code:", qrError);
+        delete updateData.qrCodeURL;
+      }
+    } else if (nuevoEstado === "rechazada") {
       await admin
         .firestore()
         .collection("adoptante")
@@ -330,38 +369,21 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         .update({
           solicitudes_activas: admin.firestore.FieldValue.increment(-1),
         });
-
-     res.status(200).json({ message: "Cita rechazada correctamente" });
-     return; 
     }
 
-    console.log("_____Buscando en citasAnimal con citaPosible_id____:", `/citaPosible/${idCitaPosible}`);
+    await citaRef.update(updateData);
 
-    if (nuevoEstado === "aceptada") {
-      const citasAnimalSnap = await admin
-        .firestore()
-        .collection("citasAnimal")
-        .where("citaPosible_id", "==", `citaPosible/${idCitaPosible}`)
-        .limit(1)
-        .get();
-
-      if (citasAnimalSnap.empty) {
-         res.status(400).json({ error: "No se encontró animal asociado a esta cita" });
-         return;
-      }
-
-      const animalRefPath = citasAnimalSnap.docs[0].data().animal_id;
-      const animalRef = admin.firestore().doc(animalRefPath);
-      await animalRef.update({ estadoAdopcion: "reservado" });
-
-       res.status(200).json({ message: "Cita aceptada y animal reservado" });
-       return;
-    }
+    res.status(200).json({
+      message:
+        nuevoEstado === "aceptada"
+          ? "Cita aceptada y animal reservado"
+          : "Cita rechazada correctamente",
+      qrCodeURL: updateData.qrCodeURL ?? null,
+    });
 
   } catch (error: any) {
-    console.error("❌ Error al validar cita:", error);
-     res.status(500).json({ error: error.message });
-     return;
+    console.error(`❌ Error al cambiar estado de cita a ${nuevoEstado}:`, error);
+    res.status(500).json({ error: error.message });
   }
 });
 
