@@ -5,9 +5,6 @@ const QRCode = require('qrcode');
 
 
 
-
-
-
 //Todo: PUT cuando se actualiza citaPosible a estado 'Cancelada' hay que actualizar el numero de solicitudes activas del adoptante
 
 //Todo: Hacer el get [Asociacion] -> CloudMessaging Firebase
