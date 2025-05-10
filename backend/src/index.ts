@@ -12,13 +12,27 @@ import citaPosibleRoutes from "./routes/citaPosible";
 import cron from "node-cron";
 import { limpiarHorariosPasados } from './utils/fnDatosFront';
 
+//!! DEBUG
+import path from 'path';
+
 // Cargar variables de entorno
 dotenv.config();
+
+// Variable global para modo debug
+export const DEBUG_MODE = process.env.NODE_ENV !== 'production';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+//!! DEBUG
+// Configurar carpeta de archivos estáticos para la aplicación de depuración
+app.use('/debug', express.static(path.join(__dirname, '../debug-app/build')));
+
+// Ruta para servir la aplicación React de depuración
+app.get('/debug/*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../debug-app/build/index.html'));
+});
 
 if (!admin.apps.length) {
   admin.initializeApp({

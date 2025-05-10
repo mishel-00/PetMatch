@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DEBUG_MODE = void 0;
 // index.ts
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
@@ -17,11 +18,22 @@ const asociacion_1 = __importDefault(require("./routes/asociacion"));
 const citaPosible_1 = __importDefault(require("./routes/citaPosible"));
 const node_cron_1 = __importDefault(require("node-cron"));
 const fnDatosFront_1 = require("./utils/fnDatosFront");
+//!! DEBUG
+const path_1 = __importDefault(require("path"));
 // Cargar variables de entorno
 dotenv_1.default.config();
+// Variable global para modo debug
+exports.DEBUG_MODE = process.env.NODE_ENV !== 'production';
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+//!! DEBUG
+// Configurar carpeta de archivos estáticos para la aplicación de depuración
+app.use('/debug', express_1.default.static(path_1.default.join(__dirname, '../debug-app/build')));
+// Ruta para servir la aplicación React de depuración
+app.get('/debug/*', (req, res) => {
+    res.sendFile(path_1.default.join(__dirname, '../debug-app/build/index.html'));
+});
 if (!firebase_admin_1.default.apps.length) {
     firebase_admin_1.default.initializeApp({
         credential: firebase_admin_1.default.credential.cert({

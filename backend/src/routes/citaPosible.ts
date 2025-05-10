@@ -384,4 +384,86 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
   }
 });
 
+
+
+// Rutas de depuración sin autenticación
+router.get("/debug/citasPendientes", async (req, res) => {
+  if (process.env.DEBUG_MODE !== 'true') {
+    res.status(403).json({ error: "Acceso denegado. Modo debug desactivado." });
+  }
+  
+  try {
+    const snapshot = await admin
+    .firestore()
+    .collection("citaPosible")
+      .where("estado", "==", "pendiente")
+      .get();
+      
+      const citasConInfo = [];
+      
+      for (const doc of snapshot.docs) {
+        const cita = doc.data();
+        
+        
+        const adoptanteSnap = await admin
+        .firestore()
+        .collection("adoptante")
+        .doc(cita.adoptante_id)
+        .get();
+        
+        const nombreAdoptante = adoptanteSnap.exists ? adoptanteSnap.data()?.nombre : "Desconocido";
+        
+       // Rutas de depuración sin autenticación
+router.get("/debug/citasPendientes", async (req, res) => {
+  if (process.env.DEBUG_MODE !== 'true') {
+    res.status(403).json({ error: "Acceso denegado. Modo debug desactivado." });
+  }
+  
+  try {
+    // ... resto del código ...
+  } catch (error: any) {
+    console.error("❌ Error al obtener citas para depuración:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+        const animalSnapshot = await admin
+        .firestore()
+        .collection("citasAnimal")
+        .where("citaPosible_id", "==", doc.ref.path) 
+        .limit(1)
+        .get();
+
+      let nombreAnimal = "No asignado";
+      let animalId = null;
+      
+      if (!animalSnapshot.empty) {
+        animalId = animalSnapshot.docs[0].data().animal_id;
+        const animalDoc = await admin.firestore().doc(animalId).get();
+        nombreAnimal = animalDoc.exists ? animalDoc.data()?.nombre : "Desconocido";
+      }
+  
+      citasConInfo.push({
+        id: doc.id,
+        fecha: cita.fecha,
+        hora: cita.hora,
+        estado: cita.estado,
+        observaciones: cita.observaciones || "",
+        adoptante: {
+          id: cita.adoptante_id,
+          nombre: nombreAdoptante,
+        },
+        animal: {
+          id: animalId, 
+          nombre: nombreAnimal,
+        },
+      });
+    }
+    res.status(200).json(citasConInfo);
+
+  } catch (error: any) {
+    console.error("❌ Error al obtener citas para depuración:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
