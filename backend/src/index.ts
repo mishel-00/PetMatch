@@ -1,5 +1,5 @@
 // index.ts
-/// <reference path="./types/index.d.ts" />
+/// <reference path="./types/express/index.d.ts" />
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -27,15 +27,9 @@ app.use(cors());
 app.use(express.json());
 
 //! DEBUG MODE 
-if (DEBUG_MODE) {
-  console.log("___DEBUG_MODE activado___");
-  const debugPath = path.join(__dirname, '../../debug-app/build');
-  app.use('/debug', express.static(debugPath));
-  app.get('/debug/:path(*)', (_, res) => {
-    res.sendFile(path.join(debugPath, 'index.html'));
-  });
-  
-}
+app.get('/debug/:path(*)', (_, res) => {
+  res.sendFile(path.join(__dirname, 'debug', _.params.path));
+});
 
 if (!admin.apps.length) {
   admin.initializeApp({

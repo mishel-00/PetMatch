@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 // index.ts
+/// <reference path="./types/express/index.d.ts" />
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -26,13 +27,9 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 //! DEBUG MODE 
-if (DEBUG_MODE) {
-    console.log("🚧 DEBUG_MODE activado");
-    app.use('/debug', express_1.default.static(path_1.default.join(__dirname, '../debug-app/build')));
-    app.get('/debug/*', (_req, res) => {
-        res.sendFile(path_1.default.join(__dirname, '../debug-app/build/index.html'));
-    });
-}
+app.get('/debug/:path(*)', (_, res) => {
+    res.sendFile(path_1.default.join(__dirname, 'debug', _.params.path));
+});
 if (!firebase_admin_1.default.apps.length) {
     firebase_admin_1.default.initializeApp({
         credential: firebase_admin_1.default.credential.cert({
