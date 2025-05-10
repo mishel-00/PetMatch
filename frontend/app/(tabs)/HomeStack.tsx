@@ -17,6 +17,7 @@ import AnimalesAsociacion from "@/components/AnimalesAsociacion";
 import AnimalDetalleAdoptante from "@/components/AnimalDetalleAdoptante";
 import ListaCitasAsociacion from "@/components/ListaCitasAsociacion";
 import CitasAdoptante from "@/components/CitasAdoptante";
+import CitaDetalle from "@/components/CitaDetalle";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 
@@ -36,7 +37,7 @@ export type RootStackParamList = {
     AnimalDetalleAdoptante : {id : string, asociacionId : string }
     ListaCitasAsociacion : undefined;
     CitasAdoptante: undefined;
-
+    CitaDetalle: {citaId: string }
 };
   
 
@@ -106,10 +107,10 @@ export default function HomeStack() {
             component={CitasAdoptante} 
             options={{ headerTitle: "Mis Citas" }} />
             
-            {/* <Stack.Screen 
+             <Stack.Screen 
             name="CitaDetalle" 
             component={CitaDetalle} 
-            options={{ headerTitle: " CodigoQR" }} /> */}
+            options={{ headerTitle: " CodigoQR" }} /> 
 
 
 

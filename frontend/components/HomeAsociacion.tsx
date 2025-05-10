@@ -11,6 +11,8 @@ import {
 import { FontAwesome5 } from "@expo/vector-icons";
 import { formatoFecha } from "@/utils/formatoFecha";
 
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 interface Cita {
   fecha: string;
   hora: string;
@@ -27,40 +29,42 @@ export default function HomeAsociacion() {
   const [loading, setLoading] = useState<boolean>(true);
   const [citasPendientes, setCitasPendientes] = useState<Cita[]>([]);
 
-  useEffect(() => {
-    const fetchDatos = async () => {
-      try {
-        setLoading(true);
+  // Dentro del componente...
+  useFocusEffect(
+    useCallback(() => {
+      const fetchDatos = async () => {
+        try {
+          setLoading(true);
   
-        const animales = await getxxx("api/animal");
-        setAnimalesCount(animales.length);
+          const animales = await getxxx("api/animal");
+          setAnimalesCount(animales.length);
   
-        let citas: Cita[] = await getxxx("api/citaPosible/aceptadas/asociacion");
+          let citas: Cita[] = await getxxx("api/citaPosible/aceptadas/asociacion");
   
-        // Filtrar solo citas futuras
-        const ahora = new Date();
-        citas = citas.filter((cita) => {
-          const fechaHoraCita = new Date(`${cita.fecha}T${cita.hora}`);
-          return fechaHoraCita.getTime() >= ahora.getTime();
-        });
+          const ahora = new Date();
+          citas = citas.filter((cita) => {
+            const fechaHoraCita = new Date(`${cita.fecha}T${cita.hora}`);
+            return fechaHoraCita.getTime() >= ahora.getTime();
+          });
   
-        // Ordenar por fecha y hora más próximas
-        citas.sort((a, b) => {
-          const fechaHoraA = new Date(`${a.fecha}T${a.hora}`);
-          const fechaHoraB = new Date(`${b.fecha}T${b.hora}`);
-          return fechaHoraA.getTime() - fechaHoraB.getTime();
-        });
+          citas.sort((a, b) => {
+            const fechaHoraA = new Date(`${a.fecha}T${a.hora}`);
+            const fechaHoraB = new Date(`${b.fecha}T${b.hora}`);
+            return fechaHoraA.getTime() - fechaHoraB.getTime();
+          });
   
-        setCitasPendientes(citas);
-      } catch (error) {
-        Alert.alert("Error", "No se pudo cargar la información.");
-      } finally {
-        setLoading(false);
-      }
-    };
+          setCitasPendientes(citas);
+        } catch (error) {
+          Alert.alert("Error", "No se pudo cargar la información.");
+        } finally {
+          setLoading(false);
+        }
+      };
   
-    fetchDatos();
-  }, []);
+      fetchDatos();
+    }, [])
+  );
+  
   
 
   if (loading) {

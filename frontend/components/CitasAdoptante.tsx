@@ -11,33 +11,53 @@ import {
 import { getxxx } from "@/service/api";
 import { formatoFecha } from "@/utils/formatoFecha";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from "@/app/(tabs)/HomeStack";
+
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+
+
+
+
 
 interface Cita {
-  id: string;
-  asociacion_id: string;
-  asociacion_nombre: string;
-  nombreAnimal: string;
-  especie: string;
-  fecha: string;
-  hora: string;
-}
+    id: string;
+    uidAsociacion: string;
+    asociacionNombre: string;
+    nombreAnimal: string;
+    especie: string;
+    fecha: string;
+    hora: string;
+  }
+  
 
 export default function Citas() {
+    type CitasScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'CitasAdoptante'
+>;
   const [citas, setCitas] = useState<Cita[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
+  const navigation = useNavigation<CitasScreenNavigationProp>();
 
-  useEffect(() => {
+
+
+// Con este useFocusEffect lo que hace es reconoce cada vez que dectecte que el eadoptante entre la pagina recarga el Get 
+useFocusEffect(
+  useCallback(() => {
     const fetchCitas = async () => {
       try {
+        setLoading(true);
         const data: Cita[] = await getxxx("api/citaPosible/aceptadas");
-        console.log(data)
+
         data.sort((a, b) => {
           const fechaA = new Date(`${a.fecha}T${a.hora}`);
           const fechaB = new Date(`${b.fecha}T${b.hora}`);
           return fechaA.getTime() - fechaB.getTime();
         });
+
         setCitas(data);
       } catch (error) {
         Alert.alert("Error", "No se pudieron cargar las citas.");
@@ -47,7 +67,9 @@ export default function Citas() {
     };
 
     fetchCitas();
-  }, []);
+  }, [])
+);
+
 
   const renderIcon = (especie: string) => {
     if (especie.toLowerCase() === "perro") {
@@ -74,13 +96,13 @@ export default function Citas() {
         <TouchableOpacity
           key={cita.id}
           style={styles.card}
-          //onPress={() => navigation.navigate("CitaDetalle", { citaId: cita.id })}
+          onPress={() => navigation.navigate("CitaDetalle", { citaId: cita.id })}
         >
           <View style={styles.cardHeader}>
             {renderIcon(cita.especie)}
             <Text style={styles.animalText}>{cita.nombreAnimal}</Text>
           </View>
-          <Text style={styles.info}>📍 Asociación: {cita.asociacion_nombre}</Text>
+          <Text style={styles.info}>📍 Asociación: {cita.asociacionNombre}</Text>
           <Text style={styles.info}>📅 {formatoFecha(cita.fecha)} {cita.hora}h</Text>
         </TouchableOpacity>
       ))}
