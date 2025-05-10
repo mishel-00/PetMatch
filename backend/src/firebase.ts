@@ -12,6 +12,7 @@
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+    storageBucket: "pet-match-cloud.appspot.com",
   });
 }
 

@@ -1,12 +1,11 @@
 import express from "express";
 import admin from "../firebase";
 import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
-const { Storage } = require('@google-cloud/storage');
 const QRCode = require('qrcode');
-const storage = new Storage(); // Usa las credenciales del backend (service account)
 
-const bucketName = 'pet-match-cloud.appspot.com'; 
-const bucket = storage.bucket(bucketName);
+
+
+
 
 
 //Todo: PUT cuando se actualiza citaPosible a estado 'Cancelada' hay que actualizar el numero de solicitudes activas del adoptante
@@ -343,8 +342,8 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         const qrCodeBuffer = await QRCode.toBuffer(qrDataToEncode);
         const fileName = `qrCodes/cita_${idCitaPosible}.png`;
 
-        // Usar el bucket que ya está definido en la parte superior del archivo
-        // en lugar de crear uno nuevo sin especificar el nombre
+        const bucket = admin.storage().bucket();
+
         const file = bucket.file(fileName);
 
         await file.save(qrCodeBuffer, {
@@ -352,7 +351,7 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           public: true,
         });
 
-        const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
         updateData.qrCodeURL = publicUrl;
 
         const animalRef = admin.firestore().doc(animalRefPath);
