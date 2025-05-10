@@ -343,7 +343,8 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         const qrCodeBuffer = await QRCode.toBuffer(qrDataToEncode);
         const fileName = `qrCodes/cita_${idCitaPosible}.png`;
 
-        const bucket = admin.storage().bucket();
+        // Usar el bucket que ya está definido en la parte superior del archivo
+        // en lugar de crear uno nuevo sin especificar el nombre
         const file = bucket.file(fileName);
 
         await file.save(qrCodeBuffer, {
@@ -351,7 +352,7 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           public: true,
         });
 
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+        const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
         updateData.qrCodeURL = publicUrl;
 
         const animalRef = admin.firestore().doc(animalRefPath);
