@@ -411,5 +411,55 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
   }
 });
 
+//* [Adoptante] -> GET -> Obtener QR de una cita aceptada
+router.get("/citaPosible/:idCitaPosible/qr", verificarTokenFireBase, async (req, res) => {
+  const uidAdoptante = req.uid;
+  const { idCitaPosible } = req.params;
+
+  if (!uidAdoptante) {
+    res.status(401).json({ error: "Token inválido" });
+    return;
+  }
+
+  if (!idCitaPosible) {
+    res.status(400).json({ error: "Falta el ID de la cita" });
+    return;
+  }
+
+  try {
+    const citaRef = admin.firestore().collection("citaPosible").doc(idCitaPosible);
+    const citaDoc = await citaRef.get();
+
+    if (!citaDoc.exists) {
+      res.status(404).json({ error: "Cita no encontrada" });
+      return;
+    }
+
+    const citaData = citaDoc.data();
+
+    if (citaData?.adoptante_id !== uidAdoptante) {
+      res.status(403).json({ error: "No autorizado para ver el QR de esta cita" });
+      return;
+    }
+
+    if (citaData?.estado !== "aceptada") {
+      res.status(400).json({ error: "La cita no está aceptada, no se puede mostrar el QR" });
+      return;
+    }
+
+    if (!citaData?.qrCodeURL) {
+      res.status(404).json({ error: "Código QR no encontrado para esta cita" });
+      return;
+    }
+
+    res.status(200).json({ qrCodeURL: citaData.qrCodeURL });
+
+  } catch (error: any) {
+    console.error("❌ Error al obtener el QR de la cita:", error);
+    res.status(500).json({ error: "Error interno del servidor al obtener el QR" });
+  }
+});
+
+
 
 export default router;
