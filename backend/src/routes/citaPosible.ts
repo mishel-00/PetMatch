@@ -336,9 +336,29 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           return;
         }
         const animalId = animalRefPath.split("/").pop();
+        // Verificar que el animalId extraído no sea vacío
+        if (!animalId) {
+          console.error("❌ Error: El animalId extraído de animalRefPath está vacío. animalRefPath original:", animalRefPath);
+          // Lanzar un error para que sea capturado por el bloque catch (qrError)
+          throw new Error(`El ID del animal extraído de '${animalRefPath}' está vacío.`);
+        }
+        
         const qrDataToEncode = `https://petmatch.com/fichaAnimal?id=${animalId}`;
-        const qrCodeBuffer = await QRCode.toBuffer(qrDataToEncode);
-        console.log("🔗 Generando QR para:", qrDataToEncode);
+        
+        // Opciones para la generación del código QR
+        const qrCodeOptions = {
+          errorCorrectionLevel: 'H', // Nivel alto de corrección de errores
+          type: 'image/png',         // Especificar el tipo de imagen
+          margin: 2,                 // Margen alrededor del QR (en módulos)
+          scale: 4,                  // Factor de escala para el tamaño del QR
+          color: {
+            dark: '#000000FF',       // Color de los módulos del QR (negro)
+            light: '#FFFFFFFF'      // Color del fondo (blanco)
+          }
+        };
+
+        const qrCodeBuffer = await QRCode.toBuffer(qrDataToEncode, qrCodeOptions);
+        console.log("🔗 Generando QR para:", qrDataToEncode, "con opciones:", qrCodeOptions);
 
         const fileName = `qrCodes/cita_${idCitaPosible}.png`;
 
