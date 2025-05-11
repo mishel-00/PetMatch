@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 // index.ts
-/// <reference path="./types/express/index.d.ts" />
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -18,8 +17,6 @@ const asociacion_1 = __importDefault(require("./routes/asociacion"));
 const citaPosible_1 = __importDefault(require("./routes/citaPosible"));
 const node_cron_1 = __importDefault(require("node-cron"));
 const fnDatosFront_1 = require("./utils/fnDatosFront");
-//!! DEBUG
-const path_1 = __importDefault(require("path"));
 // Cargar variables de entorno
 dotenv_1.default.config();
 const DEBUG_MODE = process.env.DEBUG_MODE === 'true';
@@ -27,9 +24,9 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 //! DEBUG MODE 
-app.get('/debug/:path(*)', (_, res) => {
-    res.sendFile(path_1.default.join(__dirname, 'debug', _.params.path));
-});
+// app.get('/debug/:path(*)', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'debug', req.params.path));
+// });
 if (!firebase_admin_1.default.apps.length) {
     firebase_admin_1.default.initializeApp({
         credential: firebase_admin_1.default.credential.cert({

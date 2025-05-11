@@ -98,7 +98,8 @@ if (!yaExisteCitaParaAnimal.empty) {
     // }
 
     //Todo -------------------- Si esto no funciona, hay que cambiar el orden de comprobacion ------------------
-    if (!citaExistente.empty || snapshot.docs.length >= 5) {
+    //!! CAMBIARLO LO DE 100 A 5
+    if (!citaExistente.empty || snapshot.docs.length >= 100) {
       res.status(400).json({
         error: !citaExistente.empty
           ? "Esa hora ya está reservada por otra persona"
@@ -337,11 +338,15 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         const animalId = animalRefPath.split("/").pop();
         const qrDataToEncode = `https://petmatch.com/fichaAnimal?id=${animalId}`;
         const qrCodeBuffer = await QRCode.toBuffer(qrDataToEncode);
+        console.log("🔗 Generando QR para:", qrDataToEncode);
+
         const fileName = `qrCodes/cita_${idCitaPosible}.png`;
 
         const bucket = admin.storage().bucket();
+        console.log("📦 Nombre del bucket:", bucket.name);
 
         const file = bucket.file(fileName);
+        console.log("📄 Guardando archivo como:", fileName);
 
         await file.save(qrCodeBuffer, {
           metadata: { contentType: "image/png" },

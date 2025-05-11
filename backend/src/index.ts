@@ -26,9 +26,9 @@ app.use(cors());
 app.use(express.json());
 
 //! DEBUG MODE 
-app.get('/debug/:path(*)', (req, res) => {
-  res.sendFile(path.join(__dirname, 'debug', req.params.path));
-});
+// app.get('/debug/:path(*)', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'debug', req.params.path));
+// });
 
 
 if (!admin.apps.length) {
