@@ -373,6 +373,8 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           public: true,
         });
 
+        await file.makePublic();
+
         const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
         updateData.qrCodeURL = publicUrl;
 
