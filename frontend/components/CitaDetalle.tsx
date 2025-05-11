@@ -23,7 +23,7 @@ export default function CitaDetalle() {
     const fetchQR = async () => {
       try {
         const response = await getxxx(`api/citaPosible/${cita.id}/qr`);
-        console.log()
+     
         setQrUrl(response.qrCodeURL);;
         console.log(response.qrCodeURL) // debe ser { url: 'https://...' }
       } catch (error) {
@@ -32,9 +32,12 @@ export default function CitaDetalle() {
         setLoading(false);
       }
     };
+    
 
     fetchQR();
   }, [cita.id]);
+  console.log(cita.id)
+  //console.log(response.qrCodeURL) // debe ser { url: 'https://...' }
 
   return (
     <View style={styles.container}>

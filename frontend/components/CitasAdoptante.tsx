@@ -51,8 +51,10 @@ useFocusEffect(
       try {
         setLoading(true);
         const data: Cita[] = await getxxx("api/citaPosible/aceptadas");
-
-        data.sort((a, b) => {
+        citas.forEach((cita) => {
+          console.log("🆔 ID de cita:", cita.id);
+        });
+                data.sort((a, b) => {
           const fechaA = new Date(`${a.fecha}T${a.hora}`);
           const fechaB = new Date(`${b.fecha}T${b.hora}`);
           return fechaA.getTime() - fechaB.getTime();
@@ -69,7 +71,7 @@ useFocusEffect(
     fetchCitas();
   }, [])
 );
-
+console.log()
 
   const renderIcon = (especie: string) => {
     if (especie.toLowerCase() === "perro") {
