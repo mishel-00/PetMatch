@@ -196,6 +196,7 @@ router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) =>
         }
 
         return {
+          uid: doc.id,
           uidAsociacion: asociacion_id || "", 
           asociacionNombre,
           animalId: animalIdParaRetornar, 
