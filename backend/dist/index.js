@@ -2,13 +2,12 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 // index.ts
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const firebase_admin_1 = __importDefault(require("firebase-admin"));
+const firebase_1 = __importDefault(require("./firebase"));
 const login_1 = __importDefault(require("./routes/login"));
 const registro_1 = __importDefault(require("./routes/registro"));
 const animal_1 = __importDefault(require("./routes/animal"));
@@ -27,16 +26,7 @@ app.use(express_1.default.json());
 // app.get('/debug/:path(*)', (req, res) => {
 //   res.sendFile(path.join(__dirname, 'debug', req.params.path));
 // });
-if (!firebase_admin_1.default.apps.length) {
-    firebase_admin_1.default.initializeApp({
-        credential: firebase_admin_1.default.credential.cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: (_a = process.env.FIREBASE_PRIVATE_KEY) === null || _a === void 0 ? void 0 : _a.replace(/\\n/g, '\n'),
-        }),
-    });
-}
-const db = firebase_admin_1.default.firestore();
+const db = firebase_1.default.firestore();
 app.get("/", (_req, res) => {
     res.send("PetMatch Backend funcionando 🐾");
 });

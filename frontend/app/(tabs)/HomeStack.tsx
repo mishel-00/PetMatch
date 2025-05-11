@@ -20,7 +20,16 @@ import CitasAdoptante from "@/components/CitasAdoptante";
 import CitaDetalle from "@/components/CitaDetalle";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-
+export interface Cita {
+    id: string;
+    uidAsociacion: string;
+    asociacionNombre: string;
+    nombreAnimal: string;
+    especie: string;
+    fecha: string;
+    hora: string;
+  }
+  
 
 export type RootStackParamList = {
     HomeScreen: undefined;
@@ -37,7 +46,7 @@ export type RootStackParamList = {
     AnimalDetalleAdoptante : {id : string, asociacionId : string }
     ListaCitasAsociacion : undefined;
     CitasAdoptante: undefined;
-    CitaDetalle: {citaId: string }
+    CitaDetalle: {cita: Cita }
 };
   
 

@@ -22,8 +22,10 @@ export default function CitaDetalle() {
   useEffect(() => {
     const fetchQR = async () => {
       try {
-        const response = await getxxx(`api/citaPosible/qr/${cita.id}`);
-        setQrUrl(response.url); // debe ser { url: 'https://...' }
+        const response = await getxxx(`api/citaPosible/${cita.id}/qr`);
+        console.log()
+        setQrUrl(response.qrCodeURL);;
+        console.log(response.qrCodeURL) // debe ser { url: 'https://...' }
       } catch (error) {
         Alert.alert("Error", "No se pudo cargar el código QR.");
       } finally {

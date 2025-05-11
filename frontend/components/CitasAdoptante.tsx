@@ -96,7 +96,7 @@ useFocusEffect(
         <TouchableOpacity
           key={cita.id}
           style={styles.card}
-          onPress={() => navigation.navigate("CitaDetalle", { citaId: cita.id })}
+          onPress={() => navigation.navigate("CitaDetalle", {  cita })}
         >
           <View style={styles.cardHeader}>
             {renderIcon(cita.especie)}

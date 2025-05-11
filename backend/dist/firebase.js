@@ -28,7 +28,8 @@ if (!firebase_admin_1.default.apps.length) {
     try {
         firebase_admin_1.default.initializeApp({
             credential: firebase_admin_1.default.credential.cert(serviceAccount),
-            storageBucket: "pet-match-cloud.appspot.com",
+            projectId: "pet-match-cloud",
+            storageBucket: "pet-match-cloud.firebasestorage.app",
         });
         console.log("✅ Firebase inicializado correctamente con bucket de almacenamiento");
     }
