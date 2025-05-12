@@ -74,7 +74,7 @@ export default function ListaAnimales() {
       fetchAnimales();
     }, [userId])
   );
-  
+ 
 
   if (loading) {
     return (
@@ -106,7 +106,12 @@ export default function ListaAnimales() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ padding: 16 }}
           renderItem={({ item }) => {
-            const sexoFormateado = item.sexo.toLowerCase() === "macho" ? "Macho" : "Hembra";
+            const sexoFormateado = item.sexo?.toLowerCase() === "macho"
+            ? "Macho"
+            : item.sexo?.toLowerCase() === "hembra"
+            ? "Hembra"
+            : "Desconocido";
+                      console.log(sexoFormateado)
             
             return (
               <TouchableOpacity onPress={() => navigation.navigate("AnimalDetalle", { id: item.id })}>

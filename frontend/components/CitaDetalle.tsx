@@ -11,6 +11,8 @@ type Cita = {
   fecha: string;
   hora: string;
   asociacionNombre: string;
+  qrCodeURL: string; // ← este campo es el que luego usas
+
 };
 
 export default function CitaDetalle() {

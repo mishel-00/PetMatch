@@ -3,8 +3,10 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-//export const API_URL = "http://192.168.18.117:3000"; //casa Garres
-export const API_URL = "http://192.168.100.69:3000"; //casa llano de brujas
+export const API_URL = "http://192.168.18.117:3000"; //casa Garres
+//export const API_URL = "http://192.168.100.69:3000"; //casa llano de brujas
+//export const API_URL = "http://192.200.0.100:3000"; //CTICONTROL
+
 
 
 const getHeaders = async () => {

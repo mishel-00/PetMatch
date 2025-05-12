@@ -64,7 +64,12 @@ export default function AnimalDetalle({ route }: any) {
     );
   }
 
-  const sexoFormateado = animal.sexo.toLowerCase() === "macho" ? "Macho" : "Hembra";
+  const sexoFormateado =
+  animal.sexo?.toLowerCase() === "macho"
+    ? "Macho"
+    : animal.sexo?.toLowerCase() === "hembra"
+    ? "Hembra"
+    : "Desconocido";
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>

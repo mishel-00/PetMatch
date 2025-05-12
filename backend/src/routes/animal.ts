@@ -228,7 +228,7 @@ router.get("/animal/tipoRaza", verificarTokenFireBase, async (req, res) => {
 
 router.post("/animal", verificarTokenFireBase, async (req, res) => {
 
-  console.log("Peticion [POST] llega al backend /api/animal");
+  console.log("Peticion [POST] llega al backend /api/animal", );
 
   const uidAsociacion = req.uid;
   if (!uidAsociacion) {
@@ -247,6 +247,7 @@ router.post("/animal", verificarTokenFireBase, async (req, res) => {
     peso, 
     fecha_nacimiento, 
     fecha_ingreso, 
+    sexo
    } = req.body;
 
   if ( !foto || !nombre || !descripcion || !estadoAdopcion || typeof esterilizado !== "boolean" || !especie || !tipoRaza || ! peso || !fecha_nacimiento || !fecha_ingreso ) {
@@ -269,6 +270,7 @@ router.post("/animal", verificarTokenFireBase, async (req, res) => {
       fecha_nacimiento,
       fecha_ingreso,
       asociacion_id: uidAsociacion,
+      sexo,
     });
 
     res.status(201).json({ uid: animalData.id, nombre });

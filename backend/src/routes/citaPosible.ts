@@ -344,7 +344,10 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           throw new Error(`El ID del animal extraído de '${animalRefPath}' está vacío.`);
         }
         
-        const qrDataToEncode = `https://petmatch.com/fichaAnimal?id=${animalId}`;
+        //? Pruebas
+        const qrDataToEncode = `http://localhost:3000/fichaAnimal?id=${animalId}`;
+
+        //const qrDataToEncode = `https://petmatch.com/fichaAnimal?id=${animalId}`;
         
         // Opciones para la generación del código QR
         const qrCodeOptions = {
@@ -371,13 +374,13 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
 
         await file.save(qrCodeBuffer, {
           metadata: { contentType: "image/png" },
-          public: true,
         });
-
-        await file.makePublic();
-
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+        
+        await file.makePublic(); 
+        
+        const publicUrl = file.publicUrl(); 
         updateData.qrCodeURL = publicUrl;
+        
 
         const animalRef = admin.firestore().doc(animalRefPath);
         await animalRef.update({ estadoAdopcion: "reservado" });
