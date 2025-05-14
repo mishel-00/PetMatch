@@ -16,6 +16,8 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/app/(tabs)/HomeStack";
 import { API_URL } from "@/service/api";
 import { formatoFecha } from "@/utils/formatoFecha";
+import FiltroEspecie from "@/components/FiltroEspecie";
+
 
 type Animal = {
   id: string;
@@ -37,8 +39,49 @@ export default function AnimalesAsociacion({ route }: any) {
   const [animales, setAnimales] = useState<Animal[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [especieSeleccionada, setEspecieSeleccionada] = useState("todos");
+
   console.log("id de la asociacion", asociacionId),
 
+  // useEffect(() => {
+  //   const cargarAnimales = async () => {
+  //     try {
+  //       const user = getAuth().currentUser;
+  //       if (!user) throw new Error("No autenticado");
+  
+  //       const token = await user.getIdToken();
+  //       const response = await axios.get(`${API_URL}/api/obtenerAnimales/${asociacionId}`, {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       });
+  
+  //       // 🔧 Aquí haces el mapeo para transformar los nombres
+  //       const mapped = response.data.map((item: any) => ({
+  //         id: item.id,
+  //         nombre: item.nombre,
+  //         especie: item.especie,
+  //         sexo: item.sexo,
+  //         foto: item.foto,
+  //         fechaIngreso: item.fechaIngreso, 
+  //         estado: item.estadoAdopcion, // 👈 añadir esto
+  //         // mapeo explícito
+  //       }));
+  
+  //       setAnimales(mapped);
+  //     } catch (error) {
+  //       console.error("Error al obtener animales:", error);
+  //       Alert.alert("Error", "No se pudieron cargar los animales.");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  
+  //   cargarAnimales();
+  // }, [asociacionId]);
+
+
+  //Este es el UseEffect para filtrar
   useEffect(() => {
     const cargarAnimales = async () => {
       try {
@@ -46,22 +89,27 @@ export default function AnimalesAsociacion({ route }: any) {
         if (!user) throw new Error("No autenticado");
   
         const token = await user.getIdToken();
-        const response = await axios.get(`${API_URL}/api/obtenerAnimales/${asociacionId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
   
-        // 🔧 Aquí haces el mapeo para transformar los nombres
+        let response;
+  
+        if (especieSeleccionada === "todos") {
+          response = await axios.get(`${API_URL}/api/obtenerAnimales/${asociacionId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        } else {
+          response = await axios.get(`${API_URL}/api/animal/especie?especie=${especieSeleccionada}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        }
+  
         const mapped = response.data.map((item: any) => ({
           id: item.id,
           nombre: item.nombre,
           especie: item.especie,
           sexo: item.sexo,
           foto: item.foto,
-          fechaIngreso: item.fechaIngreso, 
-          estado: item.estadoAdopcion, // 👈 añadir esto
-          // mapeo explícito
+          fechaIngreso: item.fechaIngreso,
+          estado: item.estadoAdopcion,
         }));
   
         setAnimales(mapped);
@@ -74,7 +122,8 @@ export default function AnimalesAsociacion({ route }: any) {
     };
   
     cargarAnimales();
-  }, [asociacionId]);
+  }, [especieSeleccionada, asociacionId]);
+  
   
 
   if (loading) {
@@ -88,6 +137,7 @@ export default function AnimalesAsociacion({ route }: any) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Animales de {nombre}</Text>
+      <FiltroEspecie selected={especieSeleccionada} onSelect={setEspecieSeleccionada} />
       <FlatList
         data={animales}
         keyExtractor={(item) => item.id}
