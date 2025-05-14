@@ -64,7 +64,7 @@ export default function AnimalesAsociacion({ route }: any) {
   //         sexo: item.sexo,
   //         foto: item.foto,
   //         fechaIngreso: item.fechaIngreso, 
-  //         estado: item.estadoAdopcion, // 👈 añadir esto
+  //         estado: item.estadoAdopcion, //  añadir esto
   //         // mapeo explícito
   //       }));
   
@@ -85,6 +85,7 @@ export default function AnimalesAsociacion({ route }: any) {
   useEffect(() => {
     const cargarAnimales = async () => {
       try {
+        
         const user = getAuth().currentUser;
         if (!user) throw new Error("No autenticado");
   
@@ -97,18 +98,25 @@ export default function AnimalesAsociacion({ route }: any) {
             headers: { Authorization: `Bearer ${token}` },
           });
         } else {
-          response = await axios.get(`${API_URL}/api/animal/especie?especie=${especieSeleccionada}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          response = await axios.get(
+            `${API_URL}/api/especie?especie=${especieSeleccionada}&asociacion_id=${asociacionId}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
         }
-  
+        console.log(especieSeleccionada)
+        console.log("📦 Respuesta completa:", response);
+        console.log("📄 Datos:", response.data);
+        console.log("🔍 Especie seleccionada:", especieSeleccionada);
+        console.log("🏷️ Asociación ID:", asociacionId);
+
+
         const mapped = response.data.map((item: any) => ({
           id: item.id,
           nombre: item.nombre,
           especie: item.especie,
           sexo: item.sexo,
           foto: item.foto,
-          fechaIngreso: item.fechaIngreso,
+          fechaIngreso: item.fechaIngreso || item.fecha_ingreso,
           estado: item.estadoAdopcion,
         }));
   

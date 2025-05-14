@@ -166,36 +166,42 @@ router.get("/animal/estado", verificarTokenFireBase, async (req, res) => {
 });
 
 //! GET -> Filtrar por especie
-router.get("/animal/especie", verificarTokenFireBase, async (req, res) => {
+router.get("/especie", verificarTokenFireBase, async (req, res) => {
   const uidAdoptante = req.uid;
   if (!uidAdoptante) {
     res.status(401).json({ error: "Token inválido" });
-    return;
+    
   }
+  const { especie, asociacion_id } = req.query;
 
-  const { especie } = req.query;
+
+
+  if (!especie || !asociacion_id) {
+     res.status(400).json({ error: "Faltan parámetros: especie o asociacion_id" });
+  }
 
   try {
     const snapshot = await admin
       .firestore()
       .collection("animal")
+      .where("asociacion_id", "==", asociacion_id)
       .where("especie", "==", especie)
       .get();
-    console.log("🐾 Animales encontrados:", snapshot.docs.length);
+
     const animales = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+
     res.status(200).json(animales);
   } catch (error: any) {
     console.error("❌ Error al obtener animales:", error);
     res.status(500).json({ error: error.message });
-    return;
   }
 });
 
 //! GET -> Filtrar por tipo de raza
-router.get("/animal/tipoRaza", verificarTokenFireBase, async (req, res) => {
+router.get("/tipoRaza", verificarTokenFireBase, async (req, res) => {
   const uidAdoptante = req.uid;
   if (!uidAdoptante) {
     res.status(401).json({ error: "Token inválido" });

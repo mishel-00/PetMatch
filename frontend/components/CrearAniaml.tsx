@@ -136,7 +136,9 @@ export default function CrearAnimal() {
         peso: form.peso,
         fecha_nacimiento: form.fechaNacimiento,
         fecha_ingreso: form.fechaIngreso,
-        sexo: form.sexo
+        sexo: form.sexo,
+        asociacion_id: auth.currentUser?.uid // 👈 AÑADE ESTO
+
       };
       
   
