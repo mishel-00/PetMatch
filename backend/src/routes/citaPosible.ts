@@ -340,14 +340,29 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         // Verificar que el animalId extraído no sea vacío
         if (!animalId) {
           console.error("❌ Error: El animalId extraído de animalRefPath está vacío. animalRefPath original:", animalRefPath);
-          // Lanzar un error para que sea capturado por el bloque catch (qrError)
+          
           throw new Error(`El ID del animal extraído de '${animalRefPath}' está vacío.`);
         }
         
-        //? Pruebas
-        const qrDataToEncode = `http://localhost:3000/fichaAnimal?id=${animalId}`;
-
-        //const qrDataToEncode = `https://petmatch.com/fichaAnimal?id=${animalId}`;
+        // Obtener datos completos del animal para el QR
+        const animalDocRef = admin.firestore().doc(animalRefPath);
+        const animalSnap = await animalDocRef.get();
+        const animalData = animalSnap.data();
+        
+        if (!animalData) {
+          throw new Error(`No se encontraron datos para el animal con ID ${animalId}`);
+        }
+        
+        // Crear objeto JSON con información completa del animal
+        const qrDataObject = {
+          id: animalId,
+          nombre: animalData.nombre || "Sin nombre",
+          especie: animalData.especie || "Desconocido",
+          descripcion: animalData.descripcion || "Sin descripción"
+        };
+        
+        // Convertir a string JSON para codificar en el QR
+        const qrDataToEncode = JSON.stringify(qrDataObject);
         
         // Opciones para la generación del código QR
         const qrCodeOptions = {

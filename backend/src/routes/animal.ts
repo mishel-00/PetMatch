@@ -167,8 +167,8 @@ router.get("/animal/estado", verificarTokenFireBase, async (req, res) => {
 
 //! GET -> Filtrar por especie
 router.get("/animal/especie", verificarTokenFireBase, async (req, res) => {
-  const uidAsociacion = req.uid;
-  if (!uidAsociacion) {
+  const uidAdoptante = req.uid;
+  if (!uidAdoptante) {
     res.status(401).json({ error: "Token inválido" });
     return;
   }
@@ -179,7 +179,6 @@ router.get("/animal/especie", verificarTokenFireBase, async (req, res) => {
     const snapshot = await admin
       .firestore()
       .collection("animal")
-      .where("asociacion_id", "==", uidAsociacion)
       .where("especie", "==", especie)
       .get();
     console.log("🐾 Animales encontrados:", snapshot.docs.length);
@@ -197,8 +196,8 @@ router.get("/animal/especie", verificarTokenFireBase, async (req, res) => {
 
 //! GET -> Filtrar por tipo de raza
 router.get("/animal/tipoRaza", verificarTokenFireBase, async (req, res) => {
-  const uidAsociacion = req.uid;
-  if (!uidAsociacion) {
+  const uidAdoptante = req.uid;
+  if (!uidAdoptante) {
     res.status(401).json({ error: "Token inválido" });
     return;
   }
@@ -209,7 +208,6 @@ router.get("/animal/tipoRaza", verificarTokenFireBase, async (req, res) => {
     const snapshot = await admin
       .firestore()
       .collection("animal")
-      .where("asociacion_id", "==", uidAsociacion)
       .where("tipoRaza", "==", tipoRaza)
       .get();
     console.log("🐾 Animales encontrados:", snapshot.docs.length);
