@@ -2,7 +2,7 @@ import express from "express";
 import admin from "../firebase";
 import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
 
-//TODO: DELETE por ID que mire si tiene una cita asoaciada o no. Y luego PUT ver si le permitidos editar 
+//TODO: Y luego PUT ver si le permitidos editar 
 //TODO: o no el horario si tiene una cita asociada. 
 
 const router = express.Router();
@@ -43,6 +43,7 @@ router.get("/horarioDisponible", verificarTokenFireBase, async (req, res) => {
       const citasSnapshot = await admin.firestore()
         .collection("citaPosible")
         .where("id_HorarioDisponible", "==", idHorario)
+        .where("estado", "in", ["pendiente", "aceptada"])
         .get();
 
       
@@ -56,7 +57,7 @@ router.get("/horarioDisponible", verificarTokenFireBase, async (req, res) => {
           horas: horasLibres,
         });
       } else {
-        console.log(`📌 Día ${data.fecha} tiene todas las horas ocupadas`);
+        console.log(`Día ${data.fecha} tiene todas las horas ocupadas`);
       }
     }
 
