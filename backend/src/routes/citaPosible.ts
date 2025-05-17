@@ -36,106 +36,207 @@ router.get("/citaPosible", verificarTokenFireBase, async (req, res) => {
 });
 
 router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
+  // 1. Verifica token
   const uidAdoptante = req.uid;
   if (!uidAdoptante) {
-    res.status(401).json({ error: "Token inválido" });
-    return;
+     res.status(401).json({ error: "Token inválido" });
   }
 
+  // 2. Verifica campos obligatorios
   const { horarioDisponible_id, hora, fecha, asociacion_id, observaciones, animal_id } = req.body;
-
   if (!horarioDisponible_id || !hora || !fecha || !asociacion_id || !animal_id) {
-    res.status(400).json({ error: "Faltan campos obligatorios" });
-    return;
+     res.status(400).json({ error: "Faltan campos obligatorios" });
   }
-  
+
+  // 3. Verifica si ya hay una cita para ese animal
   const yaExisteCitaParaAnimal = await admin
-  .firestore()
-  .collection("citasAnimal")
-  .where("animal_id", "==", animal_id)
-  .get();
+    .firestore()
+    .collection("citasAnimal")
+    .where("animal_id", "==", `animal/${animal_id}`)
+    .get();
 
-if (!yaExisteCitaParaAnimal.empty) {
-   res.status(400).json({error: "Ya has solicitado una cita para este animal",});
-  return; 
+  if (!yaExisteCitaParaAnimal.empty) {
+     res.status(400).json({ error: "Ya has solicitado una cita para este animal" });
   }
 
+  // 4. Verifica si ya tiene una cita el mismo día
+  const citasMismoDia = await admin
+    .firestore()
+    .collection("citaPosible")
+    .where("adoptante_id", "==", uidAdoptante)
+    .where("fecha", "==", fecha)
+    .where("estado", "in", ["pendiente", "aceptada"])
+    .get();
 
-  try {
-    const snapshot = await admin
-      .firestore()
-      .collection("citaPosible")
-      .where("adoptante_id", "==", uidAdoptante)
-      .where("estado", "in", ["pendiente", "aceptada"])
-      .get();
-
-    const citasMaximas = snapshot.docs.length;
-    // if (citasMaximas >= 5) {
-    //   res.status(400).json({ error: "No se pueden registrar más citas" });
-    //   return;
-    // }
-
-    const citaData = {
-      horarioDisponible_id,
-      hora,
-      fecha,
-      asociacion_id,
-      observaciones,
-      estado: "pendiente",
-      adoptante_id: uidAdoptante,
-    };
-
-    const citaExistente = await admin
-      .firestore()
-      .collection("citaPosible")
-      .where("horarioDisponible_id", "==", horarioDisponible_id)
-      .where("hora", "==", hora)
-      .get();
-
-    // if (!citaExistente.empty) {
-    //  res.status(400).json({ error: "Esa hora ya está reservada por otra persona" });
-    //  return;
-    // }
-
-    //Todo -------------------- Si esto no funciona, hay que cambiar el orden de comprobacion ------------------
-    //!! CAMBIARLO LO DE 100 A 5
-    if (!citaExistente.empty || snapshot.docs.length >= 100) {
-      res.status(400).json({
-        error: !citaExistente.empty
-          ? "Esa hora ya está reservada por otra persona"
-          : "Ya tiene 5 solicitudes activas. No se pueden registrar más citas. Debes esperar a que se liberen las citas pasadas.",
-      });
-      return;
-    }
-
-    const nuevaCita = await admin
-      .firestore()
-      .collection("citaPosible")
-      .add(citaData);
-
-    if (!animal_id) {
-    res.status(400).json({ error: "Falta el ID del animal" });
-    return;
+  if (!citasMismoDia.empty) {
+     res.status(400).json({ error: "Ya tienes una cita para este día" });
   }
 
+  // 5. Verifica si ya tiene muchas citas activas
+  const citasActivas = await admin
+    .firestore()
+    .collection("citaPosible")
+    .where("adoptante_id", "==", uidAdoptante)
+    .where("estado", "in", ["pendiente", "aceptada"])
+    .get();
 
-await admin.firestore().collection("citasAnimal").add({
-  citaPosible_id: nuevaCita.path, 
-  animal_id: `animal/${animal_id}` 
+  if (citasActivas.docs.length >= 5) {
+     res.status(400).json({ error: "Ya tienes 5 solicitudes activas. No puedes registrar más citas hasta que se liberen." });
+  }
+
+  // 6. Verifica si esa hora ya está ocupada por otra persona
+  const citaExistente = await admin
+    .firestore()
+    .collection("citaPosible")
+    .where("horarioDisponible_id", "==", horarioDisponible_id)
+    .where("hora", "==", hora)
+    .where("estado", "in", ["pendiente", "aceptada"])
+    .get();
+
+  if (!citaExistente.empty) {
+     res.status(400).json({ error: "Esa hora ya está reservada por otra persona" });
+  }
+
+  // 7. Crear la cita
+  const citaData = {
+    horarioDisponible_id,
+    hora,
+    fecha,
+    asociacion_id,
+    observaciones,
+    estado: "pendiente",
+    adoptante_id: uidAdoptante,
+  };
+
+  const nuevaCita = await admin.firestore().collection("citaPosible").add(citaData);
+
+  // 8. Crea entrada en citasAnimal
+  await admin.firestore().collection("citasAnimal").add({
+    citaPosible_id: nuevaCita.path,
+    animal_id: `animal/${animal_id}`,
+  });
+
+  // 9. Actualiza contador de citas activas del adoptante
+  await admin.firestore().collection("adoptante").doc(uidAdoptante).update({
+    solicitudes_activas: admin.firestore.FieldValue.increment(1),
+  });
+
+   res.status(201).json({ id: nuevaCita.id, hora, fecha });
 });
 
-    await admin
-      .firestore()
-      .collection("adoptante")
-      .doc(uidAdoptante)
-      .update({ solicitudes_activas: admin.firestore.FieldValue.increment(1) });
-    res.status(201).json({ id: nuevaCita.id, hora, fecha });
-  } catch (error: any) {
-    console.error("❌ Error al registrar cita:", error);
-    res.status(500).json({ error: error.message });
-    return;
-  }
-});
+// router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
+//   const uidAdoptante = req.uid;
+//   if (!uidAdoptante) {
+//     res.status(401).json({ error: "Token inválido" });
+//     return;
+//   }
+
+//   const { horarioDisponible_id, hora, fecha, asociacion_id, observaciones, animal_id } = req.body;
+
+//   if (!horarioDisponible_id || !hora || !fecha || !asociacion_id || !animal_id) {
+//     res.status(400).json({ error: "Faltan campos obligatorios" });
+//     return;
+//   }
+  
+//   const citasMismoDia = await admin
+//     .firestore()
+//     .collection("citaPosible")
+//     .where("adoptante_id", "==", uidAdoptante)
+//     .where("fecha", "==", fecha)
+//     .where("estado", "in", ["pendiente", "aceptada"])
+//     .get();
+
+//   if (!citasMismoDia.empty) {
+//     res.status(400).json({ error: "Ya tienes una cita para este día" });
+//     return;
+//   }
+//   const yaExisteCitaParaAnimal = await admin
+//   .firestore()
+//   .collection("citasAnimal")
+//   .where("animal_id", "==", animal_id)
+//   .get();
+
+// if (!yaExisteCitaParaAnimal.empty) {
+//    res.status(400).json({error: "Ya has solicitado una cita para este animal",});
+//   return; 
+//   }
+
+
+//   try {
+//     const snapshot = await admin
+//       .firestore()
+//       .collection("citaPosible")
+//       .where("adoptante_id", "==", uidAdoptante)
+//       .where("estado", "in", ["pendiente", "aceptada"])
+//       .get();
+
+//     const citasMaximas = snapshot.docs.length;
+//     // if (citasMaximas >= 5) {
+//     //   res.status(400).json({ error: "No se pueden registrar más citas" });
+//     //   return;
+//     // }
+
+//     const citaData = {
+//       horarioDisponible_id,
+//       hora,
+//       fecha,
+//       asociacion_id,
+//       observaciones,
+//       estado: "pendiente",
+//       adoptante_id: uidAdoptante,
+//     };
+
+//     const citaExistente = await admin
+//       .firestore()
+//       .collection("citaPosible")
+//       .where("horarioDisponible_id", "==", horarioDisponible_id)
+//       .where("hora", "==", hora)
+//       .get();
+
+//     // if (!citaExistente.empty) {
+//     //  res.status(400).json({ error: "Esa hora ya está reservada por otra persona" });
+//     //  return;
+//     // }
+
+//     //Todo -------------------- Si esto no funciona, hay que cambiar el orden de comprobacion ------------------
+//     //!! CAMBIARLO LO DE 100 A 5
+//     if (!citaExistente.empty || snapshot.docs.length >= 100) {
+//       res.status(400).json({
+//         error: !citaExistente.empty
+//           ? "Esa hora ya está reservada por otra persona"
+//           : "Ya tiene 5 solicitudes activas. No se pueden registrar más citas. Debes esperar a que se liberen las citas pasadas.",
+//       });
+//       return;
+//     }
+
+//     const nuevaCita = await admin
+//       .firestore()
+//       .collection("citaPosible")
+//       .add(citaData);
+
+//     if (!animal_id) {
+//     res.status(400).json({ error: "Falta el ID del animal" });
+//     return;
+//   }
+
+
+// await admin.firestore().collection("citasAnimal").add({
+//   citaPosible_id: nuevaCita.path, 
+//   animal_id: `animal/${animal_id}` 
+// });
+
+//     await admin
+//       .firestore()
+//       .collection("adoptante")
+//       .doc(uidAdoptante)
+//       .update({ solicitudes_activas: admin.firestore.FieldValue.increment(1) });
+//     res.status(201).json({ id: nuevaCita.id, hora, fecha });
+//   } catch (error: any) {
+//     console.error("❌ Error al registrar cita:", error);
+//     res.status(500).json({ error: error.message });
+//     return;
+//   }
+// });
 //? "Quiero todas las citas con estado: 'aceptada', adoptante_id: X y ordenadas por fecha" -> índice Firebase
 //* [Adoptante] -> GET -> Ver las citas aceptadas por la asociación
 router.get("/citaPosible/aceptadas", verificarTokenFireBase, async (req, res) => {
@@ -358,10 +459,11 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           id: animalId,
           nombre: animalData.nombre || "Sin nombre",
           especie: animalData.especie || "Desconocido",
-          descripcion: animalData.descripcion || "Sin descripción"
+          descripcion: animalData.descripcion || "Sin descripción", 
+          citaPosible_id: idCitaPosible,
         };
         
-        // Convertir a string JSON para codificar en el QR
+        
         const qrDataToEncode = JSON.stringify(qrDataObject);
         
         // Opciones para la generación del código QR
