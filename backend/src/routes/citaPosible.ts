@@ -36,19 +36,19 @@ router.get("/citaPosible", verificarTokenFireBase, async (req, res) => {
 });
 
 router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
-  // 1. Verifica token
+  
   const uidAdoptante = req.uid;
   if (!uidAdoptante) {
      res.status(401).json({ error: "Token inválido" });
   }
 
-  // 2. Verifica campos obligatorios
+  
   const { horarioDisponible_id, hora, fecha, asociacion_id, observaciones, animal_id } = req.body;
   if (!horarioDisponible_id || !hora || !fecha || !asociacion_id || !animal_id) {
      res.status(400).json({ error: "Faltan campos obligatorios" });
   }
 
-  // 3. Verifica si ya hay una cita para ese animal
+  //* si ya hay una cita para ese animal
   const yaExisteCitaParaAnimal = await admin
     .firestore()
     .collection("citasAnimal")
@@ -59,7 +59,7 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
      res.status(400).json({ error: "Ya has solicitado una cita para este animal" });
   }
 
-  // 4. Verifica si ya tiene una cita el mismo día
+  //*  una cita el mismo día
   const citasMismoDia = await admin
     .firestore()
     .collection("citaPosible")
@@ -72,7 +72,7 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
      res.status(400).json({ error: "Ya tienes una cita para este día" });
   }
 
-  // 5. Verifica si ya tiene muchas citas activas
+  // *  muchas citas activas
   const citasActivas = await admin
     .firestore()
     .collection("citaPosible")
@@ -84,7 +84,7 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
      res.status(400).json({ error: "Ya tienes 5 solicitudes activas. No puedes registrar más citas hasta que se liberen." });
   }
 
-  // 6. Verifica si esa hora ya está ocupada por otra persona
+  // *  si esa hora ya está ocupada por otra persona
   const citaExistente = await admin
     .firestore()
     .collection("citaPosible")
@@ -97,7 +97,7 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
      res.status(400).json({ error: "Esa hora ya está reservada por otra persona" });
   }
 
-  // 7. Crear la cita
+  //* Crear la cita
   const citaData = {
     horarioDisponible_id,
     hora,
@@ -110,13 +110,13 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
 
   const nuevaCita = await admin.firestore().collection("citaPosible").add(citaData);
 
-  // 8. Crea entrada en citasAnimal
+  
   await admin.firestore().collection("citasAnimal").add({
     citaPosible_id: nuevaCita.path,
     animal_id: `animal/${animal_id}`,
   });
 
-  // 9. Actualiza contador de citas activas del adoptante
+  //* Actualiza contador de citas activas del adoptante
   if (!uidAdoptante) {
     throw new Error("Invalid adoptante ID");
   }
