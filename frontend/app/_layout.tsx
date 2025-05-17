@@ -18,6 +18,7 @@ import AnimalDetalleAdoptante from "@/components/AnimalDetalleAdoptante";
 import ListaCitasAsociacion from "@/components/ListaCitasAsociacion";
 import CitasAdoptante from "@/components/CitasAdoptante";
 import CitaDetalle from "@/components/CitaDetalle";
+import EscanearQR from "@/components/EscanearQR";
 
 const Drawer = createDrawerNavigator();
 
@@ -51,6 +52,9 @@ export default function Layout() {
       <Drawer.Screen name="ListaCitasAsociacion" component={ListaCitasAsociacion} options={{drawerLabel: "Lista Citas "}}/>
       <Drawer.Screen name="CitasAdoptante" component={CitasAdoptante} options={{drawerLabel: "Mis Citas "}}/>
       <Drawer.Screen name="CitaDetalle" component={CitaDetalle} options={{drawerLabel: "Mis Citas "}}/>
+      <Drawer.Screen name="EscanearQR" component={EscanearQR} options={{drawerLabel: "EscanearQR "}}/>
+
+      
 
 
       

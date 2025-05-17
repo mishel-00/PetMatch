@@ -6,6 +6,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  TouchableOpacity,
 } from "react-native";
  import { getxxx } from "@/service/api";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -13,6 +14,12 @@ import { formatoFecha } from "@/utils/formatoFecha";
 
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "@/app/(tabs)/HomeStack"; // Asegúrate de que esta ruta esté bien
+
+
+
 interface Cita {
   fecha: string;
   hora: string;
@@ -28,6 +35,9 @@ export default function HomeAsociacion() {
   const [animalesCount, setAnimalesCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [citasPendientes, setCitasPendientes] = useState<Cita[]>([]);
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+
 
   // Dentro del componente...
   useFocusEffect(
@@ -117,19 +127,17 @@ export default function HomeAsociacion() {
   }
 
   return (
-    <View key={index} style={styles.statRow}>
-      <FontAwesome5
-        name={iconName}
-        size={20}
-        color={iconColor}
-        style={{ marginRight: 8 }}
-      />
-      <Text style={styles.statText}>
-        {formatoFecha(cita.fecha)} {(cita.hora)}h –{" "}
-        {nombreAnimal && nombreAnimal !== "No asignado" ? nombreAnimal : "Animal no asignado"}{" "}
-        con {nombreAdoptante ?? "Adoptante"}
-      </Text>
-    </View>
+    <TouchableOpacity
+  key={index}
+  style={styles.statRow}
+  onPress={() => navigation.navigate("EscanearQR")}
+>
+  <FontAwesome5 name={iconName} size={20} color={iconColor} style={{ marginRight: 8 }} />
+  <Text style={styles.statText}>
+    {formatoFecha(cita.fecha)} {cita.hora}h – {nombreAnimal} con {nombreAdoptante}
+  </Text>
+</TouchableOpacity>
+
   );
 })}
 
