@@ -117,6 +117,9 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
   });
 
   // 9. Actualiza contador de citas activas del adoptante
+  if (!uidAdoptante) {
+    throw new Error("Invalid adoptante ID");
+  }
   await admin.firestore().collection("adoptante").doc(uidAdoptante).update({
     solicitudes_activas: admin.firestore.FieldValue.increment(1),
   });
