@@ -1,5 +1,5 @@
 import express from "express";
-import admin from "../firebase";
+import admin, { enviarNotificacion, obtenerTokenAdoptante, obtenerTokenAsociacion } from "../firebase";
 import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
 const QRCode = require('qrcode');
 
@@ -7,7 +7,7 @@ const QRCode = require('qrcode');
 
 //Todo: PUT cuando se actualiza citaPosible a estado 'Cancelada' hay que actualizar el numero de solicitudes activas del adoptante
 
-//Todo: Hacer el get [Asociacion] -> CloudMessaging Firebase
+
 const router = express.Router();
 router.get("/citaPosible", verificarTokenFireBase, async (req, res) => {
   const uidAsociacion = req.uid;
@@ -36,7 +36,7 @@ router.get("/citaPosible", verificarTokenFireBase, async (req, res) => {
 });
 
 router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
-  
+
   const uidAdoptante = req.uid;
   if (!uidAdoptante) {
      res.status(401).json({ error: "Token inválido" });
@@ -119,6 +119,20 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
   //* Actualiza contador de citas activas del adoptante
   if (!uidAdoptante) {
     throw new Error("Invalid adoptante ID");
+  }
+
+  const animalDoc = await admin.firestore().collection('animales').doc(animal_id).get();
+  const idAsociacion = animalDoc.data()?.idAsociacion;
+
+  const tokenAsociacion = await obtenerTokenAsociacion(idAsociacion);
+
+  //! noti
+  if (tokenAsociacion) {
+    await enviarNotificacion(
+      tokenAsociacion,
+      'Nueva solicitud de cita 🐾',
+      'Un adoptante ha solicitado una cita para uno de tus animales. Revisa la app para más detalles',
+    );
   }
   await admin.firestore().collection("adoptante").doc(uidAdoptante).update({
     solicitudes_activas: admin.firestore.FieldValue.increment(1),
@@ -433,7 +447,19 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           res.status(400).json({ error: "No se encontró animal asociado a esta cita" });
           return;
         }
-
+        
+     
+        const uidAdoptante = citaDoc.data()?.adoptante_id;
+    
+        const tokenAdoptante = await obtenerTokenAdoptante(uidAdoptante);
+        //! noti 
+        if (tokenAdoptante) {
+          await enviarNotificacion(
+            tokenAdoptante,
+            '¡Cita confirmada!',
+            'Felicidades 🎉 Tu cita con la asociación ha sido aceptada. Revisa la app para más detalles.'
+          );
+        }
         const animalRefPath = citasAnimalSnap.docs[0].data().animal_id;
 
         if (!animalRefPath || typeof animalRefPath !== "string") {
