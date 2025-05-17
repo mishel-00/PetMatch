@@ -33,7 +33,9 @@ const config: ExpoConfig = {
         resizeMode: "contain",
         backgroundColor: "#ffffff"
       }
-    ]
+    ],
+    "expo-barcode-scanner" 
+
   ],
   experiments: {
     typedRoutes: true

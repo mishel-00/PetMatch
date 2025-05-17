@@ -202,10 +202,19 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 160,
+    aspectRatio: 1, 
     borderRadius: 10,
     marginBottom: 10,
+    resizeMode: "cover",
   },
+  //o asi?
+  // image: {
+  //   width: 200,
+  //   height: 200,
+  //   alignSelf: "center", // centrado opcional
+  //   borderRadius: 10,
+  //   marginBottom: 10,
+  // },
   name: {
     fontSize: 20,
     fontWeight: "bold",
