@@ -459,10 +459,11 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           id: animalId,
           nombre: animalData.nombre || "Sin nombre",
           especie: animalData.especie || "Desconocido",
-          descripcion: animalData.descripcion || "Sin descripción"
+          descripcion: animalData.descripcion || "Sin descripción", 
+          citaPosible_id: idCitaPosible,
         };
         
-        // Convertir a string JSON para codificar en el QR
+        
         const qrDataToEncode = JSON.stringify(qrDataObject);
         
         // Opciones para la generación del código QR
