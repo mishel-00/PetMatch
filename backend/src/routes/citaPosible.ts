@@ -611,26 +611,27 @@ router.get("/citaPosible/:idCitaPosible/qr", verificarTokenFireBase, async (req,
 });
 
 router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) => {
-  const uidAdoptante = req.uid;
+  const uidAsociacion = req.uid;
   const { citaId, adoptado } = req.body;
 
-  if (!uidAdoptante) {
+  if (!uidAsociacion) {
     throw new Error("Invalid adoptante ID");
   }
 
-  if (!uidAdoptante || !citaId || typeof adoptado !== 'boolean') {
+  if (!uidAsociacion || !citaId || typeof adoptado !== 'boolean') {
      res.status(400).json({ error: "Datos inválidos" });
   }
-
+  
   try {
     const citaRef = admin.firestore().collection("citaPosible").doc(citaId);
     const citaDoc = await citaRef.get();
-
+    const uidAdoptante = citaDoc.data()?.adoptante_id;
+    
     if (!citaDoc.exists) {
       res.status(404).json({ error: "Cita no encontrada" });
     }
 
-  
+   
     const animalSnap = await admin
       .firestore()
       .collection("citasAnimal")
