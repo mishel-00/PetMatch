@@ -60,7 +60,7 @@ export const obtenerTokenAdoptante = async (uid: string) => {
 };
 
 export const obtenerTokenAsociacion = async (uid: string) => {
-  const doc = await admin.firestore().collection("asociaciones").doc(uid).get();
+  const doc = await admin.firestore().collection("asociacion").doc(uid).get();
   return doc.exists ? doc.data()?.tokenFCM ?? null : null;
 };
 export const db = admin.firestore();
