@@ -73,14 +73,14 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
   }
 
   // *  muchas citas activas
-  const citasActivas = await admin
+  const citasMaximas = await admin
     .firestore()
     .collection("citaPosible")
     .where("adoptante_id", "==", uidAdoptante)
     .where("estado", "in", ["pendiente", "aceptada"])
     .get();
 
-  if (citasActivas.docs.length >= 5) {
+  if (citasMaximas.docs.length >= 5) {
      res.status(400).json({ error: "Ya tienes 5 solicitudes activas. No puedes registrar más citas hasta que se liberen." });
   }
 
