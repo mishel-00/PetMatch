@@ -2,26 +2,54 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from "react-native";
 import { useAuthStore } from "../store/authStore";
 import { Feather } from "@expo/vector-icons";
+import { getAuth } from "firebase/auth";
+import { notificationService } from "@/hooks/NotificationService ";
+
+
 
 export default function LoginScreen({ navigation }: any) {
   const { username: savedEmail, password: savedPassword, login } = useAuthStore();
   const [email, setEmail] = useState(savedEmail || "");
   const [password, setPassword] = useState(savedPassword || "");
 
+  // const handleLogin = async () => {
+  //   try {
+  //     const rol = await login(email, password);
+  //     if (rol === "adoptante") {
+  //       navigation.navigate("HomeAdoptante");
+  //     } else if (rol === "asociacion") {
+  //       navigation.navigate("HomeAsociacion");
+  //     } else {
+  //       Alert.alert( "Correo o contraseña incorrectos");
+  //     }
+  //   } catch (error) {
+  //     Alert.alert( "Algo salió mal al iniciar sesión.");
+  //   }
+  // };
+
+  //Para las notificaciones
   const handleLogin = async () => {
     try {
       const rol = await login(email, password);
+  
+      const userId = getAuth().currentUser?.uid;
+  
+      if (userId) {
+        await notificationService.registerDevice(userId);
+      }
+  
       if (rol === "adoptante") {
         navigation.navigate("HomeAdoptante");
       } else if (rol === "asociacion") {
         navigation.navigate("HomeAsociacion");
       } else {
-        Alert.alert( "Correo o contraseña incorrectos");
+        Alert.alert("Correo o contraseña incorrectos");
       }
     } catch (error) {
-      Alert.alert( "Algo salió mal al iniciar sesión.");
+      Alert.alert("Algo salió mal al iniciar sesión.");
     }
   };
+  
 
   return (
     <View style={styles.container}>

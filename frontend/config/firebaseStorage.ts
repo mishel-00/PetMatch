@@ -11,3 +11,4 @@ export const uploadImageToFirebase = async (uri: string, filename: string) => {
 
   return await getDownloadURL(storageRef);
 };
+//Cambiar
