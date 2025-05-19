@@ -10,7 +10,9 @@ buildscript {
 
         kotlinVersion = '1.9.25'
         composeCompilerVersion = '1.5.15' // Versión compatible con Kotlin 1.9.25
-        ndkVersion = "26.1.10909125"
+        // ndkVersion = "26.1.10909125"
+        ndkVersion = "26.0.10792818"
+
     }
     repositories {
         google()
