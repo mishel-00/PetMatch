@@ -52,6 +52,8 @@ app.listen(PORT, () => {
   console.log(`✅ PetMatch API corriendo en http://localhost:${PORT}`);
 });
 
+export default app;
+
 //* ===============================CRON PROGRAMAR TAREA PARA LIMPIAR HORARIOS PASADOS ===============================
 //* Tarea programada para limpiar horarios pasados
 //* Cada horario que pase es un día, se limpia sino tiene citaPosible asociada

@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Asegurarse de que la clave privada tenga el formato correcto
+// que la clave privada tenga el formato correcto
 const privateKey = process.env.FIREBASE_PRIVATE_KEY 
   ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') 
   : undefined;
@@ -36,5 +36,32 @@ if (!admin.apps.length) {
   }
 }
 
+export const enviarNotificacion = async (
+  token: string,
+  titulo: string,
+  cuerpo: string
+) => {
+  try {
+    await admin.messaging().send({
+      token,
+      notification: {
+        title: titulo,
+        body: cuerpo,
+      },
+    });
+    console.log('✅ Notificación enviada con éxito');
+  } catch (error) {
+    console.error('❌ Error al enviar notificación:', error);
+  }
+};
+export const obtenerTokenAdoptante = async (uid: string) => {
+  const doc = await admin.firestore().collection("adoptante").doc(uid).get();
+  return doc.exists ? doc.data()?.tokenFCM ?? null : null;
+};
+
+export const obtenerTokenAsociacion = async (uid: string) => {
+  const doc = await admin.firestore().collection("asociacion").doc(uid).get();
+  return doc.exists ? doc.data()?.tokenFCM ?? null : null;
+};
 export const db = admin.firestore();
 export default admin;

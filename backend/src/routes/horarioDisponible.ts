@@ -1,6 +1,7 @@
 import express from "express";
 import admin from "../firebase";
 import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
+import { validarHorario } from "../utils/fnDatosFront";
 
 //TODO: Y luego PUT ver si le permitidos editar 
 //TODO: o no el horario si tiene una cita asociada. 
@@ -138,7 +139,12 @@ if (!fecha || !hora) {
   res.status(400).json({ error: "Fecha y hora son obligatorias" });
   return;
 }
-
+//??????????????????????????????????????????????????????????????
+const { valido, error } = validarHorario(fecha, hora);
+if (!valido) {
+  res.status(400).json({ error });
+  return;
+}
 try {
   const fechaObj = new Date(fecha);
 
