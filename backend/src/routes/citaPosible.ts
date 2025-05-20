@@ -532,14 +532,16 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         const file = bucket.file(fileName);
         console.log("📄 Guardando archivo como:", fileName);
 
-        await file.save(qrCodeBuffer, {
-          metadata: { contentType: "image/png" },
-        });
+        // await file.save(qrCodeBuffer, {
+        //   metadata: { contentType: "image/png" },
+        // });
         
-        await file.makePublic(); 
+        // await file.makePublic(); 
         
-        const publicUrl = file.publicUrl(); 
-        updateData.qrCodeURL = publicUrl;
+        // const publicUrl = file.publicUrl(); 
+        // updateData.qrCodeURL = publicUrl;
+
+     
         
 
         const animalRef = admin.firestore().doc(animalRefPath);

@@ -21,24 +21,42 @@ const navigation = useNavigation<NavigationProp>();
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ data }: { data: string }) => {
+  const handleBarCodeScanned = async ({ data }: { data: string }) => {
     setScanned(true);
-    try {
-      const parsed = JSON.parse(data);
+    console.log("QR escaneado:", data);
   
-      if (!parsed.animal || !parsed.id) {
-        Alert.alert("Error", "QR inválido: falta información.");
+    try {
+      const url = new URL(data);
+      const citaId = url.searchParams.get("cita");
+  
+      if (!citaId) {
+        Alert.alert("QR inválido", "No se encontró el parámetro 'cita'.");
         return;
       }
   
+      // Llamada GET al backend para obtener datos del animal
+      const response = await fetch(`https://TU_BACKEND_URL/api/citaPosible/info?id=${citaId}`);
+      if (!response.ok) throw new Error("Respuesta no válida del servidor");
+  
+      const result = await response.json();
+  
+      if (!result.animal) {
+        Alert.alert("Error", "No se encontraron datos del animal.");
+        return;
+      }
+  
+      // Navegamos con los datos obtenidos
       navigation.navigate("AnimalEscaneado", {
-        animal: parsed.animal,
-        id: parsed.id,
+        animal: result.animal,
+        id: citaId,
       });
+  
     } catch (e) {
-      Alert.alert("QR inválido", "No se pudo leer el código QR.");
+      console.error("Error al procesar el QR:", e);
+      Alert.alert("QR inválido", "No se pudo procesar el código QR.");
     }
   };
+  
   
 
   if (hasPermission === null) return <Text>Solicitando permisos...</Text>;
