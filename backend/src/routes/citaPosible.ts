@@ -415,6 +415,7 @@ router.get("/citaPosible/pendientes/asociacion",verificarTokenFireBase, async (r
   }
 );
 
+
 //* [Asociacion] -> POST -> CitaPosible x Adoptante
 router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => {
   const uidAsociacion = req.uid;
@@ -507,8 +508,8 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         };
         
         
-        const qrDataToEncode = JSON.stringify(qrDataObject);
-        
+        // const qrDataToEncode = JSON.stringify(qrDataObject);
+        const qrURL = `https://tu-frontend.com/qr?cita=${idCitaPosible}`;
         // Opciones para la generación del código QR
         const qrCodeOptions = {
           errorCorrectionLevel: 'H', // Nivel alto de corrección de errores
@@ -520,9 +521,10 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
             light: '#FFFFFFFF'      // Color del fondo (blanco)
           }
         };
+        const qrCodeBuffer = await QRCode.toBuffer(qrURL, qrCodeOptions);
 
-        const qrCodeBuffer = await QRCode.toBuffer(qrDataToEncode, qrCodeOptions);
-        console.log("🔗 Generando QR para:", qrDataToEncode, "con opciones:", qrCodeOptions);
+        // const qrCodeBuffer = await QRCode.toBuffer(qrDataToEncode, qrCodeOptions);
+        console.log("🔗 Generando QR para:", qrURL, "con opciones:", qrCodeOptions);
 
         const fileName = `qrCodes/cita_${idCitaPosible}.png`;
 
@@ -532,16 +534,14 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         const file = bucket.file(fileName);
         console.log("📄 Guardando archivo como:", fileName);
 
-        // await file.save(qrCodeBuffer, {
-        //   metadata: { contentType: "image/png" },
-        // });
+        await file.save(qrCodeBuffer, {
+          metadata: { contentType: "image/png" },
+        });
         
-        // await file.makePublic(); 
+        await file.makePublic(); 
         
-        // const publicUrl = file.publicUrl(); 
-        // updateData.qrCodeURL = publicUrl;
-
-     
+        const publicUrl = file.publicUrl(); 
+        updateData.qrCodeURL = publicUrl;
         
 
         const animalRef = admin.firestore().doc(animalRefPath);
@@ -688,4 +688,39 @@ router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) =
     res.status(500).json({ error: error.message });
   }
 });
+//TENER ID DE CITA Y OBTENER INFO DEL ANIMAL
+router.get("/citaPosible/idAnimal", verificarTokenFireBase, async (req, res) => {
+  const citaId = req.query.id as string;
+  if (!citaId) res.status(400).json({ error: "Falta id" });
+
+  try {
+    const citasAnimalSnap = await admin
+      .firestore()
+      .collection("citasAnimal")
+      .where("citaPosible_id", "==", `citaPosible/${citaId}`)
+      .limit(1)
+      .get();
+
+    if (citasAnimalSnap.empty) {
+       res.status(404).json({ error: "No se encontró relación cita-animal" });
+       return;
+    }
+
+    const animalRefPath = citasAnimalSnap.docs[0].data().animal_id;
+    const animalDoc = await admin.firestore().doc(animalRefPath).get();
+
+    if (!animalDoc.exists) {
+     res.status(404).json({ error: "Animal no encontrado" });
+     return;
+    }
+
+     res.json({ animal: { id: animalDoc.id, ...animalDoc.data() } });
+
+  } catch (err) {
+    console.error("Error al obtener animal:", err);
+     res.status(500).json({ error: "Error interno" });
+     return;
+  }
+});
+
 export default router;
