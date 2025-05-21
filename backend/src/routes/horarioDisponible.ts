@@ -43,7 +43,7 @@ router.get("/horarioDisponible", verificarTokenFireBase, async (req, res) => {
       
       const citasSnapshot = await admin.firestore()
         .collection("citaPosible")
-        .where("id_HorarioDisponible", "==", idHorario)
+        .where("horarioDisponible_id", "==", admin.firestore().doc(`horarioDisponible/${idHorario}`))
         .where("estado", "in", ["pendiente", "aceptada"])
         .get();
 

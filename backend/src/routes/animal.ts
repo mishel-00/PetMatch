@@ -170,7 +170,7 @@ router.get("/especie", verificarTokenFireBase, async (req, res) => {
   const uidAdoptante = req.uid;
   if (!uidAdoptante) {
     res.status(401).json({ error: "Token inválido" });
-    
+    return;
   }
   const { especie, asociacion_id } = req.query;
 
@@ -178,6 +178,7 @@ router.get("/especie", verificarTokenFireBase, async (req, res) => {
 
   if (!especie || !asociacion_id) {
      res.status(400).json({ error: "Faltan parámetros: especie o asociacion_id" });
+     return; 
   }
 
   try {
@@ -197,6 +198,7 @@ router.get("/especie", verificarTokenFireBase, async (req, res) => {
   } catch (error: any) {
     console.error("❌ Error al obtener animales:", error);
     res.status(500).json({ error: error.message });
+    return; 
   }
 });
 
