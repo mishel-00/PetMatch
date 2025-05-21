@@ -1,18 +1,18 @@
-// screens/EscanearQR.tsx
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Alert } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/app/(tabs)/HomeStack"; // ajusta la ruta si es distinta
-
+import { RootStackParamList } from "@/app/(tabs)/HomeStack";
+import { auth } from "../config/firebase";
+import axios from "axios";
+import { API_URL } from "@/service/api";
 
 export default function EscanearQR() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
   type NavigationProp = NativeStackNavigationProp<RootStackParamList, "EscanearQR">;
-const navigation = useNavigation<NavigationProp>();
-
+  const navigation = useNavigation<NavigationProp>();
 
   useEffect(() => {
     (async () => {
@@ -24,40 +24,55 @@ const navigation = useNavigation<NavigationProp>();
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
     setScanned(true);
     console.log("QR escaneado:", data);
-  
+
     try {
-      const url = new URL(data);
-      const citaId = url.searchParams.get("cita");
-  
+      console.log("QR escaneado:", data);
+      Alert.alert("Contenido escaneado", data);
+    
+      // Buscar id o cita manualmente con regex
+      const match = data.match(/[?&](cita|id)=([^&]+)/);
+      const citaId = match?.[2];
+    
       if (!citaId) {
-        Alert.alert("QR inválido", "No se encontró el parámetro 'cita'.");
+        Alert.alert("QR inválido", "No se encontró el parámetro 'cita' o 'id'.");
         return;
       }
-  
-      // Llamada GET al backend para obtener datos del animal
-      const response = await fetch(`https://TU_BACKEND_URL/api/citaPosible/info?id=${citaId}`);
-      if (!response.ok) throw new Error("Respuesta no válida del servidor");
-  
-      const result = await response.json();
-  
+    
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        Alert.alert("Error", "Usuario no autenticado.");
+        return;
+      }
+    
+      const token = await currentUser.getIdToken();
+    
+      const response = await axios.get(`${API_URL}/api/citaPosible/idAnimal`, {
+        params: { id: citaId },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    
+      const result = response.data;
+    
       if (!result.animal) {
         Alert.alert("Error", "No se encontraron datos del animal.");
         return;
       }
-  
-      // Navegamos con los datos obtenidos
+    
       navigation.navigate("AnimalEscaneado", {
         animal: result.animal,
         id: citaId,
       });
-  
+    
     } catch (e) {
       console.error("Error al procesar el QR:", e);
-      Alert.alert("QR inválido", "No se pudo procesar el código QR.");
+      Alert.alert("QR inválido", `Error: ${(e as Error).message}`);
+      Alert.alert("Contenido escaneado", data);
+
     }
+    
   };
-  
-  
 
   if (hasPermission === null) return <Text>Solicitando permisos...</Text>;
   if (hasPermission === false) return <Text>Permiso denegado.</Text>;
