@@ -457,13 +457,20 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           .where("citaPosible_id", "==", `citaPosible/${idCitaPosible}`)
           .limit(1)
           .get();
-
+           
         if (citasAnimalSnap.empty) {
           res.status(400).json({ error: "No se encontró animal asociado a esta cita" });
           return;
-        }
+        } 
         
-     
+        const citasAnimalDoc = citasAnimalSnap.docs[0];
+        const animalRefPath = citasAnimalSnap.docs[0].data().animal_id;
+
+        await citasAnimalDoc.ref.update({
+          animal_id:  animalRefPath || admin.firestore.FieldValue.delete(),
+          citaPosible_id: `citaPosible/${idCitaPosible}`,
+        });
+        
         const uidAdoptante = citaDoc.data()?.adoptante_id;
     
         const tokenAdoptante = await obtenerTokenAdoptante(uidAdoptante);
@@ -475,7 +482,6 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
             'Felicidades 🎉 Tu cita con la asociación ha sido aceptada. Revisa la app para más detalles.'
           );
         }
-        const animalRefPath = citasAnimalSnap.docs[0].data().animal_id;
 
         if (!animalRefPath || typeof animalRefPath !== "string") {
           res.status(400).json({ error: "ID del animal inválido" });
@@ -562,6 +568,7 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
     }
 
     await citaRef.update(updateData);
+    
 
     res.status(200).json({
       message:
