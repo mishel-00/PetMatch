@@ -20,6 +20,7 @@ import CitasAdoptante from "@/components/CitasAdoptante";
 import CitaDetalle from "@/components/CitaDetalle";
 import EscanearQR from "@/components/EscanearQR";
 import AnimalEscaneado from "@/components/AnimalEscaneado";
+import SessionRedirector from "@/components/SessionRedirector";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export interface Cita {
@@ -51,12 +52,18 @@ export type RootStackParamList = {
     CitaDetalle: {cita: Cita }
     EscanearQR: undefined;
     AnimalEscaneado: { animal: Animal; id: string };
+    SessionRedirector : undefined
 };
   
 
 export default function HomeStack() {
     return (
-        <Stack.Navigator>
+        <Stack.Navigator initialRouteName="SessionRedirector">
+  <Stack.Screen
+    name="SessionRedirector"
+    component={SessionRedirector}
+    options={{ headerShown: false }}
+  />
             <Stack.Screen
                 name="HomeScreen"
                 component={HomeScreen}

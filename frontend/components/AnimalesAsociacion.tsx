@@ -108,6 +108,15 @@ export default function AnimalesAsociacion({ route }: any) {
         console.log("📄 Datos:", response.data);
         console.log("🔍 Especie seleccionada:", especieSeleccionada);
         console.log("🏷️ Asociación ID:", asociacionId);
+        Alert.alert(
+          "Datos de respuesta",
+          `📄 Especie seleccionada: ${especieSeleccionada}
+        🏷️ Asociación ID: ${asociacionId}
+        📦 Respuesta completa: ${JSON.stringify(response, null, 2)}
+        📄 Datos: ${JSON.stringify(response.data, null, 2)}`
+        );
+        
+        
 
 
         const mapped = response.data.map((item: any) => ({
@@ -155,8 +164,8 @@ export default function AnimalesAsociacion({ route }: any) {
               {item.foto && (
                 <Image
                   source={{ uri: item.foto }}
-                  style={{ width: "100%", height: 140, borderRadius: 8, marginBottom: 8 }}
-                />
+                  style={styles.image}
+                  />
               )}
               <Text style={styles.name}>{item.nombre}</Text>
               <Text style={styles.row}>
@@ -192,16 +201,56 @@ export default function AnimalesAsociacion({ route }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF5E6", padding: 20 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 20, fontWeight: "bold", color: "#D35400", marginBottom: 16 },
-  card: { backgroundColor: "#fff", padding: 16, borderRadius: 10, marginBottom: 12, elevation: 2 },
-  name: { fontSize: 16, fontWeight: "bold", color: "#2c3e50" },
-  type: { fontSize: 14, color: "#555" },
-  empty: { textAlign: "center", marginTop: 20, color: "#999" },
-  row: { fontSize: 14, color: "#333", marginTop: 4 },
-icon: { fontSize: 14 },
-bold: { fontWeight: "bold", color: "#2c3e50" },
+  container: { 
+    flex: 1,
+     backgroundColor: "#FFF5E6", 
+     padding: 20 
+    },
+  center: {
+     flex: 1, 
+     justifyContent: "center",
+      alignItems: "center" 
+    },
+  title: {
+     fontSize: 20,
+      fontWeight: "bold",
+       color: "#D35400", 
+       marginBottom: 16 
+      },
+  card: {
+     backgroundColor: "#fff",
+      padding: 16,
+       borderRadius: 10,
+        marginBottom: 12,
+         elevation: 2 
+        },
+  name: { 
+    fontSize: 16, 
+    fontWeight: "bold",
+    color: "#2c3e50"
+   },
+  type: { 
+    fontSize: 14, 
+    color: "#555" 
+  },
+  empty: {
+     textAlign: "center", 
+     marginTop: 20, 
+     
+     color: "#999" 
+    },
+  row: { 
+    fontSize: 14, 
+    color: "#333",
+     marginTop: 4 
+    },
+  icon: {
+   fontSize: 14 
+  },
+bold: { 
+  fontWeight: "bold", 
+  color: "#2c3e50"
+ },
 estado: {
   marginTop: 10,
   fontWeight: "bold",
@@ -224,6 +273,14 @@ enAdopcion: {
   backgroundColor: "#c8e6c9",
   color: "#2e7d32",
 },
+image: {
+  width: "100%",
+  aspectRatio: 1,
+  borderRadius: 10,
+  marginBottom: 10,
+  resizeMode: "cover",
+},
+
 
 
 });
