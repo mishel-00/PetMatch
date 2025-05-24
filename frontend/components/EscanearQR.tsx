@@ -56,7 +56,7 @@ export default function EscanearQR() {
       const token = await currentUser.getIdToken();
       Alert.alert("✅ Token obtenido", token.substring(0, 20) + "...");
   
-      const apiUrl = `${API_URL}/api/test/idCita`;
+      const apiUrl = `${API_URL}/api/qr/citaId`;
       Alert.alert("📤 Enviando petición", `URL: ${apiUrl}\nID: ${citaId}`);
   
       // Hacer la petición al backend
