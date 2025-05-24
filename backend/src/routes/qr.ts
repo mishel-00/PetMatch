@@ -4,7 +4,7 @@ import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
 
 const router = express.Router();
 
-router.get("/citaId", verificarTokenFireBase, async (req, res) => {
+router.get("/citaid",  verificarTokenFireBase, async (req, res) => {
     const citaId = req.query.id as string;
      
     console.log("CITA ---- ID recibido en query:", citaId);
@@ -28,7 +28,8 @@ router.get("/citaId", verificarTokenFireBase, async (req, res) => {
       const citasAnimalSnap = await admin
         .firestore()
         .collection("citasAnimal")
-        .where("citaPosible_id", "in", [citaId, `citaPosible/${citaId}`])
+        //.where("citaPosible_id", "in", [citaId, `citaPosible/${citaId}`])
+        .where("citaPosible_id", "==", `citaPosible/${citaId}`)
         .limit(1)
         .get();
   
