@@ -14,6 +14,8 @@ const config: ExpoConfig = {
   },
   android: {
     package: "com.santicticontrol.frontend",
+    permissions: ["CAMERA"], // 👈 Añadir esto
+
     adaptiveIcon: {
       foregroundImage: "./assets/images/adaptive-icon.png",
       backgroundColor: "#ffffff",
@@ -26,6 +28,8 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-router",
+    "expo-camera", // 👈 Añadir esto
+
     [
       "expo-splash-screen",
       {
