@@ -23,19 +23,23 @@ export default function EscanearQR() {
 
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
     setScanned(true);
-    console.log("📦 QR escaneado:", data);
-  
+    console.log("QR escaneado:", data);
+
     try {
       let citaId: string | null = null;
   
-      // 📌 Soporta varios formatos posibles
+      // Intentar extraer el ID de la cita de diferentes formatos de URL
       if (data.startsWith("petmatch://cita?id=")) {
         citaId = data.substring("petmatch://cita?id=".length);
         console.log("🎯 ID extraído de esquema personalizado:", citaId);
       } else if (data.includes("fichaAnimal?cita=")) {
         citaId = data.split("fichaAnimal?cita=")[1];
         console.log("🎯 ID extraído de fichaAnimal:", citaId);
+      } else if (data.includes("/api/citaPosible/escanear?id=")) {
+        citaId = data.split("/api/citaPosible/escanear?id=")[1];
+        console.log("🎯 ID extraído de URL de escaneo:", citaId);
       } else {
+        // Intentar extraer el ID de cualquier parámetro de consulta
         const match = data.match(/[?&](cita|id)=([^&]+)/);
         citaId = match?.[2] || null;
         console.log("🎯 ID extraído de query genérica:", citaId);
@@ -77,7 +81,7 @@ export default function EscanearQR() {
       console.error("❌ Error al procesar el QR:", e);
       Alert.alert(
         "QR inválido",
-        `Error: ${(e as Error).message}. Verifique que el código QR sea válido y que tenga conexión a internet.`
+        `Error: Request failed with status code 404. Verifique que el código QR sea válido y que tenga conexión a internet.`
       );
     }
   };
