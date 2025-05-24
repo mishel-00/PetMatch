@@ -518,8 +518,9 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         
         // const qrDataToEncode = JSON.stringify(qrDataObject);
        // const qrURL = `https://tu-frontend.com/qr?cita=${idCitaPosible}`;
-       const qrURL = `http://localhost:3000/fichaAnimal?cita=${idCitaPosible}`;
-
+      //  const qrURL = `http://localhost:3000/fichaAnimal?cita=${idCitaPosible}`;
+       const qrURL = `petmatch://cita?id=${idCitaPosible}`; // Usar un esquema de URL personalizado para la app
+       
         // Opciones para la generación del código QR
         const qrCodeOptions = {
           errorCorrectionLevel: 'H', // Nivel alto de corrección de errores
@@ -699,10 +700,12 @@ router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) =
     res.status(500).json({ error: error.message });
   }
 });
-//TENER ID DE CITA Y OBTENER INFO DEL ANIMAL
 router.get("/citaPosible/idAnimal", verificarTokenFireBase, async (req, res) => {
   const citaId = req.query.id as string;
-  if (!citaId) res.status(400).json({ error: "Falta id" });
+  if (!citaId) {
+    res.status(400).json({ error: "Falta id" });
+    return; // Añadir return para evitar continuar la ejecución
+  }
 
   try {
     const citasAnimalSnap = await admin
@@ -713,24 +716,24 @@ router.get("/citaPosible/idAnimal", verificarTokenFireBase, async (req, res) => 
       .get();
 
     if (citasAnimalSnap.empty) {
-       res.status(404).json({ error: "No se encontró relación cita-animal" });
-       return;
+      res.status(404).json({ error: "No se encontró relación cita-animal" });
+      return;
     }
 
     const animalRefPath = citasAnimalSnap.docs[0].data().animal_id;
     const animalDoc = await admin.firestore().doc(animalRefPath).get();
 
     if (!animalDoc.exists) {
-     res.status(404).json({ error: "Animal no encontrado" });
-     return;
+      res.status(404).json({ error: "Animal no encontrado" });
+      return;
     }
 
-     res.json({ animal: { id: animalDoc.id, ...animalDoc.data() } });
+    res.json({ animal: { id: animalDoc.id, ...animalDoc.data() } });
 
   } catch (err) {
     console.error("Error al obtener animal:", err);
-     res.status(500).json({ error: "Error interno" });
-     return;
+    res.status(500).json({ error: "Error interno" });
+    return;
   }
 });
 
