@@ -716,12 +716,20 @@ router.get("/citaPosible/idAnimal", verificarTokenFireBase, async (req, res) => 
 
   try {
     const consulta = `citaPosible/${citaId}`;
+    console.log("🔍 Query esperada: citaPosible/%s", citaId);
+
+  const allDocs = await admin.firestore().collection("citasAnimal").get();
+    console.log("🗂 Todos los citaPosible_id encontrados:");
+    allDocs.forEach(doc => {
+    console.log("📌", doc.id, "→", doc.data().citaPosible_id);
+   });
+
     //? DEBUG
     console.log("🔍 Buscando en citasAnimal con citaPosible_id =", consulta);
     const citasAnimalSnap = await admin
       .firestore()
       .collection("citasAnimal")
-      .where("citaPosible_id", "==", consulta)
+      .where("citaPosible_id", "in", [citaId, `citaPosible/${citaId}`])
       .limit(1)
       .get();
 
@@ -755,6 +763,6 @@ router.get("/citaPosible/idAnimal", verificarTokenFireBase, async (req, res) => 
   }
 });
 
-// Añadir este nuevo endpoint al final del archivo, antes de export default router;
+
 
 export default router;
