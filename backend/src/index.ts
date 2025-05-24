@@ -50,6 +50,7 @@ app.use("/api", citaPosibleRoutes);
 const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0'; 
 app.listen(Number(PORT), HOST, () => {
+  
   console.log(`✅ PetMatch API corriendo en http://${HOST}:${PORT}`);
   
   const interfaces = require('os').networkInterfaces();
