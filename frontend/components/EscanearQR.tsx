@@ -23,12 +23,12 @@ export default function EscanearQR() {
 
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
     setScanned(true);
-    // Alert.alert("QR Escaneado", data); // Opcional: para ver el contenido crudo del QR
-
+    Alert.alert("📦 QR escaneado", data); // Ver contenido crudo
+  
     try {
       let citaId: string | null = null;
   
-      // Intentar extraer el ID de la cita de diferentes formatos de URL
+      // 🔍 Extraer citaId desde distintos formatos
       if (data.startsWith("petmatch://cita?id=")) {
         citaId = data.substring("petmatch://cita?id=".length);
       } else if (data.includes("fichaAnimal?cita=")) {
@@ -40,29 +40,26 @@ export default function EscanearQR() {
         citaId = match?.[2] || null;
       }
   
-      // Alert.alert("Cita ID Extraído", citaId || "No se pudo extraer el ID"); // Para ver el ID extraído
+      Alert.alert("🔍 ID extraído", citaId || "❌ No se pudo extraer el ID");
   
       if (!citaId) {
-        Alert.alert("QR inválido", "No se encontró el parámetro 'cita' o 'id' en el código escaneado.");
+        Alert.alert("❌ QR inválido", "No se encontró el parámetro 'cita' o 'id' en el código escaneado.");
         return;
       }
   
       const currentUser = auth.currentUser;
       if (!currentUser) {
-        Alert.alert("Error", "Usuario no autenticado.");
+        Alert.alert("❌ Error", "Usuario no autenticado.");
         return;
       }
   
       const token = await currentUser.getIdToken();
-
-      const apiUrl = `${API_URL}/api/citaPosible/idAnimal`;
-      
-      // Mostrar la URL y el ID de la cita antes de hacer la petición
-      Alert.alert(
-        "Datos de la Petición", 
-        `URL: ${apiUrl}\nCita ID: ${citaId}`
-      );
+      Alert.alert("✅ Token obtenido", token.substring(0, 20) + "...");
   
+      const apiUrl = `${API_URL}/api/citaPosible/idAnimal`;
+      Alert.alert("📤 Enviando petición", `URL: ${apiUrl}\nID: ${citaId}`);
+  
+      // Hacer la petición al backend
       const response = await axios.get(apiUrl, {
         params: { id: citaId },
         headers: {
@@ -70,33 +67,41 @@ export default function EscanearQR() {
         },
       });
   
+      Alert.alert("✅ Respuesta recibida", `Status: ${response.status}`);
+  
       const result = response.data;
   
       if (!result.animal) {
-        Alert.alert("Error", "No se encontraron datos del animal.");
+        Alert.alert("⚠️ Animal no encontrado", "La cita existe pero no está vinculada a un animal.");
         return;
       }
   
+      Alert.alert("✅ Animal encontrado", `Nombre: ${result.animal.nombre}`);
+  
+      // Navegar con los datos
       navigation.navigate("AnimalEscaneado", {
         animal: result.animal,
         id: citaId,
       });
   
     } catch (e: any) {
-      // Mostrar detalles del error
       let errorMessage = "Error desconocido";
+  
       if (e.message) {
         errorMessage = e.message;
       }
-      if (e.response && e.response.data && e.response.data.error) {
-        errorMessage += `\nDetalles: ${e.response.data.error}`;
+  
+      if (e.response && e.response.data) {
+        errorMessage += `\n🧾 Backend: ${JSON.stringify(e.response.data)}`;
       }
+  
       Alert.alert(
-        "QR inválido",
-        `Error: ${errorMessage}. Verifique que el código QR sea válido y que tenga conexión a internet.`
+        "❌ Error al procesar el QR",
+        `Error: ${errorMessage}`
       );
     }
   };
+  
   
 
   if (hasPermission === null) return <Text>Solicitando permisos...</Text>;
