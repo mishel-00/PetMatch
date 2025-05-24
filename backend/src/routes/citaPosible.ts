@@ -738,15 +738,5 @@ router.get("/citaPosible/idAnimal", verificarTokenFireBase, async (req, res) => 
 });
 
 // Añadir este nuevo endpoint al final del archivo, antes de export default router;
-router.get("/citaPosible/escanear", verificarTokenFireBase, async (req, res) => {
-  const citaId = req.query.id as string;
-  if (!citaId) {
-    res.status(400).send("ID de cita no proporcionado");
-    return;
-  }
-  
-  // Redirigir a la aplicación móvil con el esquema personalizado
-  res.redirect(`petmatch://cita?id=${citaId}`);
-});
 
 export default router;
