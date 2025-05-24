@@ -519,7 +519,7 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         // const qrDataToEncode = JSON.stringify(qrDataObject);
        // const qrURL = `https://tu-frontend.com/qr?cita=${idCitaPosible}`;
       //  const qrURL = `http://localhost:3000/fichaAnimal?cita=${idCitaPosible}`;
-       const qrURL = `petmatch://cita?id=${idCitaPosible}`; // Usar un esquema de URL personalizado para la app
+       const qrURL = `${req.protocol}://${req.get('host')}/api/citaPosible/escanear?id=${idCitaPosible}`; // Usar un esquema de URL personalizado para la app
        
         // Opciones para la generación del código QR
         const qrCodeOptions = {
@@ -735,6 +735,18 @@ router.get("/citaPosible/idAnimal", verificarTokenFireBase, async (req, res) => 
     res.status(500).json({ error: "Error interno" });
     return;
   }
+});
+
+// Añadir este nuevo endpoint al final del archivo, antes de export default router;
+router.get("/citaPosible/escanear", verificarTokenFireBase, async (req, res) => {
+  const citaId = req.query.id as string;
+  if (!citaId) {
+    res.status(400).send("ID de cita no proporcionado");
+    return;
+  }
+  
+  // Redirigir a la aplicación móvil con el esquema personalizado
+  res.redirect(`petmatch://cita?id=${citaId}`);
 });
 
 export default router;
