@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert, Platform } from "react-native"; // Asegúrate de importar Alert
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -23,7 +23,7 @@ export default function EscanearQR() {
 
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
     setScanned(true);
-    console.log("QR escaneado:", data);
+    // Alert.alert("QR Escaneado", data); // Opcional: para ver el contenido crudo del QR
 
     try {
       let citaId: string | null = null;
@@ -31,19 +31,16 @@ export default function EscanearQR() {
       // Intentar extraer el ID de la cita de diferentes formatos de URL
       if (data.startsWith("petmatch://cita?id=")) {
         citaId = data.substring("petmatch://cita?id=".length);
-        console.log("🎯 ID extraído de esquema personalizado:", citaId);
       } else if (data.includes("fichaAnimal?cita=")) {
         citaId = data.split("fichaAnimal?cita=")[1];
-        console.log("🎯 ID extraído de fichaAnimal:", citaId);
       } else if (data.includes("/api/citaPosible/escanear?id=")) {
         citaId = data.split("/api/citaPosible/escanear?id=")[1];
-        console.log("🎯 ID extraído de URL de escaneo:", citaId);
       } else {
-        // Intentar extraer el ID de cualquier parámetro de consulta
         const match = data.match(/[?&](cita|id)=([^&]+)/);
         citaId = match?.[2] || null;
-        console.log("🎯 ID extraído de query genérica:", citaId);
       }
+  
+      // Alert.alert("Cita ID Extraído", citaId || "No se pudo extraer el ID"); // Para ver el ID extraído
   
       if (!citaId) {
         Alert.alert("QR inválido", "No se encontró el parámetro 'cita' o 'id' en el código escaneado.");
@@ -57,8 +54,16 @@ export default function EscanearQR() {
       }
   
       const token = await currentUser.getIdToken();
+
+      const apiUrl = `${API_URL}/api/citaPosible/idAnimal`;
+      
+      // Mostrar la URL y el ID de la cita antes de hacer la petición
+      Alert.alert(
+        "Datos de la Petición", 
+        `URL: ${apiUrl}\nCita ID: ${citaId}`
+      );
   
-      const response = await axios.get(`${API_URL}/api/citaPosible/idAnimal`, {
+      const response = await axios.get(apiUrl, {
         params: { id: citaId },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -77,11 +82,18 @@ export default function EscanearQR() {
         id: citaId,
       });
   
-    } catch (e) {
-      console.error("❌ Error al procesar el QR:", e);
+    } catch (e: any) {
+      // Mostrar detalles del error
+      let errorMessage = "Error desconocido";
+      if (e.message) {
+        errorMessage = e.message;
+      }
+      if (e.response && e.response.data && e.response.data.error) {
+        errorMessage += `\nDetalles: ${e.response.data.error}`;
+      }
       Alert.alert(
         "QR inválido",
-        `Error: Request failed with status code 404. Verifique que el código QR sea válido y que tenga conexión a internet.`
+        `Error: ${errorMessage}. Verifique que el código QR sea válido y que tenga conexión a internet.`
       );
     }
   };
