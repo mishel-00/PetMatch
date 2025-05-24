@@ -12,6 +12,8 @@ import citaPosibleRoutes from "./routes/citaPosible";
 import cron from "node-cron";
 import { limpiarHorariosPasados } from './utils/fnDatosFront';
 
+
+
 //!! DEBUG
 import path from 'path';
 
@@ -46,6 +48,8 @@ app.use("/api", animalRoutes);
 app.use("/api", horarioRoutes);
 app.use("/api", asociacionRoutes);
 app.use("/api", citaPosibleRoutes);
+
+
 
 const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0'; 

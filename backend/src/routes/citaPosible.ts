@@ -705,10 +705,10 @@ router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) =
     res.status(500).json({ error: error.message });
   }
 });
-router.get("/citaPosible/idAnimal", verificarTokenFireBase, async (req, res) => {
+router.get("/test/idCita", verificarTokenFireBase, async (req, res) => {
   const citaId = req.query.id as string;
-
-  console.log("/citaPosible/idAnimal---- ID recibido en query:", citaId);
+   
+  console.log("TEST---- ID recibido en query:", citaId);
   if (!citaId) {
     res.status(400).json({ error: "Falta id" });
     return; // Añadir return para evitar continuar la ejecución
@@ -735,7 +735,7 @@ router.get("/citaPosible/idAnimal", verificarTokenFireBase, async (req, res) => 
 
     if (citasAnimalSnap.empty) {
       //? DEBUG
-      console.warn("⚠️ No se encontró ningún documento en citasAnimal con ese citaPosible_id");
+      console.warn("⚠ No se encontró ningún documento en citasAnimal con ese citaPosible_id");
       const dump = await admin.firestore().collection("citasAnimal").get();
       console.log("--- Lista actual de citaPosible_id en citasAnimal:");
       dump.docs.forEach((doc) => {
