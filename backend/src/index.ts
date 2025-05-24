@@ -49,7 +49,7 @@ app.use("/api", animalRoutes);
 app.use("/api", horarioRoutes);
 app.use("/api", asociacionRoutes);
 app.use("/api", citaPosibleRoutes);
-app.use("/api", qrRoutes);
+app.use("/api/qr", qrRoutes);
 
 
 

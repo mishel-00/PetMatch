@@ -4,7 +4,7 @@ import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
 
 const router = express.Router();
 
-router.get("/qr/citaId", verificarTokenFireBase, async (req, res) => {
+router.get("/citaId", verificarTokenFireBase, async (req, res) => {
     const citaId = req.query.id as string;
      
     console.log("CITA ---- ID recibido en query:", citaId);
