@@ -9,6 +9,7 @@ import animalRoutes from "./routes/animal";
 import horarioRoutes from "./routes/horarioDisponible";
 import asociacionRoutes from "./routes/asociacion";
 import citaPosibleRoutes from "./routes/citaPosible";
+import qrRoutes from "./routes/qr";
 import cron from "node-cron";
 import { limpiarHorariosPasados } from './utils/fnDatosFront';
 
@@ -48,13 +49,15 @@ app.use("/api", animalRoutes);
 app.use("/api", horarioRoutes);
 app.use("/api", asociacionRoutes);
 app.use("/api", citaPosibleRoutes);
+app.use("/api", qrRoutes);
+
 
 
 
 const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0'; 
 app.listen(Number(PORT), HOST, () => {
-  
+
   console.log(`✅ PetMatch API corriendo en http://${HOST}:${PORT}`);
   
   const interfaces = require('os').networkInterfaces();
