@@ -472,6 +472,10 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           animal_id:  animalRefPath || admin.firestore.FieldValue.delete(),
           citaPosible_id: `citaPosible/${idCitaPosible}`,
         });
+
+        //? DEBUG
+        console.log("📝 Guardando citaPosible_id como:", `citaPosible/${idCitaPosible}`);
+
         
         const uidAdoptante = citaDoc.data()?.adoptante_id;
     
@@ -703,20 +707,32 @@ router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) =
 });
 router.get("/citaPosible/idAnimal", verificarTokenFireBase, async (req, res) => {
   const citaId = req.query.id as string;
+
+  console.log("/citaPosible/idAnimal---- ID recibido en query:", citaId);
   if (!citaId) {
     res.status(400).json({ error: "Falta id" });
     return; // Añadir return para evitar continuar la ejecución
   }
 
   try {
+    const consulta = `citaPosible/${citaId}`;
+    //? DEBUG
+    console.log("🔍 Buscando en citasAnimal con citaPosible_id =", consulta);
     const citasAnimalSnap = await admin
       .firestore()
       .collection("citasAnimal")
-      .where("citaPosible_id", "==", `citaPosible/${citaId}`)
+      .where("citaPosible_id", "==", consulta)
       .limit(1)
       .get();
 
     if (citasAnimalSnap.empty) {
+      //? DEBUG
+      console.warn("⚠️ No se encontró ningún documento en citasAnimal con ese citaPosible_id");
+      const dump = await admin.firestore().collection("citasAnimal").get();
+      console.log("--- Lista actual de citaPosible_id en citasAnimal:");
+      dump.docs.forEach((doc) => {
+        console.log("  🔸", doc.data().citaPosible_id);
+      });
       res.status(404).json({ error: "No se encontró relación cita-animal" });
       return;
     }
@@ -728,7 +744,8 @@ router.get("/citaPosible/idAnimal", verificarTokenFireBase, async (req, res) => 
       res.status(404).json({ error: "Animal no encontrado" });
       return;
     }
-
+    //? DEBUG
+    console.log("📦 Datos del animal:", animalDoc.data());
     res.json({ animal: { id: animalDoc.id, ...animalDoc.data() } });
 
   } catch (err) {
