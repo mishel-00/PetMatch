@@ -51,8 +51,7 @@ const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0'; 
 app.listen(Number(PORT), HOST, () => {
   console.log(`✅ PetMatch API corriendo en http://${HOST}:${PORT}`);
-  // Si quieres ver la IP local específica en la consola (opcional):
-  // Intenta obtener la IP local para mostrarla en la consola
+  
   const interfaces = require('os').networkInterfaces();
   Object.keys(interfaces).forEach(devName => {
     interfaces[devName].forEach((iface: any) => {
