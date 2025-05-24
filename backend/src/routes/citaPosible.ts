@@ -120,7 +120,9 @@ router.post("/citaPosible", verificarTokenFireBase, async (req, res) => {
 
     
     await admin.firestore().collection("citasAnimal").add({
-      citaPosible_id: nuevaCita.path,
+      //citaPosible_id: nuevaCita.path,
+      citaPosible_id: `citaPosible/${nuevaCita.id}`,
+
       animal_id: `animal/${animal_id}`,
     });
 
@@ -515,7 +517,9 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         
         
         // const qrDataToEncode = JSON.stringify(qrDataObject);
-        const qrURL = `https://tu-frontend.com/qr?cita=${idCitaPosible}`;
+       // const qrURL = `https://tu-frontend.com/qr?cita=${idCitaPosible}`;
+       const qrURL = `http://localhost:3000/fichaAnimal?cita=${idCitaPosible}`;
+
         // Opciones para la generación del código QR
         const qrCodeOptions = {
           errorCorrectionLevel: 'H', // Nivel alto de corrección de errores
