@@ -53,7 +53,7 @@ app.use("/api/qr", qrRoutes);
 
 
 
-
+// Servicio Ngrok --> Ejecutamos el túnel 
 const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0'; 
 app.listen(Number(PORT), HOST, () => {
