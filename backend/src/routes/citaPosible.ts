@@ -528,9 +528,6 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
        //?? DEBUG 
        console.log("🔍 ---URL QR----", qrURL);
        
-       //?? DEBUG 
-       console.log("🔍 ---URL QR----", qrURL);
-       
         // Opciones para la generación del código QR
         const qrCodeOptions = {
           errorCorrectionLevel: 'H', // Nivel alto de corrección de errores
