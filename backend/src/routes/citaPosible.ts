@@ -548,6 +548,7 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         const file = bucket.file(fileName);
         console.log("📄 Guardando archivo como:", fileName);
 
+        await file.delete().catch(() => {});
         await file.save(qrCodeBuffer, {
           metadata: { contentType: "image/png" },
         });
@@ -597,9 +598,7 @@ router.get("/citaPosible/:idCitaPosible/qr", verificarTokenFireBase, async (req,
   const uidAdoptante = req.uid;
   const { idCitaPosible } = req.params;
 
-  console.log("🔍 [DEBUG] Solicitud de QR:");
-  console.log("  - idCitaPosible:", idCitaPosible);
-  console.log("  - uidAdoptante:", uidAdoptante);
+  console.log("____________Entró al GET /citaPosible/:idCitaPosible/qr____________");
 
   if (!uidAdoptante) {
     res.status(401).json({ error: "Token inválido" });
@@ -622,7 +621,8 @@ router.get("/citaPosible/:idCitaPosible/qr", verificarTokenFireBase, async (req,
     }
 
     const citaData = citaDoc.data();
-    console.log("📄 [DEBUG] Datos de la cita:", {
+
+    console.log(" [DEBUG] Datos de la cita:", {
       adoptante_id: citaData?.adoptante_id,
       estado: citaData?.estado,
       qrCodeURL: citaData?.qrCodeURL

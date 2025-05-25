@@ -27,7 +27,7 @@ export default function CitaDetalle() {
         const response = await getxxx(`api/citaPosible/${cita.id}/qr`);
      
         setQrUrl(response.qrCodeURL);;
-        console.log(response.qrCodeURL) // debe ser { url: 'https://...' }
+        Alert.alert("Detalle cita, qrCODEURL", response.qrCodeURL) // debe ser { url: 'https://...' }
       } catch (error) {
         Alert.alert("Error", "No se pudo cargar el código QR.");
       } finally {
@@ -35,10 +35,11 @@ export default function CitaDetalle() {
       }
     };
     
-
+    
     fetchQR();
   }, [cita.id]);
-  console.log(cita.id)
+
+  Alert.alert("Detalle cita, id de CITA---", cita.id) // debe ser { url: 'https://...' }
   //console.log(response.qrCodeURL) // debe ser { url: 'https://...' }
 
   return (
