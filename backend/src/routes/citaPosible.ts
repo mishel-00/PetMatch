@@ -525,6 +525,8 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
       //  const qrURL = `http://localhost:3000/fichaAnimal?cita=${idCitaPosible}`;
        // const qrURL = `${req.protocol}://${req.get('host')}/api/citaPosible/escanear?id=${idCitaPosible}`; // Usar un esquema de URL personalizado para la app
        const qrURL = `petmatch://cita?id=${idCitaPosible}`; // Si configuraste el esquema "petmatch" en app.config.ts
+       //?? DEBUG 
+       console.log("🔍 ---URL QR----", qrURL);
        
         // Opciones para la generación del código QR
         const qrCodeOptions = {
