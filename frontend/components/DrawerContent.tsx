@@ -2,6 +2,8 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { DrawerContentComponentProps } from "@react-navigation/drawer";
 import { useAuthStore } from "../store/authStore";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 
 export default function DrawerContent(props: DrawerContentComponentProps) {
   const { username: email, isActive, logout, isAuthenticated, rol } = useAuthStore();
@@ -30,6 +32,22 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
           <Text style={styles.loginText}>Iniciar Sesión</Text>
         </TouchableOpacity>
       )}
+      {isAuthenticated && rol === "adoptante" && (
+  <View style={styles.section}>
+    <Text style={styles.sectionTitle}>Citas</Text>
+
+    <TouchableOpacity
+      onPress={() => navigation.navigate("CitasAdoptante")}
+      style={[styles.menuButton, { backgroundColor: "#5DADE2" }]}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+        <Icon name="calendar-check" size={20} color="#fff" style={{ marginRight: 8 }} />
+        <Text style={styles.menuButtonText}>Mis Citas</Text>
+      </View>
+    </TouchableOpacity>
+  </View>
+)}
+
 
       {/* Botón para cerrar sesión si está autenticado */}
       {isAuthenticated && (
@@ -54,6 +72,30 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
           >
             <Text style={styles.menuButtonText}>🐾 Animales</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate("HorarioDisponible")}
+            style={[styles.menuButton, { backgroundColor: "#4CAF50" }]}
+          >
+       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+    <Icon name="calendar-month" size={20} color="#fff" style={{ marginRight: 8 }} />
+    <Text style={styles.menuButtonText}>Horario Disponible</Text>
+  </View>
+  </TouchableOpacity>
+  <TouchableOpacity
+  style={{
+    backgroundColor: "#1abc9c",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  }}
+  onPress={() => navigation.navigate("ListaCitasAsociacion")}
+>
+  <Text style={{ color: "white", fontWeight: "bold", textAlign: "center" }}>
+    📅 Citas
+  </Text>
+</TouchableOpacity>
+
         </View>
       )}
     </View>
@@ -118,6 +160,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     marginBottom: 10,
+    width: "100%"
   },
   menuButtonText: {
     color: "#fff",

@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import zustandStorage from "./zustandStorage";
 import { postxxx , API_URL } from "@/service/api";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/config/firebase";
+import { auth } from "../config/firebase";
 interface AuthState {
     username: string | null;
     password: string | null;

@@ -13,6 +13,8 @@ export const verificarTokenFireBase = async (
     next: NextFunction
 ): Promise<void> => {   
     const authHeader = req.headers.authorization;
+    console.log(" Entró al middleware verificarTokenFireBase");
+
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       res.status(401).json({ error: "Token no proporcionado o mal formado" });
