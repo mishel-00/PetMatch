@@ -6,6 +6,7 @@ import {
   Switch,
   Button,
   Alert,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { RouteProp } from "@react-navigation/native";
@@ -29,7 +30,7 @@ export default function AnimalEscaneado({ route }: Props) {
       });
 
       Alert.alert(
-        " Confirmado",
+        "✅ Confirmado",
         isAdopted
           ? "El animal fue adoptado."
           : "El animal no fue adoptado y seguirá en adopción."
@@ -42,16 +43,18 @@ export default function AnimalEscaneado({ route }: Props) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>🐾 Animal Escaneado</Text>
-      <Text style={styles.label}>📄 ID de la cita: {citaId}</Text>
-      <Text>ID del animal: {animal.id}</Text>
-      <Text>Nombre: {animal.nombre}</Text>
-      <Text>Especie: {animal.especie}</Text>
-      <Text>Descripción: {animal.descripcion}</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.icon}>🐾</Text>
+      <Text style={styles.title}>Animal Escaneado</Text>
+
+      <View style={styles.animalCard}>
+        <Text style={styles.info}>🐶 Nombre: {animal.nombre}</Text>
+        <Text style={styles.info}>🧬 Especie: {animal.especie}</Text>
+        <Text style={styles.info}>📖 Descripción: {animal.descripcion}</Text>
+      </View>
 
       <View style={styles.switchContainer}>
-        <Text style={styles.label}>
+        <Text style={[styles.adopcionText, { color: isAdopted ? "#27ae60" : "#c0392b" }]}>
           {isAdopted ? "✅ Se adoptará" : "🚫 No se adoptará"}
         </Text>
         <Switch
@@ -62,31 +65,60 @@ export default function AnimalEscaneado({ route }: Props) {
         />
       </View>
 
-      <Button title="Aceptar" onPress={handleAceptar} color="#D35400" />
-    </View>
+      <View style={styles.buttonContainer}>
+        <Button title="ACEPTAR" onPress={handleAceptar} color="#D35400" />
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    flex: 1,
+    padding: 24,
     backgroundColor: "#FFF5E6",
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+  icon: {
+    fontSize: 40,
+    textAlign: "center",
+    marginBottom: 10,
   },
   title: {
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: "bold",
-    marginBottom: 16,
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#D35400",
   },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
+  animalCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    marginVertical: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  info: {
+    fontSize: 17,
+    color: "#333",
     marginBottom: 10,
+  },
+  adopcionText: {
+    fontSize: 18,
+    fontWeight: "600",
   },
   switchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 20,
+    marginVertical: 30,
     justifyContent: "space-between",
+    paddingHorizontal: 12,
+  },
+  buttonContainer: {
+    marginTop: 10,
   },
 });

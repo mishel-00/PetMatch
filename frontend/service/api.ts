@@ -8,7 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 //export const API_URL = "http://192.200.0.101:3000"; //CTICONTROL portatil
 //export const API_URL = "http:// 192.168.10.171:3000"; //CTICONTROL torre
 //export const API_URL = "http://192.168.10.171:3000"; //CTICONTROL portatil
-export const API_URL = "https://ae97-88-148-32-250.ngrok-free.app"; //casa Garres con https
+export const API_URL = "https://2eb7-88-148-32-250.ngrok-free.app"; //casa Garres con https
 
 
 
