@@ -46,10 +46,24 @@ router.get("/horarioDisponible", verificarTokenFireBase, async (req, res) => {
         .where("horarioDisponible_id", "==", admin.firestore().doc(`horarioDisponible/${idHorario}`))
         .where("estado", "in", ["pendiente", "aceptada"])
         .get();
-
+        
+      function formatearHora(hora: any): string {
+          if (typeof hora === "string") return hora.slice(0, 5); // Ej. "16:00:00" → "16:00"
+          if (hora?.toDate) hora = hora.toDate(); // Firestore Timestamp → Date
+          if (hora instanceof Date) {
+            const h = hora.getHours().toString().padStart(2, "0");
+            const m = hora.getMinutes().toString().padStart(2, "0");
+            return `${h}:${m}`;
+          }
+          return String(hora);
+        }
       
-      const horasOcupadas = citasSnapshot.docs.map((cita) => cita.data().hora);
+      const horasOcupadas = citasSnapshot.docs.map((cita) => formatearHora(cita.data().hora));
       const horasLibres = todasLasHoras.filter((h: string) => !horasOcupadas.includes(h));
+
+      console.log("__Todas las horas__:", todasLasHoras);
+      console.log("___Horas ocupadas__:", horasOcupadas);
+
 
       if (horasLibres.length > 0) {
         horariosDisponibles.push({
@@ -63,6 +77,7 @@ router.get("/horarioDisponible", verificarTokenFireBase, async (req, res) => {
     }
 
     res.status(200).json(horariosDisponibles);
+    return; 
   } catch (error: any) {
     console.error("❌ Error al obtener horarios filtrados:", error);
     res.status(500).json({ error: error.message });

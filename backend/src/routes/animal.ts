@@ -227,8 +227,8 @@ router.get("/tipoRaza", verificarTokenFireBase, async (req, res) => {
   } catch (error: any) {
     console.error("❌ Error al obtener animales:", error);
     res.status(500).json({ error: error.message });
-    return;
-  }
+    return;
+  }
 });
 
 

@@ -720,6 +720,4 @@ router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) =
   }
 });
 
-
-
 export default router;
