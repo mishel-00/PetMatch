@@ -55,7 +55,7 @@ export default function AnimalEscaneado({ route }: Props) {
 
       <View style={styles.switchContainer}>
         <Text style={[styles.adopcionText, { color: isAdopted ? "#27ae60" : "#c0392b" }]}>
-          {isAdopted ? "✅ Se adoptará" : "🚫 No se adoptará"}
+          {isAdopted ? " Se adoptará" : "🚫 No se adoptará"}
         </Text>
         <Switch
           value={isAdopted}
