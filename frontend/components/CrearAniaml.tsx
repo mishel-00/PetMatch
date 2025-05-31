@@ -9,22 +9,16 @@ import {
   Alert,
   ScrollView,
   Platform,
+  Image,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
-import { API_URL, getxxx, postxxx } from "@/service/api";
+import { postxxx } from "@/service/api";
 import * as ImagePicker from "expo-image-picker";
-import { Image } from "react-native";
-
-import {uploadImageToFirebase} from "@/config/firebaseStorage"
-import uuid from "react-native-uuid"
-
+import { uploadImageToFirebase } from "@/config/firebaseStorage";
+import uuid from "react-native-uuid";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { auth } from "@/config/firebaseConfig";
-
-
-
-
 
 export default function CrearAnimal() {
   const navigation = useNavigation();
@@ -42,43 +36,9 @@ export default function CrearAnimal() {
     fechaNacimiento: "",
     fechaIngreso: "",
   });
+  const [errores, setErrores] = useState<{ [key: string]: boolean }>({});
   const [showNacimientoPicker, setShowNacimientoPicker] = useState(false);
   const [showIngresoPicker, setShowIngresoPicker] = useState(false);
-  
-  const seleccionarImagen = async () => {
-    // Pedir permiso
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permiso requerido", "Se necesita permiso para acceder a la galería.");
-      return;
-    }
-  
-    // Seleccionar imagen
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-  
-    if (!result.canceled) {
-      // Guardar URI temporal
-      const uri = result.assets[0].uri;
-      handleChange("foto", uri);
-    }
-  };
-  const handleDateChange = (event: any, selectedDate: Date | undefined, field: "fechaNacimiento" | "fechaIngreso") => {
-    if (selectedDate) {
-      const isoDate = selectedDate.toISOString().split("T")[0]; // YYYY-MM-DD
-      handleChange(field, isoDate);
-    }
-  
-    // Ocultar picker después de seleccionar (solo en Android)
-    if (Platform.OS === "android") {
-      if (field === "fechaNacimiento") setShowNacimientoPicker(false);
-      if (field === "fechaIngreso") setShowIngresoPicker(false);
-    }
-  };
-  
 
   const pesoPerro = [
     "Miniatura (1-6 kg)",
@@ -93,6 +53,7 @@ export default function CrearAnimal() {
   const handleChange = (field: string, value: string | boolean) => {
     setForm({ ...form, [field]: value });
   };
+
   const resetForm = () => {
     setForm({
       foto: "",
@@ -108,23 +69,91 @@ export default function CrearAnimal() {
       fechaNacimiento: "",
       fechaIngreso: "",
     });
+    setErrores({});
   };
-  
+
+  const validarCampos = () => {
+    const camposRequeridos = [
+      "foto",
+      "nombre",
+      "sexo",
+      "tipoAnimal",
+      "descripcion",
+      "tipoRaza",
+      "peso",
+      "fechaNacimiento",
+      "fechaIngreso"
+    ];
+
+    const nuevosErrores: { [key: string]: boolean } = {};
+    camposRequeridos.forEach((campo) => {
+      if (!form[campo as keyof typeof form]) {
+        nuevosErrores[campo] = true;
+      }
+    });
+
+    // Validar que fechaIngreso no sea mayor a la fecha actual
+    if (form.fechaIngreso) {
+      const hoy = new Date().toISOString().split("T")[0];
+      if (form.fechaIngreso > hoy) {
+        nuevosErrores["fechaIngreso"] = true;
+        Alert.alert("Fecha inválida", "La fecha de ingreso no puede ser posterior a hoy.");
+      }
+    }
+
+    setErrores(nuevosErrores);
+    return Object.keys(nuevosErrores).length === 0;
+  };
+
+  const seleccionarImagen = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permiso requerido", "Se necesita permiso para acceder a la galería.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      handleChange("foto", uri);
+    }
+  };
+
+  const handleDateChange = (
+    event: any,
+    selectedDate: Date | undefined,
+    field: "fechaNacimiento" | "fechaIngreso"
+  ) => {
+    if (selectedDate) {
+      const isoDate = selectedDate.toISOString().split("T")[0];
+      handleChange(field, isoDate);
+    }
+    if (Platform.OS === "android") {
+      if (field === "fechaNacimiento") setShowNacimientoPicker(false);
+      if (field === "fechaIngreso") setShowIngresoPicker(false);
+    }
+  };
+
   const handleSubmit = async () => {
+    if (!validarCampos()) {
+      Alert.alert("Faltan campos por rellenar", "Por favor completa los campos obligatorios.");
+      return;
+    }
+
     try {
-      // Hay que verificar que esta activa la sesion de firebase para poder mandarle la foto en formato png para que luego 
-      // me devuleva un url de esa foto y hasta que no me  mnada correctamente esa url yo no le mando los datos del animal creado 
       if (!auth.currentUser) {
         Alert.alert("Error", "Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.");
         return;
       }
-  
+
       const nombreArchivo = `animal_${uuid.v4()}.jpg`;
-  
-      // Aqui subimos la imagen 
       const imageUrl = await uploadImageToFirebase(form.foto, nombreArchivo);
-  
-      // Preparamos los datos para enviarlo al backend y que coincidan los datos
+
       const datosFinales = {
         foto: imageUrl,
         nombre: form.nombre,
@@ -137,13 +166,11 @@ export default function CrearAnimal() {
         fecha_nacimiento: form.fechaNacimiento,
         fecha_ingreso: form.fechaIngreso,
         sexo: form.sexo,
-        asociacion_id: auth.currentUser?.uid // 👈 AÑADE ESTO
-
+        asociacion_id: auth.currentUser?.uid
       };
-      
-  
+
       await postxxx("api/animal", datosFinales);
-  
+
       Alert.alert("Éxito", "Animal creado exitosamente");
       resetForm();
       navigation.navigate("ListaAnimales" as never);
@@ -152,105 +179,81 @@ export default function CrearAnimal() {
       console.error("Error al crear animal:", error);
     }
   };
-  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Crear Animal</Text>
- {/*  Botón para seleccionar imagen y subirla */}
- <TouchableOpacity onPress={seleccionarImagen} style={styles.imagePicker}>
-      {form.foto ? (
-        <Image source={{ uri: form.foto }} style={styles.imagePreview} />
-      ) : (
-        <Text style={styles.imagePickerText}>📸 Seleccionar imagen</Text>
-      )}
-    </TouchableOpacity>
-      {[
-        { label: "Nombre", field: "nombre" },
-        { label: "Descripción", field: "descripcion" },
-        { label: "Tipo de Raza", field: "tipoRaza" },
-      
-      ].map((input) => (
+
+      <TouchableOpacity onPress={seleccionarImagen} style={[styles.imagePicker, errores["foto"] && { borderColor: "red", borderWidth: 2 }]}>
+        {form.foto ? (
+          <Image source={{ uri: form.foto }} style={styles.imagePreview} />
+        ) : (
+          <Text style={styles.imagePickerText}>📸 Seleccionar imagen</Text>
+        )}
+      </TouchableOpacity>
+
+      {["nombre", "descripcion", "tipoRaza"].map((campo) => (
         <TextInput
-          key={input.field}
-          placeholder={input.label}
-          value={form[input.field as keyof typeof form] as string}
-          onChangeText={(text) => handleChange(input.field, text)}
-          style={styles.input}
+          key={campo}
+          placeholder={campo.charAt(0).toUpperCase() + campo.slice(1)}
+          value={form[campo as keyof typeof form] as string}
+          onChangeText={(text) => handleChange(campo, text)}
+          style={[styles.input, errores[campo] && { borderColor: "red", borderWidth: 2 }]}
         />
       ))}
-{/*  Este es el boton de la fecha de nacimiento */}
-<TouchableOpacity
-  style={styles.input}
-  onPress={() => setShowNacimientoPicker(true)}
->
-  <Text>{form.fechaNacimiento || "📅 Fecha de Nacimiento"}</Text>
-</TouchableOpacity>
-{showNacimientoPicker && (
-  <DateTimePicker
-    value={form.fechaNacimiento ? new Date(form.fechaNacimiento) : new Date()}
-    mode="date"
-    display="default"
-    onChange={(e, date) => handleDateChange(e, date, "fechaNacimiento")}
-  />
-)}
 
-{/*  Este es el boton de la fecha de cuando ingreso a la asociacion */}
-<TouchableOpacity
-  style={styles.input}
-  onPress={() => setShowIngresoPicker(true)}
->
-  <Text>{form.fechaIngreso || "📅 Fecha de Ingreso"}</Text>
-</TouchableOpacity>
-{showIngresoPicker && (
-  <DateTimePicker
-    value={form.fechaIngreso ? new Date(form.fechaIngreso) : new Date()}
-    mode="date"
-    display="default"
-    onChange={(e, date) => handleDateChange(e, date, "fechaIngreso")}
-  />
-)}
-
-      <Picker
-        selectedValue={form.sexo}
-        onValueChange={(value) => handleChange("sexo", value)}
-        style={styles.picker}
+      <TouchableOpacity
+        style={[styles.input, errores["fechaNacimiento"] && { borderColor: "red", borderWidth: 2 }]}
+        onPress={() => setShowNacimientoPicker(true)}
       >
-        <Picker.Item label="Sexo" value="" />
-        <Picker.Item label="Hembra" value="Hembra" />
-        <Picker.Item label="Macho" value="Macho" />
-      </Picker>
+        <Text>{form.fechaNacimiento || "📅 Fecha de Nacimiento"}</Text>
+      </TouchableOpacity>
+      {showNacimientoPicker && (
+        <DateTimePicker
+          value={form.fechaNacimiento ? new Date(form.fechaNacimiento) : new Date()}
+          mode="date"
+          display="default"
+          onChange={(e, date) => handleDateChange(e, date, "fechaNacimiento")}
+        />
+      )}
 
-      <Picker
-        selectedValue={form.tipoAnimal}
-        onValueChange={(value) => handleChange("tipoAnimal", value)}
-        style={styles.picker}
+      <TouchableOpacity
+        style={[styles.input, errores["fechaIngreso"] && { borderColor: "red", borderWidth: 2 }]}
+        onPress={() => setShowIngresoPicker(true)}
       >
-        <Picker.Item label="Tipo de Animal" value="" />
-        <Picker.Item label="Perro" value="perro" />
-        <Picker.Item label="Gato" value="gato" />
-      </Picker>
+        <Text>{form.fechaIngreso || "📅 Fecha de Ingreso"}</Text>
+      </TouchableOpacity>
+      {showIngresoPicker && (
+        <DateTimePicker
+          value={form.fechaIngreso ? new Date(form.fechaIngreso) : new Date()}
+          mode="date"
+          display="default"
+          onChange={(e, date) => handleDateChange(e, date, "fechaIngreso")}
+        />
+      )}
 
-      <Picker
-        selectedValue={form.estado}
-        onValueChange={(value) => handleChange("estado", value)}
-        style={styles.picker}
-      >
-        <Picker.Item label="En adopcion" value="en adopcion" />
-        <Picker.Item label="Reservado" value="reservado" />
-        <Picker.Item label="Adoptado" value="adoptado" />
-      </Picker>
+      {["sexo", "tipoAnimal", "estado", "peso"].map((campo) => {
+        let opciones: string[] = [];
 
-      <Picker
-        selectedValue={form.peso}
-        onValueChange={(value) => handleChange("peso", value)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Seleccione Peso" value="" />
-        {(form.tipoAnimal === "perro" ? pesoPerro : pesoGato).map((p) => (
-          <Picker.Item key={p} label={p} value={p} />
-        ))}
-      </Picker>
+        if (campo === "sexo") opciones = ["Hembra", "Macho"];
+        else if (campo === "tipoAnimal") opciones = ["perro", "gato"];
+        else if (campo === "estado") opciones = ["en adopcion", "reservado", "adoptado"];
+        else if (campo === "peso") opciones = form.tipoAnimal === "perro" ? pesoPerro : pesoGato;
+
+        return (
+          <Picker
+            key={campo}
+            selectedValue={form[campo as keyof typeof form] as string}
+            onValueChange={(value) => handleChange(campo, value)}
+            style={[styles.picker, errores[campo] && { borderColor: "red", borderWidth: 2 }]}
+          >
+            <Picker.Item label={campo === "estado" ? "Estado" : `Seleccione ${campo}`} value="" />
+            {opciones.map((op) => (
+              <Picker.Item key={op} label={op} value={op} />
+            ))}
+          </Picker>
+        );
+      })}
 
       <TouchableOpacity
         style={[styles.checkbox, form.esterilizado && styles.checked]}
@@ -336,5 +339,4 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 10,
   },
-  
 });

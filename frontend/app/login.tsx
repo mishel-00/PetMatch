@@ -11,6 +11,8 @@ export default function LoginScreen({ navigation }: any) {
   const { username: savedEmail, password: savedPassword, login } = useAuthStore();
   const [email, setEmail] = useState(savedEmail || "");
   const [password, setPassword] = useState(savedPassword || "");
+  const [showPassword, setShowPassword] = useState(false);
+
 
   // const handleLogin = async () => {
   //   try {
@@ -69,16 +71,27 @@ export default function LoginScreen({ navigation }: any) {
       </View>
 
       <View style={styles.inputContainer}>
-        <Feather name="lock" size={20} style={styles.iconBlue} />
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          placeholderTextColor="#A67C52"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-      </View>
+  <Feather name="lock" size={20} style={styles.iconBlue} />
+  <TextInput
+    style={[styles.input, { paddingRight: 40 }]}
+    placeholder="Contraseña"
+    placeholderTextColor="#A67C52"
+    value={password}
+    onChangeText={setPassword}
+    secureTextEntry={!showPassword}
+  />
+  <TouchableOpacity
+    onPress={() => setShowPassword(!showPassword)}
+    style={styles.eyeIcon}
+  >
+    <Feather
+      name={showPassword ? "eye" : "eye-off"}
+      size={20}
+      color="#002aa1"
+    />
+  </TouchableOpacity>
+</View>
+
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Ingresar</Text>
@@ -165,4 +178,9 @@ const styles = StyleSheet.create({
     color: "#D35400",
     fontWeight: "bold",
   },
+  eyeIcon: {
+    position: "absolute",
+    right: 15,
+  },
+  
 });
