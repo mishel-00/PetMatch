@@ -6,7 +6,7 @@ const config: ExpoConfig = {
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
-  scheme: "myapp",
+  scheme: "petmatch", 
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   ios: {

@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "npx tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/src/index.js",
     "dev": "ts-node-dev --respawn src/index.ts",
     "build:debug": "cd debug-app && npm run build && rm -rf ../public/debug && mkdir -p ../public/debug && cp -r build/* ../public/debug/",
     "dev:debug": "concurrently \"npm run dev\" \"cd debug-app && npm start\""

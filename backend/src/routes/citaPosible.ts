@@ -472,6 +472,10 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           animal_id:  animalRefPath || admin.firestore.FieldValue.delete(),
           citaPosible_id: `citaPosible/${idCitaPosible}`,
         });
+
+        //? DEBUG
+        console.log("📝 Guardando citaPosible_id como:", `citaPosible/${idCitaPosible}`);
+
         
         const uidAdoptante = citaDoc.data()?.adoptante_id;
     
@@ -515,11 +519,11 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
           citaPosible_id: idCitaPosible,
         };
         
-        
-        // const qrDataToEncode = JSON.stringify(qrDataObject);
-       // const qrURL = `https://tu-frontend.com/qr?cita=${idCitaPosible}`;
-       const qrURL = `http://localhost:3000/fichaAnimal?cita=${idCitaPosible}`;
-
+      
+       const qrURL = `petmatch://cita?id=${idCitaPosible}`; // Si configuraste el esquema "petmatch" en app.config.ts
+       //?? DEBUG 
+       console.log("🔍 ---URL QR----", qrURL);
+       
         // Opciones para la generación del código QR
         const qrCodeOptions = {
           errorCorrectionLevel: 'H', // Nivel alto de corrección de errores
@@ -544,6 +548,7 @@ router.post("/citaPosible/validar", verificarTokenFireBase, async (req, res) => 
         const file = bucket.file(fileName);
         console.log("📄 Guardando archivo como:", fileName);
 
+        await file.delete().catch(() => {});
         await file.save(qrCodeBuffer, {
           metadata: { contentType: "image/png" },
         });
@@ -593,6 +598,8 @@ router.get("/citaPosible/:idCitaPosible/qr", verificarTokenFireBase, async (req,
   const uidAdoptante = req.uid;
   const { idCitaPosible } = req.params;
 
+  console.log("____________Entró al GET /citaPosible/:idCitaPosible/qr____________");
+
   if (!uidAdoptante) {
     res.status(401).json({ error: "Token inválido" });
     return;
@@ -608,27 +615,38 @@ router.get("/citaPosible/:idCitaPosible/qr", verificarTokenFireBase, async (req,
     const citaDoc = await citaRef.get();
 
     if (!citaDoc.exists) {
+      console.log("❌ [DEBUG] Cita no encontrada");
       res.status(404).json({ error: "Cita no encontrada" });
       return;
     }
 
     const citaData = citaDoc.data();
 
+    console.log(" [DEBUG] Datos de la cita:", {
+      adoptante_id: citaData?.adoptante_id,
+      estado: citaData?.estado,
+      qrCodeURL: citaData?.qrCodeURL
+    });
+
     if (citaData?.adoptante_id !== uidAdoptante) {
+      console.log("❌ [DEBUG] No autorizado - adoptante_id no coincide");
       res.status(403).json({ error: "No autorizado para ver el QR de esta cita" });
       return;
     }
 
     if (citaData?.estado !== "aceptada") {
+      console.log("❌ [DEBUG] Estado no es 'aceptada':", citaData?.estado);
       res.status(400).json({ error: "La cita no está aceptada, no se puede mostrar el QR" });
       return;
     }
 
     if (!citaData?.qrCodeURL) {
+      console.log("❌ [DEBUG] No hay qrCodeURL en la cita");
       res.status(404).json({ error: "Código QR no encontrado para esta cita" });
       return;
     }
 
+    console.log("✅ [DEBUG] Devolviendo QR URL:", citaData.qrCodeURL);
     res.status(200).json({ qrCodeURL: citaData.qrCodeURL });
 
   } catch (error: any) {
@@ -641,24 +659,26 @@ router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) =
   const uidAsociacion = req.uid;
   const { citaId, adoptado } = req.body;
 
-  if (!uidAsociacion) {
-    throw new Error("Invalid adoptante ID");
+  if (!uidAsociacion || !citaId || typeof adoptado !== "boolean") {
+     res.status(400).json({ error: "Datos inválidos" });
+     return;
   }
 
-  if (!uidAsociacion || !citaId || typeof adoptado !== 'boolean') {
-     res.status(400).json({ error: "Datos inválidos" });
-  }
-  
   try {
-    const citaRef = admin.firestore().collection("citaPosible").doc(citaId);
-    const citaDoc = await citaRef.get();
-    const uidAdoptante = citaDoc.data()?.adoptante_id;
-    
+    const citaFire = admin.firestore().collection("citaPosible").doc(citaId);
+    const citaDoc = await citaFire.get();
+
     if (!citaDoc.exists) {
-      res.status(404).json({ error: "Cita no encontrada" });
+     res.status(404).json({ error: "Cita no encontrada" });
+     return;
     }
 
-   
+    const uidAdoptante = citaDoc.data()?.adoptante_id;
+    if (!uidAdoptante) {
+     res.status(400).json({ error: "Adoptante no definido en la cita" });
+     return;
+    }
+
     const animalSnap = await admin
       .firestore()
       .collection("citasAnimal")
@@ -667,7 +687,8 @@ router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) =
       .get();
 
     if (animalSnap.empty) {
-     res.status(400).json({ error: "No se encontró animal asociado" });
+      res.status(400).json({ error: "No se encontró animal asociado" });
+      return;
     }
 
     const animalPath = animalSnap.docs[0].data().animal_id;
@@ -677,60 +698,25 @@ router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) =
     if (adoptado) {
       await animalRef.update({ estadoAdopcion: "adoptado" });
 
-   
-
       const fechaHoy = new Date();
       await admin.firestore().collection("adoptante").doc(uidAdoptante).update({
         fecha_ultima_adopcion: fechaHoy,
-        // Podrías guardar también fecha_bloqueo hasta dentro de 3 meses
-        bloqueo_solicitudes_hasta: new Date(fechaHoy.setMonth(fechaHoy.getMonth() + 3))
+        bloqueo_solicitudes_hasta: new Date(fechaHoy.getFullYear(), fechaHoy.getMonth() + 3, fechaHoy.getDate())
       });
     } else {
-      // ❌ No fue adoptado → vuelve a estado "en adopcion"
       await animalRef.update({ estadoAdopcion: "en adopcion" });
 
-      // Resta 1 en solicitudes activas
       await admin.firestore().collection("adoptante").doc(uidAdoptante).update({
         solicitudes_activas: admin.firestore.FieldValue.increment(-1)
       });
     }
+
+     res.status(200).json({ message: "Cita completada correctamente" });
+     return;
   } catch (error: any) {
     console.error("❌ Error al completar cita:", error);
     res.status(500).json({ error: error.message });
-  }
-});
-//TENER ID DE CITA Y OBTENER INFO DEL ANIMAL
-router.get("/citaPosible/idAnimal", verificarTokenFireBase, async (req, res) => {
-  const citaId = req.query.id as string;
-  if (!citaId) res.status(400).json({ error: "Falta id" });
-
-  try {
-    const citasAnimalSnap = await admin
-      .firestore()
-      .collection("citasAnimal")
-      .where("citaPosible_id", "==", `citaPosible/${citaId}`)
-      .limit(1)
-      .get();
-
-    if (citasAnimalSnap.empty) {
-       res.status(404).json({ error: "No se encontró relación cita-animal" });
-       return;
-    }
-
-    const animalRefPath = citasAnimalSnap.docs[0].data().animal_id;
-    const animalDoc = await admin.firestore().doc(animalRefPath).get();
-
-    if (!animalDoc.exists) {
-     res.status(404).json({ error: "Animal no encontrado" });
-     return;
-    }
-
-     res.json({ animal: { id: animalDoc.id, ...animalDoc.data() } });
-
-  } catch (err) {
-    console.error("Error al obtener animal:", err);
-     res.status(500).json({ error: "Error interno" });
-     return;
+    return;
   }
 });
 

@@ -9,8 +9,11 @@ import animalRoutes from "./routes/animal";
 import horarioRoutes from "./routes/horarioDisponible";
 import asociacionRoutes from "./routes/asociacion";
 import citaPosibleRoutes from "./routes/citaPosible";
+import qrRoutes from "./routes/qr";
 import cron from "node-cron";
 import { limpiarHorariosPasados } from './utils/fnDatosFront';
+
+
 
 //!! DEBUG
 import path from 'path';
@@ -46,10 +49,25 @@ app.use("/api", animalRoutes);
 app.use("/api", horarioRoutes);
 app.use("/api", asociacionRoutes);
 app.use("/api", citaPosibleRoutes);
+app.use("/api/qr", qrRoutes);
 
+
+
+// Servicio Ngrok --> Ejecutamos el túnel 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ PetMatch API corriendo en http://localhost:${PORT}`);
+const HOST = '0.0.0.0'; 
+app.listen(Number(PORT), HOST, () => {
+
+  console.log(`✅ PetMatch API corriendo en http://${HOST}:${PORT}`);
+  
+  const interfaces = require('os').networkInterfaces();
+  Object.keys(interfaces).forEach(devName => {
+    interfaces[devName].forEach((iface: any) => {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        console.log(`   Accesible también en: http://${iface.address}:${PORT}`);
+      }
+    });
+  });
 });
 
 export default app;
