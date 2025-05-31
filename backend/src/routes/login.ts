@@ -64,4 +64,64 @@ router.post("/register-push-token", verificarTokenFireBase, async (req, res) => 
   }
 });
 
+// [Adoptante] -> GET -> Mensaje cuando puede volver a adoptar 
+router.get("/adoptante/cooldown", verificarTokenFireBase, async (req, res) => {
+  const uidAdoptante = req.uid;
+
+  if (!uidAdoptante) {
+    res.status(401).json({ error: "Token inválido" });
+    return;
+  }
+
+  try {
+    const docRef = admin.firestore().collection("adoptante").doc(uidAdoptante);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      res.status(404).json({ error: "Adoptante no encontrado" });
+      return;
+    }
+
+    const data = doc.data();
+
+    if (!data?.fecha_ultima_adopcion) {
+      res.status(200).json({
+        puedeAdoptar: true,
+        mensaje: "No has adoptado ningún animal todavía.",
+      });
+      return;
+    }
+
+    const ultimaAdopcion = data.fecha_ultima_adopcion.toDate();
+    const ahora = new Date();
+
+    const diffMs = ahora.getTime() - ultimaAdopcion.getTime();
+    const diasTranscurridos = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diasCooldown = 90;
+    const diasRestantes = diasCooldown - diasTranscurridos;
+
+    if (diasRestantes > 0) {
+       res.status(200).json({
+        puedeAdoptar: false,
+        fecha_ultima_adopcion: ultimaAdopcion.toISOString(),
+        diasRestantes,
+        mensaje: `Ya adoptaste el ${ultimaAdopcion.toLocaleDateString()}. Podrás adoptar de nuevo en ${diasRestantes} días.`,
+      });
+      return; 
+    } else {
+      res.status(200).json({
+        puedeAdoptar: true,
+        fecha_ultima_adopcion: ultimaAdopcion.toISOString(),
+        mensaje: `Tu última adopción fue el ${ultimaAdopcion.toLocaleDateString()}. Ya puedes adoptar de nuevo.`,
+      });
+      return; 
+    }
+
+  } catch (error: any) {
+    console.error("❌ Error al comprobar la cuenta atrás:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 export default router;
