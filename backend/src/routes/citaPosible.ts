@@ -659,24 +659,26 @@ router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) =
   const uidAsociacion = req.uid;
   const { citaId, adoptado } = req.body;
 
-  if (!uidAsociacion) {
-    throw new Error("Invalid adoptante ID");
+  if (!uidAsociacion || !citaId || typeof adoptado !== "boolean") {
+     res.status(400).json({ error: "Datos inválidos" });
+     return;
   }
 
-  if (!uidAsociacion || !citaId || typeof adoptado !== 'boolean') {
-     res.status(400).json({ error: "Datos inválidos" });
-  }
-  
   try {
-    const citaRef = admin.firestore().collection("citaPosible").doc(citaId);
-    const citaDoc = await citaRef.get();
-    const uidAdoptante = citaDoc.data()?.adoptante_id;
-    
+    const citaFire = admin.firestore().collection("citaPosible").doc(citaId);
+    const citaDoc = await citaFire.get();
+
     if (!citaDoc.exists) {
-      res.status(404).json({ error: "Cita no encontrada" });
+     res.status(404).json({ error: "Cita no encontrada" });
+     return;
     }
 
-   
+    const uidAdoptante = citaDoc.data()?.adoptante_id;
+    if (!uidAdoptante) {
+     res.status(400).json({ error: "Adoptante no definido en la cita" });
+     return;
+    }
+
     const animalSnap = await admin
       .firestore()
       .collection("citasAnimal")
@@ -685,7 +687,8 @@ router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) =
       .get();
 
     if (animalSnap.empty) {
-     res.status(400).json({ error: "No se encontró animal asociado" });
+      res.status(400).json({ error: "No se encontró animal asociado" });
+      return;
     }
 
     const animalPath = animalSnap.docs[0].data().animal_id;
@@ -695,28 +698,28 @@ router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) =
     if (adoptado) {
       await animalRef.update({ estadoAdopcion: "adoptado" });
 
-   
-
       const fechaHoy = new Date();
       await admin.firestore().collection("adoptante").doc(uidAdoptante).update({
         fecha_ultima_adopcion: fechaHoy,
-        // Podrías guardar también fecha_bloqueo hasta dentro de 3 meses
-        bloqueo_solicitudes_hasta: new Date(fechaHoy.setMonth(fechaHoy.getMonth() + 3))
+        bloqueo_solicitudes_hasta: new Date(fechaHoy.getFullYear(), fechaHoy.getMonth() + 3, fechaHoy.getDate())
       });
     } else {
-      // ❌ No fue adoptado → vuelve a estado "en adopcion"
       await animalRef.update({ estadoAdopcion: "en adopcion" });
 
-      // Resta 1 en solicitudes activas
       await admin.firestore().collection("adoptante").doc(uidAdoptante).update({
         solicitudes_activas: admin.firestore.FieldValue.increment(-1)
       });
     }
+
+     res.status(200).json({ message: "Cita completada correctamente" });
+     return;
   } catch (error: any) {
     console.error("❌ Error al completar cita:", error);
     res.status(500).json({ error: error.message });
+    return;
   }
 });
+
 
 
 export default router;
