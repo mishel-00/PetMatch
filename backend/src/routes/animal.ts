@@ -227,8 +227,8 @@ router.get("/tipoRaza", verificarTokenFireBase, async (req, res) => {
   } catch (error: any) {
     console.error("❌ Error al obtener animales:", error);
     res.status(500).json({ error: error.message });
-    return;
-  }
+    return;
+  }
 });
 
 
@@ -297,7 +297,7 @@ router.get("/obtenerAnimales/:idAsociacion", verificarTokenFireBase, async (req,
       .firestore()
       .collection("animal")
       .where("asociacion_id", "==", idAsociacion)
-      // .where("estadoAdopcion", "==", "en adopcion")
+      .where("estadoAdopcion", "==", "en adopcion")
       .get();
 
     const animales = snapshot.docs.map((doc) => {
@@ -349,5 +349,88 @@ router.get("/animal/:idAnimal/asociacion/:idAsociacion", verificarTokenFireBase,
     res.status(500).json({ error: error.message });
   }
 });
+
+//? [Adoptante] -> GET -> Obtener animales que han sido adoptados 
+router.get("/adoptante/historial", verificarTokenFireBase, async (req, res) => {
+  const uidAdoptante = req.uid;
+  if (!uidAdoptante) {
+     res.status(401).json({ error: "Token inválido" });
+     return;
+  }
+
+  try {
+
+    const horariosSnapshot = await admin.firestore()
+      .collection("horarioDisponible")
+      .where("adoptante_id", "==", uidAdoptante)
+      .get();
+
+    const horarioRefs = horariosSnapshot.docs.map(doc =>
+      admin.firestore().doc(`horarioDisponible/${doc.id}`)
+    );
+
+    if (horarioRefs.length === 0) res.status(200).json([]) ;
+
+    // Paso 2: Obtener citas adoptadas
+    const citasSnapshot = await admin.firestore()
+      .collection("citaPosible")
+      .where("estado", "==", "adoptado")
+      .where("id_Horario", "in", horarioRefs)
+      .get();
+
+    const historial: any[] = [];
+
+    for (const citaDoc of citasSnapshot.docs) {
+      const citaData = citaDoc.data();
+      const citaId = citaDoc.id;
+      const fechaAdopcion = citaData.fecha_cita?.toDate();
+      const asociacionId = citaData.asociacion_id;
+
+      // Paso 3: Buscar animales asociados a esta cita
+      const citasAnimalSnapshot = await admin.firestore()
+        .collection("citasAnimal")
+        .where("cita_id", "==", citaId)
+        .get();
+
+      for (const rel of citasAnimalSnapshot.docs) {
+        const animalId = rel.data().animal_id;
+
+        const animalDoc = await admin.firestore()
+          .collection("animal")
+          .doc(animalId)
+          .get();
+
+        const animalData = animalDoc.exists ? animalDoc.data() : null;
+        if (!animalData) continue;
+
+        // Paso 4: Obtener nombre de la asociación
+        let nombreAsociacion = "Desconocida";
+        if (asociacionId) {
+          const asociacionDoc = await admin.firestore()
+            .collection("asociacion")
+            .doc(asociacionId)
+            .get();
+
+          if (asociacionDoc.exists) {
+            nombreAsociacion = asociacionDoc.data()?.nombre || "Desconocida";
+          }
+        }
+
+        historial.push({
+          animal_id: animalId,
+          nombre_animal: animalData.nombre,
+          fecha_adopcion: fechaAdopcion?.toLocaleDateString("es-ES", { day: 'numeric', month: 'long', year: 'numeric' }),
+          asociacion: nombreAsociacion,
+        });
+      }
+    }
+
+    res.status(200).json(historial);
+  } catch (error: any) {
+    console.error("❌ Error al obtener historial de adopciones:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 export default router;
