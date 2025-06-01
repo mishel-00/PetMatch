@@ -103,18 +103,18 @@ export default function AnimalesAsociacion({ route }: any) {
             { headers: { Authorization: `Bearer ${token}` } }
           );
         }
-        console.log(especieSeleccionada)
-        console.log("📦 Respuesta completa:", response);
-        console.log("📄 Datos:", response.data);
-        console.log("🔍 Especie seleccionada:", especieSeleccionada);
-        console.log("🏷️ Asociación ID:", asociacionId);
-        Alert.alert(
-          "Datos de respuesta",
-          `📄 Especie seleccionada: ${especieSeleccionada}
-        🏷️ Asociación ID: ${asociacionId}
-        📦 Respuesta completa: ${JSON.stringify(response, null, 2)}
-        📄 Datos: ${JSON.stringify(response.data, null, 2)}`
-        );
+        // console.log(especieSeleccionada)
+        // console.log("📦 Respuesta completa:", response);
+        // console.log("📄 Datos:", response.data);
+        // console.log("🔍 Especie seleccionada:", especieSeleccionada);
+        // console.log("🏷️ Asociación ID:", asociacionId);
+        // Alert.alert(
+        //   "Datos de respuesta",
+        //   `📄 Especie seleccionada: ${especieSeleccionada}
+        // 🏷️ Asociación ID: ${asociacionId}
+        // 📦 Respuesta completa: ${JSON.stringify(response, null, 2)}
+        // 📄 Datos: ${JSON.stringify(response.data, null, 2)}`
+        // );
         
         
 

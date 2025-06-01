@@ -17,8 +17,9 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, "HomeAdoptan
 export default function HomeAdoptante() {
   const [asociaciones, setAsociaciones] = useState<Asociacion[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation<NavigationProp>();;
-  //Peticion para pedir las asociaciones con el GET
+  const navigation = useNavigation<NavigationProp>();
+  const [cooldownMessage, setCooldownMessage] = useState("");
+
   useEffect(() => {
     const cargarAsociaciones = async () => {
       try {
@@ -31,7 +32,19 @@ export default function HomeAdoptante() {
       }
     };
 
+    const verificarBloqueo = async () => {
+      try {
+        const res = await getxxx("api/adoptante/cooldown");
+        if (!res.puedeAdoptar && res.mensaje) {
+          setCooldownMessage(res.mensaje);
+        }
+      } catch (error) {
+        console.error("Error al verificar cooldown:", error);
+      }
+    };
+
     cargarAsociaciones();
+    verificarBloqueo();
   }, []);
 
   if (loading) {
@@ -47,12 +60,17 @@ export default function HomeAdoptante() {
       <Text style={styles.title}>Bienvenido Adoptante 🐾</Text>
       <Text style={styles.subtitle}>¡Gracias por querer adoptar!</Text>
 
+      {cooldownMessage !== "" && (
+        <View style={styles.cooldownBox}>
+          <Text style={styles.cooldownText}>⏳ {cooldownMessage}</Text>
+        </View>
+      )}
+
       <FlatList
         data={asociaciones}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingVertical: 20 }}
         renderItem={({ item }) => (
-          //Boton para navefar a otra pantalla
           <TouchableOpacity
             style={styles.card}
             onPress={() => navigation.navigate("AnimalesAsociacion", { asociacionId: item.id, nombre: item.nombre })}
@@ -110,5 +128,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#aaa",
     marginTop: 20,
+  },
+  cooldownBox: {
+    backgroundColor: "#ffe8cc",
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 15,
+    borderLeftWidth: 4,
+    borderLeftColor: "#D35400",
+  },
+  cooldownText: {
+    color: "#C0392B",
+    fontSize: 15,
+    textAlign: "center",
   },
 });
