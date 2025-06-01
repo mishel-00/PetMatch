@@ -60,7 +60,7 @@ useFocusEffect(
           return fechaA.getTime() - fechaB.getTime();
         });
 
-        Alert.alert("Citas cargadas", JSON.stringify(data, null, 2));
+        // Alert.alert("Citas cargadas", JSON.stringify(data, null, 2));
 
 
         setCitas(data);
