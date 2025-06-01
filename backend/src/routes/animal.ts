@@ -186,6 +186,7 @@ router.get("/especie", verificarTokenFireBase, async (req, res) => {
       .firestore()
       .collection("animal")
       .where("asociacion_id", "==", asociacion_id)
+      .where("estadoAdopcion", "==", "en adopcion")
       .where("especie", "==", especie)
       .get();
 

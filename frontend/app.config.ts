@@ -1,8 +1,8 @@
 import { ExpoConfig } from "@expo/config";
 
 const config: ExpoConfig = {
-  name: "frontend",
-  slug: "frontend",
+  name: "PetMatch",
+  slug: "PetMatch",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
