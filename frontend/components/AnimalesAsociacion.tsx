@@ -93,7 +93,7 @@ export default function AnimalesAsociacion({ route }: any) {
   
         let response;
   
-        if (especieSeleccionada === "todos") {
+        if (especieSeleccionada.toLowerCase() === "todos") {
           response = await axios.get(`${API_URL}/api/obtenerAnimales/${asociacionId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });

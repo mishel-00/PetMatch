@@ -2,6 +2,7 @@ import express from "express";
 import admin from "../firebase";
 import { ESTADOS_ADOPCION } from "../utils/enums";
 import { verificarTokenFireBase } from "../middleware/verficarTokenFireBase";
+import { data } from "react-router-dom";
 
 const router = express.Router();
 //! Ruta general sin filtros aplicados
@@ -186,7 +187,7 @@ router.get("/especie", verificarTokenFireBase, async (req, res) => {
       .firestore()
       .collection("animal")
       .where("asociacion_id", "==", asociacion_id)
-      .where("estadoAdopcion", "==", "en adopcion")
+      .where("estadoAdopcion", "==", "En adopcion")
       .where("especie", "==", especie)
       .get();
 
@@ -298,7 +299,7 @@ router.get("/obtenerAnimales/:idAsociacion", verificarTokenFireBase, async (req,
       .firestore()
       .collection("animal")
       .where("asociacion_id", "==", idAsociacion)
-      .where("estadoAdopcion", "==", "en adopcion")
+      .where("estadoAdopcion", "==", "En adopcion")
       .get();
 
     const animales = snapshot.docs.map((doc) => {
@@ -316,7 +317,8 @@ router.get("/obtenerAnimales/:idAsociacion", verificarTokenFireBase, async (req,
         peso: data.peso,
       };
     });
-
+      console.log(data)
+      console.log("-----LO QUE ENVIO----",animales)
     res.status(200).json(animales);
   } catch (error: any) {
     console.error("❌ Error al obtener animales:", error);

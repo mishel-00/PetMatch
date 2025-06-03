@@ -704,7 +704,7 @@ router.post("/citaPosible/completar", verificarTokenFireBase, async (req, res) =
         bloqueo_solicitudes_hasta: new Date(fechaHoy.getFullYear(), fechaHoy.getMonth() + 3, fechaHoy.getDate())
       });
     } else {
-      await animalRef.update({ estadoAdopcion: "en adopcion" });
+      await animalRef.update({ estadoAdopcion: "En adopcion" });
 
       await admin.firestore().collection("adoptante").doc(uidAdoptante).update({
         solicitudes_activas: admin.firestore.FieldValue.increment(-1)

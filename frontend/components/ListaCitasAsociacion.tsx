@@ -11,6 +11,9 @@ import {
 } from "react-native";
 import { getxxx, postxxx } from "@/service/api";
 import { formatoFecha } from "@/utils/formatoFecha";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+
 
 interface Cita {
   id: string;
@@ -45,10 +48,12 @@ export default function ListaCitasAsociacion() {
   };
 
 
-  useEffect(() => {
-    cargarCitas();
-  }, []);
-
+  useFocusEffect(
+    useCallback(() => {
+      cargarCitas();
+    }, [])
+  );
+  
   const actualizarEstado = async (id: string, nuevoEstado: "aceptada" | "rechazada") => {
     try {
       await postxxx(`api/citaPosible/validar`, {
